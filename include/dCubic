@@ -2,5 +2,7 @@
 #define D_CUBIC_H
 
 #include "dCubic_bits/dimension_1d.hpp"
+#include "dCubic_bits/grid_pt.hpp"
+#include "dCubic_bits/idx_set.hpp"
 
 #endif
