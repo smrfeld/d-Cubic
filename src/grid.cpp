@@ -448,6 +448,19 @@ namespace dcu {
 	};
 
 	/********************
+	Set grid point values
+	********************/
+
+	void Grid::Impl::set_grid_point_ordinate(const GridPt* grid_pt, double val) {
+		auto it = _grid_pts.find(GridPtKey(grid_pt->get_idxs(),_dims));
+		if (it == _grid_pts.end()) {
+			std::cerr << ">>> Error: Grid::Impl::set_grid_point_ordinate <<< could not find grid pt: " << grid_pt->print_abscissa() << std::endl;
+			exit(EXIT_FAILURE);
+		};
+		it->second->set_ordinate(val);
+	};
+
+	/********************
 	Get grid points surrounding a point
 	********************/
 
@@ -1067,6 +1080,14 @@ namespace dcu {
 	};
 	const GridPtOut* Grid::get_grid_point_outside(GridPtKey key) const {
 		return _impl->get_grid_point_outside(key);
+	};
+
+	/********************
+	Set grid point values
+	********************/
+
+	void Grid::set_grid_point_ordinate(const GridPt* grid_pt, double val) {
+		_impl->set_grid_point_ordinate(grid_pt,val);
 	};
 
 	/********************

@@ -20,6 +20,11 @@ namespace dcu {
 		// Idxs
 		std::vector<int> _idxs;
 
+		// Helpers
+		void _clean_up();
+		void _copy(const IdxSet& other);
+		void _move(IdxSet& other);
+
 	public:
 
 		/********************
@@ -29,6 +34,11 @@ namespace dcu {
 		IdxSet();
 		IdxSet(int no_idxs);
 		IdxSet(std::vector<int> idxs);
+		IdxSet(const IdxSet& other);
+		IdxSet(IdxSet&& other);
+		IdxSet& operator=(const IdxSet &other);
+		IdxSet& operator=(IdxSet &&other);
+		~IdxSet();
 
 		/********************
 		Accessors

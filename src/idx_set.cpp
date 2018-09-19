@@ -23,6 +23,44 @@ namespace dcu {
 	IdxSet::IdxSet(std::vector<int> idxs) {
 		_idxs = idxs;
 	};
+	IdxSet::IdxSet(const IdxSet& other) {
+		_copy(other);
+	};
+	IdxSet::IdxSet(IdxSet&& other) {
+		_move(other);
+	};
+    IdxSet& IdxSet::operator=(const IdxSet& other) {
+		if (this != &other) {
+			_clean_up();
+			_copy(other);
+		};
+		return *this;
+    };
+    IdxSet& IdxSet::operator=(IdxSet&& other) {
+		if (this != &other) {
+			_clean_up();
+			_move(other);
+		};
+		return *this;
+    };
+	IdxSet::~IdxSet()
+	{
+		_clean_up();
+	};
+
+	// Helpers
+	void IdxSet::_clean_up()
+	{
+		// Nothing...
+	};
+	void IdxSet::_copy(const IdxSet& other)
+	{
+		_idxs = other._idxs;
+	};
+	void IdxSet::_move(IdxSet& other)
+	{
+		_idxs = std::move(other._idxs);
+	};
 
 	// Accessors
 	int IdxSet::operator [](int idx) const {
