@@ -81,17 +81,27 @@ namespace dcu {
 		Nbr4 get_surrounding_4(std::vector<double> abscissas) const;
 
 		/********************
-		Project
+		Get a point by interpolating
 		********************/
 
-		void project();
+		double get_val(std::vector<double> abscissas);
 
 		/********************
-		Write
+		Get derivative
 		********************/
 
-		void write_solution(std::string fname) const;
+		double get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> grid_idxs);
+		double get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet idx_set);
+		double get_deriv_wrt_pt_value(std::vector<double> abscissas, GridPtKey grid_pt_key);
 
+		double get_deriv_wrt_x(std::vector<double> abscissas, int k);
+
+		/********************
+		Read/write grid
+		********************/
+
+		void read_from_file(std::string fname);
+		void write_to_file(std::string fname) const;
 	};
 
 };

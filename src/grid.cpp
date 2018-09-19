@@ -122,16 +122,27 @@ namespace dcu {
 		Nbr4 get_surrounding_4(std::vector<double> abscissas) const;
 
 		/********************
-		Project
+		Get a point by interpolating
 		********************/
 
-		void project();
+		double get_val(std::vector<double> abscissas);
 
 		/********************
-		Write
+		Get derivative
 		********************/
 
-		void write_solution(std::string fname) const;
+		double get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> grid_idxs);
+		double get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet idx_set);
+		double get_deriv_wrt_pt_value(std::vector<double> abscissas, GridPtKey grid_pt_key);
+
+		double get_deriv_wrt_x(std::vector<double> abscissas, int k);
+
+		/********************
+		Read/write grid
+		********************/
+
+		void read_from_file(std::string fname);
+		void write_to_file(std::string fname) const;
 
 	};
 
@@ -553,12 +564,117 @@ namespace dcu {
 	};
 
 	/********************
+	Get a point by interpolating
+	********************/
+
+	double Grid::Impl::get_val(std::vector<double> abscissas) {
+		return 0.0;
+	};
+
+	/********************
+	Get derivative
+	********************/
+
+	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> grid_idxs) {
+		return 0.0;
+	};
+	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet idx_set) {
+		return 0.0;
+	};
+	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, GridPtKey grid_pt_key) {
+		return 0.0;
+	};
+
+	double Grid::Impl::get_deriv_wrt_x(std::vector<double> abscissas, int k) {
+		return 0.0;
+	};
+
+	/********************
+	Read/write grid
+	********************/
+
+	void Grid::Impl::read_from_file(std::string fname) {
+		std::ofstream f;
+
+		// Open
+		f.open(fname);
+
+		// Make sure we found it
+		if (!f.is_open()) {
+			std::cerr << ">>> Error: Grid::Impl::read_from_file <<< could not write to file: " << fname << std::endl;
+			exit(EXIT_FAILURE);
+		};
+
+		// Go through all grid pts
+		std::vector<double> abscissas;
+		double ordinate;
+		int i_count = 0;
+		for (auto &pr: _grid_pts) {
+
+			// Get
+			abscissas = pr.second->get_abscissas();
+			ordinate = pr.second->get_ordinate();
+
+			// Write
+			for (auto dim=0; dim<_dim_grid; dim++) {
+				f << abscissas[dim] << " ";
+			};
+			f << ordinate;
+
+			if (i_count != _grid_pts.size()-1) {
+				f << "\n";
+			};
+			i_count++;
+		};
+
+		// Close
+		f.close();
+	};
+	void Grid::Impl::write_to_file(std::string fname) const {
+		std::ofstream f;
+
+		// Open
+		f.open(fname);
+
+		// Make sure we found it
+		if (!f.is_open()) {
+			std::cerr << ">>> Error: Grid::Impl::write_to_file <<< could not write to file: " << fname << std::endl;
+			exit(EXIT_FAILURE);
+		};
+
+		// Go through all grid pts
+		std::vector<double> abscissas;
+		double ordinate;
+		int i_count = 0;
+		for (auto &pr: _grid_pts) {
+
+			// Get
+			abscissas = pr.second->get_abscissas();
+			ordinate = pr.second->get_ordinate();
+
+			// Write
+			for (auto dim=0; dim<_dim_grid; dim++) {
+				f << abscissas[dim] << " ";
+			};
+			f << ordinate;
+
+			if (i_count != _grid_pts.size()-1) {
+				f << "\n";
+			};
+			i_count++;
+		};
+
+		// Close
+		f.close();
+	};
+
+	/********************
 	Project
 	********************/
 
+	/*
 	void Grid::Impl::project() {
 
-		/*
 		if (DIAG_PROJ) {
 			std::cout << ">>> Grid::Impl::project <<<" << std::endl;
 		};
@@ -787,8 +903,8 @@ namespace dcu {
 			std::cout << ">>> Grid::Impl::project <<< Finished!" << std::endl;
 		};
 
-		*/
 	};
+	*/
 
 	void Grid::Impl::_iterate_form_coeffs(std::map<GridPtKey, double> &coeffs_store, std::vector<double> &frac_abscissas, int dim_to_interpolate_in, IdxSet &idxs_p, double coeff_p) {
 
@@ -827,47 +943,13 @@ namespace dcu {
 		};
 	};
 
-	/********************
-	Write
-	********************/
 
-	void Grid::Impl::write_solution(std::string fname) const {
-		std::ofstream f;
 
-		// Open
-		f.open(fname);
 
-		// Make sure we found it
-		if (!f.is_open()) {
-			std::cerr << ">>> Error: Grid::Impl::write_solution <<< could not write to file: " << fname << std::endl;
-			exit(EXIT_FAILURE);
-		};
 
-		// Go through all grid pts
-		std::vector<double> abscissas;
-		double ordinate;
-		int i_count = 0;
-		for (auto &pr: _grid_pts) {
 
-			// Get
-			abscissas = pr.second->get_abscissas();
-			ordinate = pr.second->get_ordinate();
 
-			// Write
-			for (auto dim=0; dim<_dim_grid; dim++) {
-				f << abscissas[dim] << " ";
-			};
-			f << ordinate;
 
-			if (i_count != _grid_pts.size()-1) {
-				f << "\n";
-			};
-			i_count++;
-		};
-
-		// Close
-		f.close();
-	};
 
 
 
@@ -972,18 +1054,39 @@ namespace dcu {
 	};
 
 	/********************
-	Project
+	Get a point by interpolating
 	********************/
 
-	void Grid::project() {
-		_impl->project();
+	double Grid::get_val(std::vector<double> abscissas) {
+		return _impl->get_val(abscissas);
 	};
 
 	/********************
-	Write
+	Get derivative
 	********************/
 
-	void Grid::write_solution(std::string fname) const {
-		_impl->write_solution(fname);
+	double Grid::get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> grid_idxs) {
+		return _impl->get_deriv_wrt_pt_value(abscissas,grid_idxs);
+	};
+	double Grid::get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet idx_set) {
+		return _impl->get_deriv_wrt_pt_value(abscissas,idx_set);
+	};
+	double Grid::get_deriv_wrt_pt_value(std::vector<double> abscissas, GridPtKey grid_pt_key) {
+		return _impl->get_deriv_wrt_pt_value(abscissas,grid_pt_key);
+	};
+
+	double Grid::get_deriv_wrt_x(std::vector<double> abscissas, int k) {
+		return _impl->get_deriv_wrt_x(abscissas,k);
+	};
+
+	/********************
+	Read/write grid
+	********************/
+
+	void Grid::read_from_file(std::string fname) {
+		_impl->read_from_file(fname);
+	};
+	void Grid::write_to_file(std::string fname) const {
+		_impl->write_to_file(fname);
 	};
 };
