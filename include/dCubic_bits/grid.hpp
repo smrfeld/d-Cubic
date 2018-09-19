@@ -77,8 +77,8 @@ namespace dcu {
 		Get grid points surrounding a point
 		********************/
 
-		Nbr2 get_surrounding_2(std::vector<double> abscissas) const;
-		Nbr4 get_surrounding_4(std::vector<double> abscissas) const;
+		Nbr2 get_surrounding_2_grid_pts(std::vector<double> abscissas) const;
+		Nbr4 get_surrounding_4_grid_pts(std::vector<double> abscissas) const;
 
 		/********************
 		Get a point by interpolating

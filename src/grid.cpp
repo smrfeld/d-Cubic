@@ -65,9 +65,9 @@ namespace dcu {
 		Get surrounding
 		********************/
 
-		void _iterate_get_surrounding_2(IdxSet &idxs_local, IdxSet &idxs_lower, IdxSet &idxs_upper, Nbr2 &map, int dim) const;
+		void _iterate_get_surrounding_2_grid_pts(IdxSet &idxs_local, IdxSet &idxs_lower, IdxSet &idxs_upper, Nbr2 &map, int dim) const;
 
-		void _iterate_get_surrounding_4(IdxSet &idxs_local, IdxSet &idxs_0, IdxSet &idxs_1, IdxSet &idxs_2, IdxSet &idxs_3, Nbr4 &nbr4, int dim) const;
+		void _iterate_get_surrounding_4_grid_pts(IdxSet &idxs_local, IdxSet &idxs_0, IdxSet &idxs_1, IdxSet &idxs_2, IdxSet &idxs_3, Nbr4 &nbr4, int dim) const;
 
 		/********************
 		Form the coeffs
@@ -75,9 +75,18 @@ namespace dcu {
 
 		// Start with coeff_p = 1.0
 		// Dimension1D to interpolate in starts at _grid_dim-1
-		void _iterate_form_coeffs(std::map<GridPtKey, double> &coeffs_store, std::vector<double> &frac_abscissas, int dim_to_interpolate_in, IdxSet &idxs_p, double coeff_p);
+		// void _iterate_form_coeffs(std::map<GridPtKey, double> &coeffs_store, std::vector<double> &frac_abscissas, int dim_to_interpolate_in, IdxSet &idxs_p, double coeff_p);
 
-		// Constructor helpers
+		/********************
+		Interpolate
+		********************/
+
+		double _interpolate(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs, Nbr4 &nbrs_p) const;
+
+		/********************
+		Constructor helpers
+		********************/
+
 		void _clean_up();
 		void _copy(const Impl& other);
 		void _move(Impl& other);
@@ -118,8 +127,8 @@ namespace dcu {
 		Get grid points surrounding a point
 		********************/
 
-		Nbr2 get_surrounding_2(std::vector<double> abscissas) const;
-		Nbr4 get_surrounding_4(std::vector<double> abscissas) const;
+		Nbr2 get_surrounding_2_grid_pts(std::vector<double> abscissas) const;
+		Nbr4 get_surrounding_4_grid_pts(std::vector<double> abscissas) const;
 
 		/********************
 		Get a point by interpolating
@@ -422,10 +431,10 @@ namespace dcu {
 	Get grid points surrounding a point
 	********************/
 
-	Nbr2 Grid::Impl::get_surrounding_2(std::vector<double> abscissas) const {
+	Nbr2 Grid::Impl::get_surrounding_2_grid_pts(std::vector<double> abscissas) const {
 		// Check size
 		if (abscissas.size() != _dim_grid) {
-			std::cerr << ">>> Error:Grid::Impl::get_surrounding_2 <<< Abscissa size should equal grid size." << std::endl;
+			std::cerr << ">>> Error:Grid::Impl::get_surrounding_2_grid_pts <<< Abscissa size should equal grid size." << std::endl;
 			exit(EXIT_FAILURE);
 		};
 
@@ -436,7 +445,7 @@ namespace dcu {
 			bounds = _dims[dim]->get_surrounding_idxs(abscissas[dim]);
 			if (!bounds.first) {
 				// Outside grid
-				std::cerr << ">>> Error:Grid::Impl::get_surrounding_2 <<< Abscissa in dim: " << dim << " value: " << abscissas[dim] << " is outside the grid: " << _dims[dim]->get_start_pt() << " to: " << _dims[dim]->get_end_pt() << std::endl;
+				std::cerr << ">>> Error:Grid::Impl::get_surrounding_2_grid_pts <<< Abscissa in dim: " << dim << " value: " << abscissas[dim] << " is outside the grid: " << _dims[dim]->get_start_pt() << " to: " << _dims[dim]->get_end_pt() << std::endl;
 				exit(EXIT_FAILURE);
 			};
 
@@ -447,19 +456,19 @@ namespace dcu {
 		// Iterate to fill out the map
 		IdxSet idxs_local(_dim_grid);
 		Nbr2 ret;
-		_iterate_get_surrounding_2(idxs_local,idxs_lower,idxs_upper,ret,0);
+		_iterate_get_surrounding_2_grid_pts(idxs_local,idxs_lower,idxs_upper,ret,0);
 
 		return ret;
 	};
 
-	void Grid::Impl::_iterate_get_surrounding_2(IdxSet &idxs_local, IdxSet &idxs_lower, IdxSet &idxs_upper, Nbr2 &map, int dim) const {
+	void Grid::Impl::_iterate_get_surrounding_2_grid_pts(IdxSet &idxs_local, IdxSet &idxs_lower, IdxSet &idxs_upper, Nbr2 &map, int dim) const {
 		if (dim != _dim_grid) {
 			// Deeper!
 			// Can be lower (=0) or higher (=+1) in this dim
 			idxs_local[dim] = 0;
-			_iterate_get_surrounding_2(idxs_local,idxs_lower,idxs_upper,map,dim+1);
+			_iterate_get_surrounding_2_grid_pts(idxs_local,idxs_lower,idxs_upper,map,dim+1);
 			idxs_local[dim] = 1;
-			_iterate_get_surrounding_2(idxs_local,idxs_lower,idxs_upper,map,dim+1);
+			_iterate_get_surrounding_2_grid_pts(idxs_local,idxs_lower,idxs_upper,map,dim+1);
 
 		} else {
 			// Do something
@@ -479,10 +488,10 @@ namespace dcu {
 		};
 	};
 
-	Nbr4 Grid::Impl::get_surrounding_4(std::vector<double> abscissas) const {
+	Nbr4 Grid::Impl::get_surrounding_4_grid_pts(std::vector<double> abscissas) const {
 		// Check size
 		if (abscissas.size() != _dim_grid) {
-			std::cerr << ">>> Error:Grid::Impl::get_surrounding_4 <<< Abscissa size should equal grid size." << std::endl;
+			std::cerr << ">>> Error:Grid::Impl::get_surrounding_4_grid_pts <<< Abscissa size should equal grid size." << std::endl;
 			exit(EXIT_FAILURE);
 		};
 
@@ -493,7 +502,7 @@ namespace dcu {
 			bounds = _dims[dim]->get_surrounding_idxs(abscissas[dim]);
 			if (!bounds.first) {
 				// Outside grid
-				std::cerr << ">>> Error:Grid::Impl::get_surrounding_4 <<< Abscissa in dim: " << dim << " value: " << abscissas[dim] << " is outside the grid: " << _dims[dim]->get_start_pt() << " to: " << _dims[dim]->get_end_pt() << std::endl;
+				std::cerr << ">>> Error:Grid::Impl::get_surrounding_4_grid_pts <<< Abscissa in dim: " << dim << " value: " << abscissas[dim] << " is outside the grid: " << _dims[dim]->get_start_pt() << " to: " << _dims[dim]->get_end_pt() << std::endl;
 				exit(EXIT_FAILURE);
 			};
 
@@ -506,23 +515,23 @@ namespace dcu {
 		// Iterate to fill out the map
 		IdxSet idxs_local(_dim_grid);
 		Nbr4 ret;
-		_iterate_get_surrounding_4(idxs_local,idxs_0,idxs_1,idxs_2,idxs_3,ret,0);
+		_iterate_get_surrounding_4_grid_pts(idxs_local,idxs_0,idxs_1,idxs_2,idxs_3,ret,0);
 
 		return ret;
 	};	
 
-	void Grid::Impl::_iterate_get_surrounding_4(IdxSet &idxs_local, IdxSet &idxs_0, IdxSet &idxs_1, IdxSet &idxs_2, IdxSet &idxs_3, Nbr4 &nbr4, int dim) const {
+	void Grid::Impl::_iterate_get_surrounding_4_grid_pts(IdxSet &idxs_local, IdxSet &idxs_0, IdxSet &idxs_1, IdxSet &idxs_2, IdxSet &idxs_3, Nbr4 &nbr4, int dim) const {
 		if (dim != _dim_grid) {
 			// Deeper!
 			// Can be lower (=0,1) or higher (=2,3) in this dim
 			idxs_local[dim] = 0;
-			_iterate_get_surrounding_4(idxs_local,idxs_0,idxs_1,idxs_2,idxs_3,nbr4,dim+1);
+			_iterate_get_surrounding_4_grid_pts(idxs_local,idxs_0,idxs_1,idxs_2,idxs_3,nbr4,dim+1);
 			idxs_local[dim] = 1;
-			_iterate_get_surrounding_4(idxs_local,idxs_0,idxs_1,idxs_2,idxs_3,nbr4,dim+1);
+			_iterate_get_surrounding_4_grid_pts(idxs_local,idxs_0,idxs_1,idxs_2,idxs_3,nbr4,dim+1);
 			idxs_local[dim] = 2;
-			_iterate_get_surrounding_4(idxs_local,idxs_0,idxs_1,idxs_2,idxs_3,nbr4,dim+1);
+			_iterate_get_surrounding_4_grid_pts(idxs_local,idxs_0,idxs_1,idxs_2,idxs_3,nbr4,dim+1);
 			idxs_local[dim] = 3;
-			_iterate_get_surrounding_4(idxs_local,idxs_0,idxs_1,idxs_2,idxs_3,nbr4,dim+1);
+			_iterate_get_surrounding_4_grid_pts(idxs_local,idxs_0,idxs_1,idxs_2,idxs_3,nbr4,dim+1);
 
 		} else {
 			// Do something
@@ -904,7 +913,6 @@ namespace dcu {
 		};
 
 	};
-	*/
 
 	void Grid::Impl::_iterate_form_coeffs(std::map<GridPtKey, double> &coeffs_store, std::vector<double> &frac_abscissas, int dim_to_interpolate_in, IdxSet &idxs_p, double coeff_p) {
 
@@ -934,14 +942,13 @@ namespace dcu {
 			// Do something
 
 			// Print the idx and coeff
-			/*
-			std::cout << idxs_p << " coeff: " << coeff_p << std::endl;
-			*/
+			// std::cout << idxs_p << " coeff: " << coeff_p << std::endl;
 
 			// Add to the map
 			coeffs_store[GridPtKey(idxs_p,4)] = coeff_p;
 		};
 	};
+	*/
 
 
 
@@ -1046,11 +1053,11 @@ namespace dcu {
 	Get grid points surrounding a point
 	********************/
 
-	Nbr2 Grid::get_surrounding_2(std::vector<double> abscissas) const {
-		return _impl->get_surrounding_2(abscissas);
+	Nbr2 Grid::get_surrounding_2_grid_pts(std::vector<double> abscissas) const {
+		return _impl->get_surrounding_2_grid_pts(abscissas);
 	};
-	Nbr4 Grid::get_surrounding_4(std::vector<double> abscissas) const {
-		return _impl->get_surrounding_4(abscissas);
+	Nbr4 Grid::get_surrounding_4_grid_pts(std::vector<double> abscissas) const {
+		return _impl->get_surrounding_4_grid_pts(abscissas);
 	};
 
 	/********************
