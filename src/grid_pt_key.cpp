@@ -1,6 +1,7 @@
-#include "idx_set_key.hpp"
+#include "../include/dCubic_bits/grid_pt_key.hpp"
 #include "../include/dCubic_bits/dimension_1d.hpp"
 #include "../include/dCubic_bits/idx_set.hpp"
+#include "../include/dCubic_bits/grid_pt.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -15,7 +16,7 @@ namespace dcu {
 	Declaration
 	****************************************/
 
-	class IdxSetKey::Impl {
+	class GridPtKey::Impl {
 
 	private:
 
@@ -91,14 +92,14 @@ namespace dcu {
 
 
 	/****************************************
-	IdxSetKey
+	GridPtKey
 	****************************************/
 
 	/********************
 	Constructor
 	********************/
 
-	IdxSetKey::Impl::Impl(IdxSet idxs, int no_idxs_possible) {
+	GridPtKey::Impl::Impl(IdxSet idxs, int no_idxs_possible) {
 		for (auto i=0; i<idxs.size(); i++) {
 			_no_idxs_possible.push_back(no_idxs_possible);
 		};
@@ -115,7 +116,7 @@ namespace dcu {
 		// Set vals
 		_idxs = idxs;
 	};
-	IdxSetKey::Impl::Impl(IdxSet idxs, std::vector<std::shared_ptr<Dimension1D>> dims) {
+	GridPtKey::Impl::Impl(IdxSet idxs, std::vector<std::shared_ptr<Dimension1D>> dims) {
 		for (auto i=0; i<dims.size(); i++) {
 			// Add 2 to take into account outside dims
 			_no_idxs_possible.push_back(dims[i]->get_no_pts()+2);
@@ -133,27 +134,27 @@ namespace dcu {
 		// Set vals
 		_idxs = idxs;
 	};
-	IdxSetKey::Impl::Impl(const Impl& other) {
+	GridPtKey::Impl::Impl(const Impl& other) {
 		_copy(other);
 	};
-	IdxSetKey::Impl::Impl(Impl&& other) {
+	GridPtKey::Impl::Impl(Impl&& other) {
 		_move(other);
 	};
-    IdxSetKey::Impl& IdxSetKey::Impl::operator=(const Impl& other) {
+    GridPtKey::Impl& GridPtKey::Impl::operator=(const Impl& other) {
 		if (this != &other) {
 			_clean_up();
 			_copy(other);
 		};
 		return *this;
     };
-    IdxSetKey::Impl& IdxSetKey::Impl::operator=(Impl&& other) {
+    GridPtKey::Impl& GridPtKey::Impl::operator=(Impl&& other) {
 		if (this != &other) {
 			_clean_up();
 			_move(other);
 		};
 		return *this;
     };
-	IdxSetKey::Impl::~Impl()
+	GridPtKey::Impl::~Impl()
 	{
 		_clean_up();
 	};
@@ -162,17 +163,17 @@ namespace dcu {
 	Helpers for constructors
 	********************/
 
-	void IdxSetKey::Impl::_clean_up()
+	void GridPtKey::Impl::_clean_up()
 	{
 		// Nothing...
 	};
-	void IdxSetKey::Impl::_copy(const Impl& other)
+	void GridPtKey::Impl::_copy(const Impl& other)
 	{
 		_type = other._type;
 		_idxs = other._idxs;
 		_no_idxs_possible = other._no_idxs_possible;
 	};
-	void IdxSetKey::Impl::_move(Impl& other)
+	void GridPtKey::Impl::_move(Impl& other)
 	{
 		_type = other._type;
 		_idxs = other._idxs;
@@ -188,12 +189,12 @@ namespace dcu {
 	********************/
 
 	// Type
-	GridPtType IdxSetKey::Impl::get_type() const {
+	GridPtType GridPtKey::Impl::get_type() const {
 		return _type;
 	};
 
 	// Linear idx
-	int IdxSetKey::Impl::get_linear() const {
+	int GridPtKey::Impl::get_linear() const {
 		int ret=0,add=0;
 		for (auto i=0; i<_idxs.size(); i++) {
 			add = _idxs[i];
@@ -211,7 +212,7 @@ namespace dcu {
 	};
 
 	// Set from linear
-	void IdxSetKey::Impl::set_from_linear(int idx_linear) {
+	void GridPtKey::Impl::set_from_linear(int idx_linear) {
 		int idx_working = idx_linear;
 
 		// Determine the idxs
@@ -234,7 +235,7 @@ namespace dcu {
 	};
  
  	// Print
- 	std::string IdxSetKey::Impl::print() const {
+ 	std::string GridPtKey::Impl::print() const {
  		return _idxs.print();
  	};
 
@@ -282,40 +283,40 @@ namespace dcu {
 	Constructor
 	********************/
 
-	IdxSetKey::IdxSetKey(IdxSet idxs, int no_idxs_possible) : _impl(new Impl(idxs,no_idxs_possible)) {};
-	IdxSetKey::IdxSetKey(IdxSet idxs, std::vector<std::shared_ptr<Dimension1D>> dims) : _impl(new Impl(idxs,dims)) {};
-	IdxSetKey::IdxSetKey(const IdxSetKey& other) : _impl(new Impl(*other._impl)) {};
-	IdxSetKey::IdxSetKey(IdxSetKey&& other) : _impl(std::move(other._impl)) {};
-	IdxSetKey& IdxSetKey::operator=(const IdxSetKey &other)  {
+	GridPtKey::GridPtKey(IdxSet idxs, int no_idxs_possible) : _impl(new Impl(idxs,no_idxs_possible)) {};
+	GridPtKey::GridPtKey(IdxSet idxs, std::vector<std::shared_ptr<Dimension1D>> dims) : _impl(new Impl(idxs,dims)) {};
+	GridPtKey::GridPtKey(const GridPtKey& other) : _impl(new Impl(*other._impl)) {};
+	GridPtKey::GridPtKey(GridPtKey&& other) : _impl(std::move(other._impl)) {};
+	GridPtKey& GridPtKey::operator=(const GridPtKey &other)  {
         _impl.reset(new Impl(*other._impl));
         return *this; 
 	};	
-	IdxSetKey& IdxSetKey::operator=(IdxSetKey &&other) {
+	GridPtKey& GridPtKey::operator=(GridPtKey &&other) {
         _impl = std::move(other._impl);
         return *this; 
 	};
-	IdxSetKey::~IdxSetKey() = default;
+	GridPtKey::~GridPtKey() = default;
 
 	/********************
 	Accessors
 	********************/
 
 	// Type
-	GridPtType IdxSetKey::get_type() const {
+	GridPtType GridPtKey::get_type() const {
 		return _impl->get_type();
 	};
 
 	// Linear idx
-	int IdxSetKey::get_linear() const {
+	int GridPtKey::get_linear() const {
 		return _impl->get_linear();
 	};
 
 	// Set from linear
-	void IdxSetKey::set_from_linear(int idx_linear) {
+	void GridPtKey::set_from_linear(int idx_linear) {
 		_impl->set_from_linear(idx_linear);
 	};
 
-	std::string IdxSetKey::print() const {
+	std::string GridPtKey::print() const {
 		return _impl->print();
 	};
 
@@ -324,16 +325,16 @@ namespace dcu {
 	********************/
 
 	// Printing
-	std::ostream& operator<<(std::ostream& stream, const IdxSetKey& idxs) {
+	std::ostream& operator<<(std::ostream& stream, const GridPtKey& idxs) {
 		stream << idxs.print();
 		return stream;
 	 };
 
 	// Comparator
-	bool operator <(const IdxSetKey& x, const IdxSetKey& y) {
+	bool operator <(const GridPtKey& x, const GridPtKey& y) {
 		return x.get_linear() < y.get_linear();
 	};
-	bool operator ==(const IdxSetKey& x, const IdxSetKey& y) {
+	bool operator ==(const GridPtKey& x, const GridPtKey& y) {
 		return x.get_linear() == y.get_linear();
 	};
 };

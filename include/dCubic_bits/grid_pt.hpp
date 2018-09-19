@@ -3,6 +3,11 @@
 #include <vector>
 #endif
 
+#ifndef MAP_H
+#define MAP_H
+#include <map>
+#endif
+
 /************************************
 * Namespace for dcu
 ************************************/
@@ -11,6 +16,33 @@ namespace dcu {
 
 	// Forwards
 	class IdxSet;
+	class GridPtKey;
+	class GridPt;
+	class GridPtOut;
+
+	/****************************************
+	Grid pt type
+	****************************************/
+
+	enum class GridPtType: unsigned int { INSIDE, OUTSIDE };
+
+	/****************************************
+	Neighborhood of points surrounding a point, 2 in each dim
+	****************************************/
+
+	struct Nbr2 {
+		std::map<GridPtKey, std::shared_ptr<GridPt>> in;
+	};
+
+	/****************************************
+	Neighborhood of points surrounding a point, 4 in each dim
+	****************************************/
+
+	struct Nbr4 {
+		std::map<GridPtKey, GridPtType> types;
+		std::map<GridPtKey, std::shared_ptr<GridPt>> in;
+		std::map<GridPtKey, std::shared_ptr<GridPtOut>> out;
+	};
 
 	/****************************************
 	Interior grid pt

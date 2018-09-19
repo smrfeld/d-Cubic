@@ -12,13 +12,13 @@ namespace dcu {
 	// Forward
 	class IdxSet;
 	class Dimension1D;
-	enum class GridPtType: unsigned int { INSIDE, OUTSIDE };
+	enum class GridPtType: unsigned int;
 
 	/****************************************
-	Index set key
+	Grid pt key
 	****************************************/
 
-	class IdxSetKey {
+	class GridPtKey {
 
 	private:
 
@@ -31,13 +31,13 @@ namespace dcu {
 		Constructor
 		********************/
 
-		IdxSetKey(IdxSet idxs, int no_idxs_possible);
-		IdxSetKey(IdxSet idxs, std::vector<std::shared_ptr<Dimension1D>> dims);
-		IdxSetKey(const IdxSetKey& other);
-		IdxSetKey(IdxSetKey&& other);
-		IdxSetKey& operator=(const IdxSetKey &other);
-		IdxSetKey& operator=(IdxSetKey &&other);
-		~IdxSetKey();
+		GridPtKey(IdxSet idxs, int no_idxs_possible);
+		GridPtKey(IdxSet idxs, std::vector<std::shared_ptr<Dimension1D>> dims);
+		GridPtKey(const GridPtKey& other);
+		GridPtKey(GridPtKey&& other);
+		GridPtKey& operator=(const GridPtKey &other);
+		GridPtKey& operator=(GridPtKey &&other);
+		~GridPtKey();
 
 		/********************
 		Accessors
@@ -60,9 +60,9 @@ namespace dcu {
 	********************/
 
 	// Printing
-    std::ostream& operator<< (std::ostream& stream, const IdxSetKey& idxs);
+    std::ostream& operator<< (std::ostream& stream, const GridPtKey& idxs);
 
 	// Comparator
-	bool operator <(const IdxSetKey& x, const IdxSetKey& y);
-	bool operator ==(const IdxSetKey& x, const IdxSetKey& y);
+	bool operator <(const GridPtKey& x, const GridPtKey& y);
+	bool operator ==(const GridPtKey& x, const GridPtKey& y);
 };

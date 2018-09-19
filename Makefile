@@ -19,9 +19,10 @@ INSTALL_INCLUDE_DIR = /usr/local/include
 # source files
 SRC_NAMES = dimension_1d.cpp \
 	idx_set.cpp \
-	idx_set_key.cpp \
+	grid_pt_key.cpp \
 	grid_pt.cpp \
-	grid_pt_out.cpp
+	grid_pt_out.cpp \
+	grid.cpp
 SRCS = $(addprefix $(SOURCE_DIR)/, $(SRC_NAMES))
 OBJS = $(addprefix $(BUILD_DIR)/, $(SRC_NAMES:.cpp=.o))
 DEPS = $(OBJS:.o=.d)
