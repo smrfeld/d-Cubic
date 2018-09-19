@@ -1,0 +1,619 @@
+\documentclass[11pt]{article}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Packages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{oke-header-math}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Mathematics
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\sbf}{\boldsymbol{s}}
+\newcommand{\pbf}{\boldsymbol{p}}
+\newcommand{\qbf}{\boldsymbol{q}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Title
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Cubic Interpolation \& Derivatives in $d$ Dimensions}
+\author{Oliver K. Ernst}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Begin document
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{In one dimension}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%
+
+\subsection{Interpolation}
+
+%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%
+
+Consider a $1$D grid of points of length $n$, with abscissas $(s_0, \dots, s_{n-1})$.
+
+Let values be defined on each point, given by $(t_0,\dots,t_{n-1})$.
+
+Given a point $\tilde{x}$ that falls between two abscissas $s_i, s_{i+1}$, define the surrounding values:
+
+$p_0 = t_{i-1}, p_1 = t_i, p_2 = t_{i+1}, p_3 = t_{i+2}$. 
+
+Let $x$ be the \textbf{fraction} that $\tilde{x}$ is between the two neighboring points, i.e. $x = (\tilde{x} - s_i) / (s_{i+1} - s_i)$.
+
+The cubic interpolation formula is:
+%---------------
+\begin{equation}
+f(x ; p_0, p_1, p_2, p_3) = \left ( - \frac{1}{2} p_0 + \frac{3}{2} p_1 - \frac{3}{2} p_2 + \frac{1}{2} p_3 \right ) x^3 + \left ( p_0 - \frac{5}{2} p_1 + 2 p_2 - \frac{1}{2} p_3 \right ) x^2 + \left ( - \frac{1}{2} p_0 + \frac{1}{2} p_2 \right ) x + p_1
+\end{equation}
+%---------------
+
+Here, assume the case where the point does not fall near the boundary, i.e. all the grid points $p_0,p_1,p_2,p_3$ exist (else they need to be approximated).
+
+%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%
+
+\subsection{The derivative with respect to a point value}
+
+%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%
+
+The derivatives with respect to a grid point values are:
+%---------------
+\begin{equation}
+\begin{split}
+\frac{\partial f}{\partial p_0} &= - \frac{1}{2} x^3 + x^2 - \frac{1}{2} x \\
+\frac{\partial f}{\partial p_1} &= \frac{3}{2} x^3 - \frac{5}{2} x^2 + 1 \\
+\frac{\partial f}{\partial p_2} &= - \frac{3}{2} x^3 + 2 x^2 + \frac{1}{2} x \\
+\frac{\partial f}{\partial p_3} &= \frac{1}{2} x^3 - \frac{1}{2} x^2
+\end{split}
+\label{eq:derivValue}
+\end{equation}
+%---------------
+
+%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%
+
+\subsection{The derivative with respect to $x$}
+
+%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%
+
+The derivative with respect to the point $\tilde{x}$ is:
+%---------------
+\begin{equation}
+\begin{split}
+\frac{\partial f}{\partial x} &=
+3 \left ( - \frac{1}{2} p_0 + \frac{3}{2} p_1 - \frac{3}{2} p_2 + \frac{1}{2} p_3 \right ) x^2 + 2 \left ( p_0 - \frac{5}{2} p_1 + 2 p_2 - \frac{1}{2} p_3 \right ) x  - \frac{1}{2} p_0 + \frac{1}{2} p_2 \\
+\frac{\partial f}{\partial \tilde{x}} 
+&= \frac{\partial f}{\partial x} \frac{\partial x}{\partial \tilde{x}} = \frac{\partial f}{\partial x} \left ( s_{i+1} - s_i \right )^{-1}
+\end{split}
+\label{eq:derivAbs}
+\end{equation}
+%---------------
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{In $d$-dimensions}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%
+
+\subsection{Interpolation}
+
+%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%
+
+In $d$ dimensions, let the grid abscissas in each dimension be $(s_0^d, \dots, s_{n_d-1}^d)$ of length $n_d$.
+
+The grid points are then:
+%---------------
+\begin{equation}
+\sbf^{[d] : \langle j_1,\dots,j_d \rangle} = \left ( s_{j_1}^1, \dots, s_{j_d}^d  \right )
+\end{equation}
+%---------------
+Here, we use the notation $\sbf^{[d] : \langle j_1,\dots,j_d \rangle}$ that there is one of such vector (of dimension $d$) for every set of $d$ indexes $\langle j_1,\dots,j_d \rangle$.
+
+Let the values associated with each grid point be:
+%---------------
+\begin{equation}
+t^{[d] : \langle j_1,\dots,j_d \rangle}
+\end{equation}
+%---------------
+To further reduce the burden of indexing, define:
+%---------------
+\begin{equation}
+[d]: \langle 1:d \rangle  = [d]: \langle j_1, \dots, j_d \rangle
+\end{equation}
+%---------------
+when specific indexes are not needed, then the abscissas and associated points are:
+%---------------
+\begin{equation*}
+\begin{split}
+\sbf^{[d]: \langle 1:d \rangle} \\
+t^{[d]: \langle 1:d \rangle}
+\end{split}
+\end{equation*}
+%---------------
+
+Given a point $\tilde{\xb} = (\tilde{x}^1, \dots, \tilde{x}^d)$ of dimension $d$ that falls between grid points $s_{i_d}^d, s_{i_{d+1}}^d$ in each dimension, define the values $p^{[d]: \langle 1:d \rangle}$:
+%---------------
+\begin{equation*}
+\begin{split}
+p^{[d]:\langle 0, \dots, 0,0 \rangle} &= t^{[d]:\langle i_1-1, \dots, i_{d-1}-1, i_d-1 \rangle} \\
+p^{[d]:\langle 0, \dots, 0,1 \rangle} &= t^{[d]:\langle i_1-1, \dots, i_{d-1}-1, i_d \rangle} \\
+p^{[d]:\langle 0, \dots, 0,2 \rangle} &= t^{[d]:\langle i_1-1, \dots, i_{d-1}-1, i_d+1 \rangle} \\
+p^{[d]:\langle 0, \dots, 0,3 \rangle} &= t^{[d]:\langle i_1-1, \dots, i_{d-1}-1, i_d+2 \rangle} \\
+p^{[d]:\langle 0, \dots, 1,0 \rangle} &= t^{[d]:\langle i_1-1, \dots, i_{d-1}, i_d-1 \rangle} \\
+p^{[d]:\langle 0, \dots, 2,0 \rangle} &= t^{[d]:\langle i_1-1, \dots, i_{d-1}+1, i_d-1 \rangle} \\
+p^{[d]:\langle 0, \dots, 3,0 \rangle} &= t^{[d]:\langle i_1-1, \dots, i_{d-1}+2, i_d-1 \rangle}
+\end{split}
+\end{equation*}
+%---------------
+etc., or more generally
+%---------------
+\begin{equation*}
+p^{[d]:\langle j_1, \dots, j_d \rangle} = t^{[d]:\langle i_1-1+j_1, \dots, i_d-1+j_d \rangle} 
+\end{equation*}
+%---------------
+where $j=0,1,2,3$.
+
+There are $4^d$ of such points $p^{[d]: \langle 1:d \rangle}$ in total.
+
+Let $\xb$ be the fraction with components:
+%---------------
+\begin{equation}
+x_\delta = (\tilde{x}^\delta - s_{i_\delta}^\delta) / (s_{i_\delta+1}^\delta - s_{i_\delta}^\delta)
+\end{equation}
+%---------------
+for $\delta=1,\dots,d$.
+
+The cubic interpolation now proceeds iteratively - define points $p^{[d-1]: \langle 2: d \rangle}$:
+%---------------
+\begin{equation}
+p^{[d-1]: \langle j_2,\dots,j_d \rangle} = f \left ( 
+x_1 ; 
+p^{[d]: \langle 0,j_2,\dots,j_d \rangle},
+p^{[d]: \langle 1,j_2,\dots,j_d \rangle},
+p^{[d]: \langle 2,j_2,\dots,j_d \rangle},
+p^{[d]: \langle 3,j_2,\dots,j_d \rangle}
+\right )
+\end{equation}
+%---------------
+(notice the indexes appearing on the left), for all $i=0,1,2,3$, or equivalently and more compactly:
+%---------------
+\begin{equation}
+p^{[d-1]: \langle 2:d \rangle} = f \left ( 
+x_1 ; 
+p^{[d]: \langle 0,2:d \rangle},
+p^{[d]: \langle 1,2:d \rangle},
+p^{[d]: \langle 2,2:d \rangle},
+p^{[d]: \langle 3,2:d \rangle}
+\right )
+\label{eq:iterate1}
+\end{equation}
+%---------------
+
+There are $4^{d-1}$ of such points $p^{[d-1]:\langle 2:d \rangle}$.
+
+In general, the recursion relation to go from dimension $\delta$ to $\delta-1$ is:
+%---------------
+\begin{equation}
+p^{[\delta-1]: \langle d-\delta+2:d \rangle} = f \left ( 
+x_{d-\delta+1} ; 
+p^{[\delta]: \langle 0,d-\delta+2:d \rangle},
+p^{[\delta]: \langle 1,d-\delta+2:d \rangle},
+p^{[\delta]: \langle 2,d-\delta+2:d \rangle},
+p^{[\delta]: \langle 3,d-\delta+2:d \rangle}
+\right )
+\label{eq:rec}
+\end{equation}
+%---------------
+
+We can continue this way until we reach the the last dimension $d=0$, and are out of indexes on the left:
+%---------------
+\begin{equation}
+p^{[0]} = f \left ( 
+x_d ; 
+p^{[1]: \langle 0 \rangle},
+p^{[1]: \langle 1 \rangle},
+p^{[1]: \langle 2 \rangle},
+p^{[1]: \langle 3 \rangle}
+\right )
+\label{eq:soln}
+\end{equation}
+%---------------
+is the desired interpolated value we seek.
+
+%%%%%%%%%%%%%%%%%%
+
+\subsubsection{Pseudocode}
+
+%%%%%%%%%%%%%%%%%%
+
+\begin{enumerate}
+\item function \textbf{iterate}($\delta$, $d$, $\xb$, $(j_2, \dots, j_d)$, $p^{[d]:\langle 1:d \rangle}$): \\
+// With argument $\delta$, this tries to return $p^{[\delta-1]: \langle d-\delta+2:d \rangle} = $ left side of~(\ref{eq:rec})
+\begin{enumerate}
+\item if $\delta$ == $d$: // Arrived at~(\ref{eq:iterate1}) which we can do with the points given
+\begin{enumerate}
+\item return $f \left ( x_1, p^{[d]:\langle 0,2:d \rangle}, p^{[d]:\langle 1,2:d \rangle}, p^{[d]:\langle 2,2:d \rangle}, p^{[d]:\langle 3,2:d \rangle} \right )$ // $= p^{[d-1]}$
+\end{enumerate}
+\item else: // Go a level higher using~(\ref{eq:rec})
+\begin{enumerate}
+\item $p^{[\delta]: \langle 0, d-\delta+2:d \rangle} = $ \textbf{iterate}($\delta+1$, $d$, $\xb$, $( j_2, \dots, j_{d-\delta+1}=0, \dots, j_d )$, $p^{[d]:\langle 1:d \rangle}$)
+\item $p^{[\delta]: \langle 1, d-\delta+2:d \rangle} = $ \textbf{iterate}($\delta+1$, $d$, $\xb$, $( j_2, \dots, j_{d-\delta+1}=1, \dots, j_d )$, $p^{[d]:\langle 1:d \rangle}$)
+\item $p^{[\delta]: \langle 2, d-\delta+2:d \rangle} = $ \textbf{iterate}($\delta+1$, $d$, $\xb$, $( j_2, \dots, j_{d-\delta+1}=2, \dots, j_d )$, $p^{[d]:\langle 1:d \rangle}$)
+\item $p^{[\delta]: \langle 3, d-\delta+2:d \rangle} = $ \textbf{iterate}($\delta+1$, $d$, $\xb$, $( j_2, \dots, j_{d-\delta+1}=3, \dots, j_d )$, $p^{[d]:\langle 1:d \rangle}$)
+\item return $f \left ( 
+x_{d-\delta+1} ; 
+p^{[\delta]: \langle 0,d-\delta+2:d \rangle},
+p^{[\delta]: \langle 1,d-\delta+2:d \rangle},
+p^{[\delta]: \langle 2,d-\delta+2:d \rangle},
+p^{[\delta]: \langle 3,d-\delta+2:d \rangle}
+\right )$ // $= p^{[\delta-1]}$
+\end{enumerate}
+\end{enumerate}
+
+\item To start: \textbf{iterate}(1,$d$,$\xb$,$(j_2,\dots,j_d)$,$p^{[d]:\langle 1:d \rangle}$)
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%
+
+\subsection{The derivative with respect to a point value}
+
+%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%
+
+What is the derivative with respect to a point value? 
+
+Let the point to differentiate with respect to be:
+%---------------
+\begin{equation}
+p^{[d]: \langle k_1, \dots, k_d \rangle}
+\end{equation}
+%---------------
+Then we seek:
+%---------------
+\begin{equation}
+\frac{\partial p^{[0]}}{\partial p^{[d]: \langle k_1, \dots, k_d \rangle}}
+\end{equation}
+%---------------
+
+Using~(\ref{eq:soln}) and the chain rule:
+%---------------
+\begin{equation}
+\frac{\partial p^{[0]}}{\partial p^{[d]: \langle k_1, \dots, k_d \rangle}}
+=
+\sum_{j_d=0}^3 \frac{\partial f \left ( 
+x_d ; 
+p^{[1]: \langle 0 \rangle},
+p^{[1]: \langle 1 \rangle},
+p^{[1]: \langle 2 \rangle},
+p^{[1]: \langle 3 \rangle}
+\right )
+}{
+\partial p^{[1]: \langle j_d \rangle}
+}
+\frac{
+\partial p^{[1]: \langle j_d \rangle}
+}{
+\partial p^{[d]: \langle k_1, \dots, k_d \rangle}
+}
+\end{equation}
+%---------------
+The first term can be evaluated using~(\ref{eq:derivValue}). We immediately notice an important property: the interpolation is linear in the point values, such that the first term does not depend on them. This greatly reduces the complexity - we use the notation from~(\ref{eq:derivValue}):
+%---------------
+\begin{equation}
+\frac{ 
+\partial f(x_d)
+}{
+\partial p_{j_d}
+}
+\end{equation}
+%---------------
+to denote the derivative, giving:
+%---------------
+\begin{equation}
+\frac{\partial p^{[0]}}{\partial p^{[d]: \langle k_1, \dots, k_d \rangle}}
+=
+\sum_{j_d=0}^3 
+\frac{ 
+\partial f(x_d)
+}{
+\partial p_{j_d}
+}
+\frac{
+\partial p^{[1]: \langle j_d \rangle}
+}{
+\partial p^{[d]: \langle k_1, \dots, k_d \rangle}
+}
+\end{equation}
+%---------------
+
+The numerator of the second term is one dimension higher than the left hand side; this then is another recursion relation. Going another level gives:
+%---------------
+\begin{equation}
+\frac{\partial p^{[0]}}{\partial p^{[d]: \langle k_1, \dots, k_d \rangle}}
+=
+\sum_{j_{d-1}=0}^3
+\sum_{j_d=0}^3
+% Level 1 
+\frac{ 
+\partial f(x_d)
+}{
+\partial p_{j_d}
+}
+% Level 2
+\frac{ 
+\partial f(x_{d-1})
+}{
+\partial p_{j_{d-1}}
+}
+% Remainder
+\frac{
+\partial p^{[2]: \langle j_{d-1}, j_d \rangle}
+}{
+\partial p^{[d]: \langle k_1, \dots, k_d \rangle}
+}
+\end{equation}
+%---------------
+After $d$ such recursions:
+%---------------
+\begin{equation}
+\begin{split}
+\frac{\partial p^{[0]}}{\partial p^{[d]: \langle k_1, \dots, k_d \rangle}}
+&=
+\sum_{j_1,\dots,j_d} 
+\left (
+\prod_{\alpha=1}^{d} 
+\frac{ 
+\partial f(x_{d-\alpha+1})
+}{
+\partial p_{j_{d-\alpha+1}}
+}
+\right ) 
+\left (
+\frac{
+\partial p^{[d]: \langle j_1,\dots,j_d \rangle}
+}{
+\partial p^{[d]: \langle k_1, \dots, k_d \rangle}
+}
+\right ) \\
+&=
+\sum_{j_1,\dots,j_d} 
+\left (
+\prod_{\alpha=1}^{d} 
+\frac{ 
+\partial f(x_{d-\alpha+1})
+}{
+\partial p_{j_{d-\alpha+1}}
+}
+\right ) 
+\left (
+\prod_{\beta=1}^d \delta_{j_\beta, k_\beta}
+\right ) \\
+&=
+\prod_{\alpha=1}^{d} 
+\frac{ 
+\partial f(x_{d-\alpha+1})
+}{
+\partial p_{k_{d-\alpha+1}}
+}
+\end{split}
+\end{equation}
+%---------------
+This is in fact quite easy to evaluate, and does not require recursion!
+
+%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%
+
+\subsection{The derivative with respect to $x$}
+
+%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%
+
+We seek the derivative with respect to the $k$-th component $x_k$ of $\xb$:
+%---------------
+\begin{equation}
+\frac{\partial p^{[0]}}{\partial x_k}
+\end{equation}
+%---------------
+Using~(\ref{eq:soln}):
+%---------------
+\begin{equation}
+\frac{\partial p^{[0]}}{\partial x_k}
+=
+\frac{\partial f \left ( 
+x_d ; 
+p^{[1]: \langle 0 \rangle},
+p^{[1]: \langle 1 \rangle},
+p^{[1]: \langle 2 \rangle},
+p^{[1]: \langle 3 \rangle}
+\right )
+}{
+\partial x_k
+}
+\end{equation}
+%---------------
+
+If $k=d$, the problem is trivially the 1D case given by~(\ref{eq:derivAbs}).
+
+If $k<d$, then using the chain rule:
+%---------------
+\begin{equation}
+\frac{\partial p^{[0]}}{\partial x_k}
+=
+\sum_{j_d=0}^3 \frac{\partial f \left ( 
+x_d ; 
+p^{[1]: \langle 0 \rangle},
+p^{[1]: \langle 1 \rangle},
+p^{[1]: \langle 2 \rangle},
+p^{[1]: \langle 3 \rangle}
+\right )
+}{
+\partial p^{[1]: \langle j_d \rangle}
+}
+\frac{
+\partial p^{[1]: \langle j_d \rangle}
+}{
+\partial x_k
+}
+\end{equation}
+%---------------
+We again notice as before that the first term can be evaluated using~(\ref{eq:derivValue}) and does not depend on the point values $p$. Using the notation from~(\ref{eq:derivValue}):
+%---------------
+\begin{equation}
+\frac{ 
+\partial f(x_d)
+}{
+\partial p_{j_d}
+}
+\end{equation}
+%---------------
+gives:
+%---------------
+\begin{equation}
+\frac{\partial p^{[0]}}{\partial x_k}
+=
+\sum_{j_d=0}^3 
+\frac{\partial f(x_d)}{\partial p_{j_d}}
+\frac{
+\partial p^{[1]: \langle j_d \rangle}
+}{
+\partial x_k
+}
+\end{equation}
+%---------------
+
+This again defines a recursion relation - more generally, differentiating~(\ref{eq:rec}) gives:
+%---------------
+\begin{equation}
+\frac{\partial p^{[\delta-1]: \langle d-\delta+2:d \rangle}}{\partial x_k} 
+= 
+\sum_{j_{d-\delta+1} = 0}^3
+\frac{\partial f(x_{d-\delta+1})}{\partial p_{j_{d-\delta+1}}}
+\frac{\partial p^{[\delta]: \langle d-\delta+1:d \rangle}}{\partial x_k}
+\label{eq:recDer}
+\end{equation}
+%---------------
+after $d-k$ such recursions:
+%---------------
+\begin{equation}
+\frac{\partial p^{[0]}}{\partial x_k}
+=
+\sum_{j_{k+1},\dots,j_d}
+\left (
+\prod_{\alpha=1}^{d-k}
+\frac{\partial f(x_{d-\alpha+1})}{\partial p_{j_{d-\alpha+1}}}
+\right )
+\frac{
+\partial p^{[d-k]: \langle j_{k+1} : j_d \rangle}
+}{
+\partial x_k
+}
+\label{eq:solnDeriv}
+\end{equation}
+%---------------
+which can be evaluated by noting that:
+%---------------
+\begin{equation}
+\frac{
+\partial p^{[d-k]: \langle j_{k+1} : j_d \rangle}
+}{
+\partial x_k
+}
+=
+\frac{
+\partial f \left ( 
+x_k ; 
+p^{[d-k+1]: \langle 0, j_{k+1}:j_d \rangle},
+p^{[d-k+1]: \langle 1, j_{k+1}:j_d \rangle},
+p^{[d-k+1]: \langle 2, j_{k+1}:j_d \rangle},
+p^{[d-k+1]: \langle 3, j_{k+1}:j_d \rangle}
+\right )
+}{
+\partial x_k
+}
+\label{eq:recDerFinal}
+\end{equation}
+%---------------
+This can be evaluated using the 1D result~(\ref{eq:derivAbs}) for the second term; unfortunately, this requires $k-1$ levels of recursion to determine the $p^{[d-k+1]}$.
+
+Also: do not forget that:
+%---------------
+\begin{equation}
+\frac{\partial p^{[0]}}{\partial \tilde{x}_k} 
+= \frac{\partial p^{[0]}}{\partial x_k} \frac{\partial x_k}{\partial \tilde{x}_k} 
+= \frac{\partial p^{[0]}}{\partial x_k} \left ( s_{i_k+1}^k - s_{i_k}^k \right )^{-1}
+\end{equation}
+%---------------
+since $\xb$ refers to a fraction between $0,1$.
+
+%%%%%%%%%%%%%%%%%%
+
+\subsubsection{Pseudocode}
+
+%%%%%%%%%%%%%%%%%%
+
+\begin{enumerate}
+\item function \textbf{iterate\_deriv}($\delta$,$k$,$d$,$\xb$,$(j_{k+1}, \dots, j_d)$, $p^{[d]:\langle 1:d \rangle}$): \\
+// With arg $\delta$, this evaluates $\partial p^{[\delta-1]: \langle d-\delta+2:d \rangle} / \partial x_k = $ the left hand of~(\ref{eq:recDer})
+\begin{enumerate}
+\item if $\delta == d-k+1$: // Evaluate the derivative on the right of~(\ref{eq:recDerFinal})
+\begin{enumerate}
+\item $p^{[d-k+1]: \langle 0, j_{k+1}:j_d \rangle}$ = \textbf{iterate}($d-k+2$, $d$, $\xb$, $(j_k=0, j_{k+1}, \dots, j_d)$, $p^{[d]:\langle 1:d \rangle}$) \\
+// Recall that \textbf{iterate}($\delta,\dots$) returns $p^{[\delta-1]}$
+\item $p^{[d-k+1]: \langle 1, j_{k+1}:j_d \rangle}$ = \textbf{iterate}($d-k+2$, $d$, $\xb$, $(j_k=1, j_{k+1}, \dots, j_d)$, $p^{[d]:\langle 1:d \rangle}$)
+\item $p^{[d-k+1]: \langle 2, j_{k+1}:j_d \rangle}$ = \textbf{iterate}($d-k+2$, $d$, $\xb$, $(j_k=2, j_{k+1}, \dots, j_d)$, $p^{[d]:\langle 1:d \rangle}$)
+\item $p^{[d-k+1]: \langle 3, j_{k+1}:j_d \rangle}$ = \textbf{iterate}($d-k+2$, $d$, $\xb$, $(j_k=3, j_{k+1}, \dots, j_d)$, $p^{[d]:\langle 1:d \rangle}$)
+\item return $\partial f \left ( 
+x_k ; 
+p^{[d-k+1]: \langle 0, j_{k+1}:j_d \rangle},
+p^{[d-k+1]: \langle 1, j_{k+1}:j_d \rangle},
+p^{[d-k+1]: \langle 2, j_{k+1}:j_d \rangle},
+p^{[d-k+1]: \langle 3, j_{k+1}:j_d \rangle}
+\right )
+/
+\partial x_k
+$
+\end{enumerate}
+\item else: // Recurse using~(\ref{eq:recDer})
+\begin{enumerate}
+\item $\partial p^{[\delta]:\langle 0, d-\delta+2:d \rangle} / \partial x_k$ = \textbf{iterate\_deriv}($\delta+1$,$k$,$d$,$\xb$,$(j_{k+1}, \dots, j_{d-\delta+1} = 0,\dots, j_d)$,$p^{[d]:\langle 1:d \rangle}$)
+\item $\partial p^{[\delta]:\langle 1, d-\delta+2:d \rangle} / \partial x_k$ = \textbf{iterate\_deriv}($\delta+1$,$k$,$d$,$\xb$,$(j_{k+1}, \dots, j_{d-\delta+1} = 1,\dots, j_d)$,$p^{[d]:\langle 1:d \rangle}$)
+\item $\partial p^{[\delta]:\langle 2, d-\delta+2:d \rangle} / \partial x_k$ = \textbf{iterate\_deriv}($\delta+1$,$k$,$d$,$\xb$,$(j_{k+1}, \dots, j_{d-\delta+1} = 2,\dots, j_d)$,$p^{[d]:\langle 1:d \rangle}$)
+\item $\partial p^{[\delta]:\langle 3, d-\delta+2:d \rangle} / \partial x_k$ = \textbf{iterate\_deriv}($\delta+1$,$k$,$d$,$\xb$,$(j_{k+1}, \dots, j_{d-\delta+1} = 3,\dots, j_d)$,$p^{[d]:\langle 1:d \rangle}$)
+\item return $\sum_{j_{d-\delta+1} = 0}^3
+\frac{\partial f(x_{d-\delta+1})}{\partial p_{j_{d-\delta+1}}}
+\frac{\partial p^{[\delta]: \langle d-\delta+1:d \rangle}}{\partial x_k}$ // = right side of~(\ref{eq:recDer})
+\end{enumerate}
+\end{enumerate}
+
+\item To start: \textbf{iterate\_deriv}($1$,$k$,$d$,$\xb$,$(j_{k+1}, \dots, j_d)$,$p^{[d]:\langle 1:d \rangle}$)
+\end{enumerate}
+
+\end{document}
+
+
