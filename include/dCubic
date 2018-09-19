@@ -1,0 +1,6 @@
+#ifndef D_CUBIC_H
+#define D_CUBIC_H
+
+#include "dCubic_bits/dimension_1d.hpp"
+
+#endif
