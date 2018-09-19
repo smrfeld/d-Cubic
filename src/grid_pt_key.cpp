@@ -28,6 +28,7 @@ namespace dcu {
 		std::vector<int> _no_idxs_possible;
 
 		// Constructor helpers
+		void _shared_constructor(IdxSet idxs);
 		void _clean_up();
 		void _copy(const Impl& other);
 		void _move(Impl& other);
@@ -39,7 +40,8 @@ namespace dcu {
 		********************/
 
 		Impl(IdxSet idxs, int no_idxs_possible);
-		Impl(IdxSet idxs, std::vector<std::shared_ptr<Dimension1D>> dims);
+		Impl(IdxSet idxs, const std::vector<Dimension1D*> dims);
+		Impl(IdxSet idxs, const std::vector<Dimension1D>& dims);
 		Impl(const Impl& other);
 		Impl(Impl&& other);
 		Impl& operator=(const Impl &other);
@@ -103,25 +105,23 @@ namespace dcu {
 		for (auto i=0; i<idxs.size(); i++) {
 			_no_idxs_possible.push_back(no_idxs_possible);
 		};
-
-		// Check if outside
-		_type = GridPtType::INSIDE;
-		for (auto dim=0; dim<idxs.size(); dim++) {
-			if (idxs[dim] < 0 || idxs[dim] > _no_idxs_possible[dim]-1) {
-				_type = GridPtType::OUTSIDE;
-				break;
-			};
-		};
-
-		// Set vals
-		_idxs = idxs;
+		_shared_constructor(idxs);
 	};
-	GridPtKey::Impl::Impl(IdxSet idxs, std::vector<std::shared_ptr<Dimension1D>> dims) {
+	GridPtKey::Impl::Impl(IdxSet idxs, const std::vector<Dimension1D*> dims) {
 		for (auto i=0; i<dims.size(); i++) {
 			// Add 2 to take into account outside dims
 			_no_idxs_possible.push_back(dims[i]->get_no_pts()+2);
 		};
-
+		_shared_constructor(idxs);
+	};
+	GridPtKey::Impl::Impl(IdxSet idxs, const std::vector<Dimension1D>& dims) {
+		for (auto i=0; i<dims.size(); i++) {
+			// Add 2 to take into account outside dims
+			_no_idxs_possible.push_back(dims[i].get_no_pts()+2);
+		};
+		_shared_constructor(idxs);
+	};
+	void GridPtKey::Impl::_shared_constructor(IdxSet idxs) {
 		// Check if grid pt is outside
 		_type = GridPtType::INSIDE;
 		for (auto dim=0; dim<idxs.size(); dim++) {
@@ -284,7 +284,8 @@ namespace dcu {
 	********************/
 
 	GridPtKey::GridPtKey(IdxSet idxs, int no_idxs_possible) : _impl(new Impl(idxs,no_idxs_possible)) {};
-	GridPtKey::GridPtKey(IdxSet idxs, std::vector<std::shared_ptr<Dimension1D>> dims) : _impl(new Impl(idxs,dims)) {};
+	GridPtKey::GridPtKey(IdxSet idxs, const std::vector<Dimension1D*> dims) : _impl(new Impl(idxs,dims)) {};
+	GridPtKey::GridPtKey(IdxSet idxs, const std::vector<Dimension1D>& dims) : _impl(new Impl(idxs,dims)) {};
 	GridPtKey::GridPtKey(const GridPtKey& other) : _impl(new Impl(*other._impl)) {};
 	GridPtKey::GridPtKey(GridPtKey&& other) : _impl(std::move(other._impl)) {};
 	GridPtKey& GridPtKey::operator=(const GridPtKey &other)  {

@@ -31,7 +31,7 @@ namespace dcu {
 	****************************************/
 
 	struct Nbr2 {
-		std::map<GridPtKey, std::shared_ptr<GridPt>> in;
+		std::map<GridPtKey, const GridPt*> in;
 	};
 
 	/****************************************
@@ -40,8 +40,8 @@ namespace dcu {
 
 	struct Nbr4 {
 		std::map<GridPtKey, GridPtType> types;
-		std::map<GridPtKey, std::shared_ptr<GridPt>> in;
-		std::map<GridPtKey, std::shared_ptr<GridPtOut>> out;
+		std::map<GridPtKey, const GridPt*> in;
+		std::map<GridPtKey, const GridPtOut*> out;
 	};
 
 	/****************************************

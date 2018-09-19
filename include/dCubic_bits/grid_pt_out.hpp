@@ -31,7 +31,7 @@ namespace dcu {
 		********************/
 
 		// Value = 2 p1 - p2
-		GridPtOut(IdxSet idxs, std::vector<double> abscissas, std::shared_ptr<GridPt> p1, std::shared_ptr<GridPt> p2);
+		GridPtOut(IdxSet idxs, std::vector<double> abscissas, const GridPt* p1, const GridPt* p2);
 		GridPtOut(const GridPtOut& other);
 		GridPtOut(GridPtOut&& other);
 		GridPtOut& operator=(const GridPtOut &other);
@@ -54,8 +54,8 @@ namespace dcu {
 		IdxSet get_idxs() const;
 
 		// Get dependent points
-		std::shared_ptr<GridPt> get_dep_p1() const;
-		std::shared_ptr<GridPt> get_dep_p2() const;
+		const GridPt* get_dep_p1() const;
+		const GridPt* get_dep_p2() const;
 
 		/********************
 		Print

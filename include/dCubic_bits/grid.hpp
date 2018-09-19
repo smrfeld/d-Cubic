@@ -45,7 +45,7 @@ namespace dcu {
 		Constructor
 		********************/
 
-		Grid(std::vector<std::shared_ptr<Dimension1D>> dims);
+		Grid(std::vector<Dimension1D> dims);
 		Grid(const Grid& other);
 		Grid(Grid&& other);
 		Grid& operator=(const Grid &other);
@@ -57,21 +57,27 @@ namespace dcu {
 		********************/
 
 		int get_no_dims() const;
-		std::vector<std::shared_ptr<Dimension1D>> get_dims() const;
+		const std::vector<Dimension1D>& get_dims() const;
 
 		/********************
 		Get grid points
 		********************/
 
-		std::map<GridPtKey, std::shared_ptr<GridPt>> get_grid_points() const;
-		std::shared_ptr<GridPt> get_grid_point(std::vector<int> grid_idxs) const;
-		std::shared_ptr<GridPt> get_grid_point(IdxSet grid_idxs) const;
-		std::shared_ptr<GridPt> get_grid_point(GridPtKey key) const;
+		const std::map<GridPtKey, GridPt*>& get_grid_points() const;
+		const GridPt* get_grid_point(std::vector<int> grid_idxs) const;
+		const GridPt* get_grid_point(IdxSet idx_set) const;
+		const GridPt* get_grid_point(GridPtKey key) const;
 
-		std::map<GridPtKey, std::shared_ptr<GridPtOut>> get_grid_points_outside() const;
-		std::shared_ptr<GridPtOut> get_grid_point_outside(std::vector<int> grid_idxs) const;
-		std::shared_ptr<GridPtOut> get_grid_point_outside(IdxSet grid_idxs) const;
-		std::shared_ptr<GridPtOut> get_grid_point_outside(GridPtKey key) const;
+		const std::map<GridPtKey, GridPtOut*>& get_grid_points_outside() const;
+		const GridPtOut* get_grid_point_outside(std::vector<int> grid_idxs) const;
+		const GridPtOut* get_grid_point_outside(IdxSet idx_set) const;
+		const GridPtOut* get_grid_point_outside(GridPtKey key) const;
+
+		/********************
+		Set grid point values
+		********************/
+
+		void set_grid_point_ordinate(const GridPt* grid_pt, double val);
 
 		/********************
 		Get grid points surrounding a point

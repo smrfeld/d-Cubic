@@ -32,7 +32,8 @@ namespace dcu {
 		********************/
 
 		GridPtKey(IdxSet idxs, int no_idxs_possible);
-		GridPtKey(IdxSet idxs, std::vector<std::shared_ptr<Dimension1D>> dims);
+		GridPtKey(IdxSet idxs, const std::vector<Dimension1D*> dims);
+		GridPtKey(IdxSet idxs, const std::vector<Dimension1D>& dims);
 		GridPtKey(const GridPtKey& other);
 		GridPtKey(GridPtKey&& other);
 		GridPtKey& operator=(const GridPtKey &other);

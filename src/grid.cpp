@@ -31,18 +31,16 @@ namespace dcu {
 		int _dim_grid;
 
 		// No pts in each dim of the grid
-		std::vector<std::shared_ptr<Dimension1D>> _dims;		
+		std::vector<Dimension1D> _dims;		
 
 		// Size of the grid
 		int _no_pts_grid;
 
 		// Grid points
-		// std::vector<std::shared_ptr<GridPt>> _grid_pts;
-		std::map<GridPtKey, std::shared_ptr<GridPt>> _grid_pts;
+		std::map<GridPtKey, GridPt*> _grid_pts;
 
 		// Outside grid points
-		// std::vector<std::shared_ptr<GridPtOut>> _grid_pts_out;
-		std::map<GridPtKey, std::shared_ptr<GridPtOut>> _grid_pts_out;
+		std::map<GridPtKey, GridPtOut*> _grid_pts_out;
 
 		/********************
 		Make grid
@@ -97,7 +95,7 @@ namespace dcu {
 		Constructor
 		********************/
 
-		Impl(std::vector<std::shared_ptr<Dimension1D>> dims);
+		Impl(std::vector<Dimension1D> dims);
 		Impl(const Impl& other);
 		Impl(Impl&& other);
 		Impl& operator=(const Impl &other);
@@ -109,19 +107,27 @@ namespace dcu {
 		********************/
 
 		int get_no_dims() const;
-		std::vector<std::shared_ptr<Dimension1D>> get_dims() const;
+		const std::vector<Dimension1D>& get_dims() const;
 
 		/********************
 		Get grid points
 		********************/
 
-		std::map<GridPtKey, std::shared_ptr<GridPt>> get_grid_points() const;
-		std::shared_ptr<GridPt> get_grid_point(IdxSet grid_idxs) const;
-		std::shared_ptr<GridPt> get_grid_point(GridPtKey key) const;
+		const std::map<GridPtKey, GridPt*>& get_grid_points() const;
+		const GridPt* get_grid_point(std::vector<int> grid_idxs) const;
+		const GridPt* get_grid_point(IdxSet idx_set) const;
+		const GridPt* get_grid_point(GridPtKey key) const;
 
-		std::map<GridPtKey, std::shared_ptr<GridPtOut>> get_grid_points_outside() const;
-		std::shared_ptr<GridPtOut> get_grid_point_outside(IdxSet grid_idxs) const;
-		std::shared_ptr<GridPtOut> get_grid_point_outside(GridPtKey key) const;
+		const std::map<GridPtKey, GridPtOut*>& get_grid_points_outside() const;
+		const GridPtOut* get_grid_point_outside(std::vector<int> grid_idxs) const;
+		const GridPtOut* get_grid_point_outside(IdxSet idx_set) const;
+		const GridPtOut* get_grid_point_outside(GridPtKey key) const;
+
+		/********************
+		Set grid point values
+		********************/
+
+		void set_grid_point_ordinate(const GridPt* grid_pt, double val);
 
 		/********************
 		Get grid points surrounding a point
@@ -179,13 +185,13 @@ namespace dcu {
 	Implementation
 	****************************************/
 
-	Grid::Impl::Impl(std::vector<std::shared_ptr<Dimension1D>> dims) {
+	Grid::Impl::Impl(std::vector<Dimension1D> dims) {
 		// Store
 		_dim_grid = dims.size();
 		_dims = dims;
 		_no_pts_grid = 1;
 		for (auto const &dim: _dims) {
-			_no_pts_grid *= dim->get_no_pts();
+			_no_pts_grid *= dim.get_no_pts();
 		};
 
 		// Make grid
@@ -252,7 +258,7 @@ namespace dcu {
 	int Grid::Impl::get_no_dims() const {
 		return _dims.size();
 	};
-	std::vector<std::shared_ptr<Dimension1D>> Grid::Impl::get_dims() const {
+	const std::vector<Dimension1D>& Grid::Impl::get_dims() const {
 		return _dims;
 	};
 
@@ -272,7 +278,7 @@ namespace dcu {
 	void Grid::Impl::_iterate_make_grid_pt(IdxSet &grid_pt_idxs, int dim) {
 		if (dim != _dim_grid) {
 			// Deeper!
-			for (grid_pt_idxs[dim]=0; grid_pt_idxs[dim]<_dims[dim]->get_no_pts(); grid_pt_idxs[dim]++) {
+			for (grid_pt_idxs[dim]=0; grid_pt_idxs[dim]<_dims[dim].get_no_pts(); grid_pt_idxs[dim]++) {
 				_iterate_make_grid_pt(grid_pt_idxs, dim+1);
 			};
 		} else {
@@ -281,11 +287,11 @@ namespace dcu {
 			// Make the abscissa
 			std::vector<double> abscissas;
 			for (auto dim2=0; dim2<_dim_grid; dim2++) {
-				abscissas.push_back(_dims[dim2]->get_pt_at_idx(grid_pt_idxs[dim2]));
+				abscissas.push_back(_dims[dim2].get_pt_at_idx(grid_pt_idxs[dim2]));
 			};
 
 			// Make the grid pt
-			_grid_pts[GridPtKey(grid_pt_idxs,_dims)] = std::make_shared<GridPt>(grid_pt_idxs,abscissas);
+			_grid_pts[GridPtKey(grid_pt_idxs,_dims)] = new GridPt(grid_pt_idxs,abscissas);
 		};
 	};
 
@@ -319,7 +325,7 @@ namespace dcu {
 			if (!idxs_of_dims_outside.find(dim)) {
 				// Inside
 				// Loop all interior pts
-				for (grid_pt_idxs[dim]=0; grid_pt_idxs[dim]<_dims[dim]->get_no_pts(); grid_pt_idxs[dim]++) {
+				for (grid_pt_idxs[dim]=0; grid_pt_idxs[dim]<_dims[dim].get_no_pts(); grid_pt_idxs[dim]++) {
 					_iterate_make_grid_pt_outside(grid_pt_idxs,idxs_of_dims_outside,dim+1);
 				};
 			} else {
@@ -327,7 +333,7 @@ namespace dcu {
 				// Loop just -1 and _dims[dim]->get_no_pts()
 				grid_pt_idxs[dim] = -1;
 				_iterate_make_grid_pt_outside(grid_pt_idxs,idxs_of_dims_outside,dim+1);
-				grid_pt_idxs[dim] = _dims[dim]->get_no_pts();
+				grid_pt_idxs[dim] = _dims[dim].get_no_pts();
 				_iterate_make_grid_pt_outside(grid_pt_idxs,idxs_of_dims_outside,dim+1);
 			};
 
@@ -340,7 +346,7 @@ namespace dcu {
 			// Make the abscissa
 			std::vector<double> abscissas;
 			for (auto dim2=0; dim2<_dim_grid; dim2++) {
-				abscissas.push_back(_dims[dim2]->get_pt_at_idx(grid_pt_idxs[dim2]));
+				abscissas.push_back(_dims[dim2].get_pt_at_idx(grid_pt_idxs[dim2]));
 			};
 
 			// Find the two pts
@@ -349,7 +355,7 @@ namespace dcu {
 				if (grid_pt_idxs[dim2] == -1) {
 					p1_idxs[dim2] = grid_pt_idxs[dim2] + 1;
 					p2_idxs[dim2] = grid_pt_idxs[dim2] + 2;
-				} else if (grid_pt_idxs[dim2] == _dims[dim2]->get_no_pts()) {
+				} else if (grid_pt_idxs[dim2] == _dims[dim2].get_no_pts()) {
 					p1_idxs[dim2] = grid_pt_idxs[dim2] - 1;
 					p2_idxs[dim2] = grid_pt_idxs[dim2] - 2;
 				} else {
@@ -357,11 +363,11 @@ namespace dcu {
 					p2_idxs[dim2] = grid_pt_idxs[dim2];
 				};
 			};
-			std::shared_ptr<GridPt> p1 = get_grid_point(p1_idxs);
-			std::shared_ptr<GridPt> p2 = get_grid_point(p2_idxs);
+			const GridPt *p1 = get_grid_point(p1_idxs);
+			const GridPt *p2 = get_grid_point(p2_idxs);
 
 			// Make the outside grid point
-			_grid_pts_out[GridPtKey(grid_pt_idxs,_dims)] = std::make_shared<GridPtOut>(grid_pt_idxs,abscissas,p1,p2);
+			_grid_pts_out[GridPtKey(grid_pt_idxs,_dims)] = new GridPtOut(grid_pt_idxs,abscissas,p1,p2);
 			// std::cout << "Made outside pt: " << grid_pt_idxs << " = " << _grid_pts_out[GridPtKey(grid_pt_idxs,GridPtType::OUTSIDE,_dims)]->print_abscissa() << std::endl;
 		};
 	};
@@ -407,24 +413,38 @@ namespace dcu {
 	Get grid point
 	********************/
 
-	std::map<GridPtKey, std::shared_ptr<GridPt>> Grid::Impl::get_grid_points() const {
+	const std::map<GridPtKey, GridPt*>& Grid::Impl::get_grid_points() const {
 		return _grid_pts;
 	};
-	std::shared_ptr<GridPt> Grid::Impl::get_grid_point(IdxSet grid_idxs) const {
-		return _grid_pts.at(GridPtKey(grid_idxs,_dims));
+	const GridPt* Grid::Impl::get_grid_point(std::vector<int> grid_idxs) const {
+		return get_grid_point(IdxSet(grid_idxs));
 	};
-	std::shared_ptr<GridPt> Grid::Impl::get_grid_point(GridPtKey key) const {
-		return _grid_pts.at(key);
+	const GridPt* Grid::Impl::get_grid_point(IdxSet idx_set) const {
+		return get_grid_point(GridPtKey(idx_set,_dims));
+	};
+	const GridPt* Grid::Impl::get_grid_point(GridPtKey key) const {
+		auto it = _grid_pts.find(key);
+		if (it == _grid_pts.end()) {
+			return nullptr;
+		};
+		return it->second;
 	};
 
-	std::map<GridPtKey, std::shared_ptr<GridPtOut>> Grid::Impl::get_grid_points_outside() const {
+	const std::map<GridPtKey, GridPtOut*>& Grid::Impl::get_grid_points_outside() const {
 		return _grid_pts_out;
 	};
-	std::shared_ptr<GridPtOut> Grid::Impl::get_grid_point_outside(IdxSet grid_idxs) const {
-		return _grid_pts_out.at(GridPtKey(grid_idxs,_dims));
+	const GridPtOut* Grid::Impl::get_grid_point_outside(std::vector<int> grid_idxs) const {
+		return get_grid_point_outside(IdxSet(grid_idxs));
 	};
-	std::shared_ptr<GridPtOut> Grid::Impl::get_grid_point_outside(GridPtKey key) const {
-		return _grid_pts_out.at(key);
+	const GridPtOut* Grid::Impl::get_grid_point_outside(IdxSet idx_set) const {
+		return get_grid_point_outside(GridPtKey(idx_set,_dims));
+	};
+	const GridPtOut* Grid::Impl::get_grid_point_outside(GridPtKey key) const {
+		auto it = _grid_pts_out.find(key);
+		if (it == _grid_pts_out.end()) {
+			return nullptr;
+		};
+		return it->second;	
 	};
 
 	/********************
@@ -442,10 +462,10 @@ namespace dcu {
 		IdxSet idxs_lower(_dim_grid), idxs_upper(_dim_grid);
 		std::pair<bool,std::pair<int,int>> bounds;
 		for (auto dim=0; dim<_dim_grid; dim++) {
-			bounds = _dims[dim]->get_surrounding_idxs(abscissas[dim]);
+			bounds = _dims[dim].get_surrounding_idxs(abscissas[dim]);
 			if (!bounds.first) {
 				// Outside grid
-				std::cerr << ">>> Error:Grid::Impl::get_surrounding_2_grid_pts <<< Abscissa in dim: " << dim << " value: " << abscissas[dim] << " is outside the grid: " << _dims[dim]->get_start_pt() << " to: " << _dims[dim]->get_end_pt() << std::endl;
+				std::cerr << ">>> Error:Grid::Impl::get_surrounding_2_grid_pts <<< Abscissa in dim: " << dim << " value: " << abscissas[dim] << " is outside the grid: " << _dims[dim].get_start_pt() << " to: " << _dims[dim].get_end_pt() << std::endl;
 				exit(EXIT_FAILURE);
 			};
 
@@ -499,10 +519,10 @@ namespace dcu {
 		IdxSet idxs_0(_dim_grid), idxs_1(_dim_grid), idxs_2(_dim_grid), idxs_3(_dim_grid);
 		std::pair<bool,std::pair<int,int>> bounds;
 		for (auto dim=0; dim<_dim_grid; dim++) {
-			bounds = _dims[dim]->get_surrounding_idxs(abscissas[dim]);
+			bounds = _dims[dim].get_surrounding_idxs(abscissas[dim]);
 			if (!bounds.first) {
 				// Outside grid
-				std::cerr << ">>> Error:Grid::Impl::get_surrounding_4_grid_pts <<< Abscissa in dim: " << dim << " value: " << abscissas[dim] << " is outside the grid: " << _dims[dim]->get_start_pt() << " to: " << _dims[dim]->get_end_pt() << std::endl;
+				std::cerr << ">>> Error:Grid::Impl::get_surrounding_4_grid_pts <<< Abscissa in dim: " << dim << " value: " << abscissas[dim] << " is outside the grid: " << _dims[dim].get_start_pt() << " to: " << _dims[dim].get_end_pt() << std::endl;
 				exit(EXIT_FAILURE);
 			};
 
@@ -553,7 +573,7 @@ namespace dcu {
 			// Check: is it inside or out?
 			bool inside=true;
 			for (auto dim2=0; dim2<_dim_grid; dim2++) {
-				if (idxs_grid_pt[dim2] < 0 || idxs_grid_pt[dim2] > _dims[dim2]->get_no_pts()-1) {
+				if (idxs_grid_pt[dim2] < 0 || idxs_grid_pt[dim2] > _dims[dim2].get_no_pts()-1) {
 					// Out
 					inside = false;
 					break;
@@ -995,7 +1015,7 @@ namespace dcu {
 	Constructor
 	********************/
 
-	Grid::Grid(std::vector<std::shared_ptr<Dimension1D>> dims) : _impl(new Impl(dims)) {};
+	Grid::Grid(std::vector<Dimension1D> dims) : _impl(new Impl(dims)) {};
 	Grid::Grid(const Grid& other) : _impl(new Impl(*other._impl)) {};
 	Grid::Grid(Grid&& other) : _impl(std::move(other._impl)) {};
 	Grid& Grid::operator=(const Grid &other) {
@@ -1015,7 +1035,7 @@ namespace dcu {
 	int Grid::get_no_dims() const {
 		return _impl->get_no_dims();
 	};
-	std::vector<std::shared_ptr<Dimension1D>> Grid::get_dims() const {
+	const std::vector<Dimension1D>& Grid::get_dims() const {
 		return _impl->get_dims();
 	};
 
@@ -1023,29 +1043,29 @@ namespace dcu {
 	Get grid pts
 	********************/
 
-	std::map<GridPtKey, std::shared_ptr<GridPt>> Grid::get_grid_points() const {
+	const std::map<GridPtKey, GridPt*>& Grid::get_grid_points() const {
 		return _impl->get_grid_points();
 	};
-	std::shared_ptr<GridPt> Grid::get_grid_point(std::vector<int> grid_idxs) const {
-		return get_grid_point(IdxSet(grid_idxs));
-	};
-	std::shared_ptr<GridPt> Grid::get_grid_point(IdxSet grid_idxs) const {
+	const GridPt* Grid::get_grid_point(std::vector<int> grid_idxs) const {
 		return _impl->get_grid_point(grid_idxs);
 	};
-	std::shared_ptr<GridPt> Grid::get_grid_point(GridPtKey key) const {
+	const GridPt* Grid::get_grid_point(IdxSet idx_set) const {
+		return _impl->get_grid_point(idx_set);
+	};
+	const GridPt* Grid::get_grid_point(GridPtKey key) const {
 		return _impl->get_grid_point(key);
 	};
 
-	std::map<GridPtKey, std::shared_ptr<GridPtOut>> Grid::get_grid_points_outside() const {
+	const std::map<GridPtKey, GridPtOut*>& Grid::get_grid_points_outside() const {
 		return _impl->get_grid_points_outside();
 	};
-	std::shared_ptr<GridPtOut> Grid::get_grid_point_outside(std::vector<int> grid_idxs) const {
-		return _impl->get_grid_point_outside(IdxSet(grid_idxs));
-	};
-	std::shared_ptr<GridPtOut> Grid::get_grid_point_outside(IdxSet grid_idxs) const {
+	const GridPtOut* Grid::get_grid_point_outside(std::vector<int> grid_idxs) const {
 		return _impl->get_grid_point_outside(grid_idxs);
 	};
-	std::shared_ptr<GridPtOut> Grid::get_grid_point_outside(GridPtKey key) const {
+	const GridPtOut* Grid::get_grid_point_outside(IdxSet idx_set) const {
+		return _impl->get_grid_point_outside(idx_set);
+	};
+	const GridPtOut* Grid::get_grid_point_outside(GridPtKey key) const {
 		return _impl->get_grid_point_outside(key);
 	};
 

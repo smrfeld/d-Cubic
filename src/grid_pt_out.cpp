@@ -28,7 +28,7 @@ namespace dcu {
 		std::vector<double> _abcissas;
 
 		// Dependencies
-		std::shared_ptr<GridPt> _p1,_p2;
+		const GridPt* _p1, *_p2;
 
 		// Constructor helpers
 		void _clean_up();
@@ -41,7 +41,7 @@ namespace dcu {
 		Constructor
 		********************/
 
-		Impl(IdxSet idxs, std::vector<double> abscissas, std::shared_ptr<GridPt> p1, std::shared_ptr<GridPt> p2);
+		Impl(IdxSet idxs, std::vector<double> abscissas, const GridPt* p1, const GridPt* p2);
 		Impl(const Impl& other);
 		Impl(Impl&& other);
 		Impl& operator=(const Impl &other);
@@ -64,8 +64,8 @@ namespace dcu {
 		IdxSet get_idxs() const;
 
 		// Get dependent points
-		std::shared_ptr<GridPt> get_dep_p1() const;
-		std::shared_ptr<GridPt> get_dep_p2() const;
+		const GridPt* get_dep_p1() const;
+		const GridPt* get_dep_p2() const;
 
 		/********************
 		Print
@@ -99,7 +99,7 @@ namespace dcu {
 	Implementation
 	****************************************/
 
-	GridPtOut::Impl::Impl(IdxSet idxs, std::vector<double> abscissas, std::shared_ptr<GridPt> p1, std::shared_ptr<GridPt> p2) {
+	GridPtOut::Impl::Impl(IdxSet idxs, std::vector<double> abscissas, const GridPt* p1, const GridPt* p2) : _p1(p1), _p2(p2) {
 		// Check lengths
 		if (idxs.size() != abscissas.size()) {
 			std::cout << ">>> Error: GridPt::Impl::Impl <<< Sizes must match." << std::endl;
@@ -109,8 +109,6 @@ namespace dcu {
 		// Store
 		_idxs = idxs;
 		_abcissas = abscissas;
-		_p1 = p1;
-		_p2 = p2;
 	};
 	GridPtOut::Impl::Impl(const Impl& other) {
 		_copy(other);
@@ -189,10 +187,10 @@ namespace dcu {
 	};
 
 	// Get dependent points
-	std::shared_ptr<GridPt> GridPtOut::Impl::get_dep_p1() const {
+	const GridPt* GridPtOut::Impl::get_dep_p1() const {
 		return _p1;
 	};
-	std::shared_ptr<GridPt> GridPtOut::Impl::get_dep_p2() const {
+	const GridPt* GridPtOut::Impl::get_dep_p2() const {
 		return _p2;
 	};
 
@@ -241,7 +239,7 @@ namespace dcu {
 	Constructor
 	********************/
 
-	GridPtOut::GridPtOut(IdxSet idxs, std::vector<double> abscissas, std::shared_ptr<GridPt> p1, std::shared_ptr<GridPt> p2) : _impl(new Impl(idxs,abscissas, p1, p2)) {};
+	GridPtOut::GridPtOut(IdxSet idxs, std::vector<double> abscissas, const GridPt* p1, const GridPt* p2) : _impl(new Impl(idxs,abscissas, p1, p2)) {};
 	GridPtOut::GridPtOut(const GridPtOut& other) : _impl(new Impl(*other._impl)) {};
 	GridPtOut::GridPtOut(GridPtOut&& other) : _impl(std::move(other._impl)) {};
 	GridPtOut& GridPtOut::operator=(const GridPtOut &other) {
@@ -280,10 +278,10 @@ namespace dcu {
 	};
 
 	// Get dependent points
-	std::shared_ptr<GridPt> GridPtOut::get_dep_p1() const {
+	const GridPt* GridPtOut::get_dep_p1() const {
 		return _impl->get_dep_p1();
 	};
-	std::shared_ptr<GridPt> GridPtOut::get_dep_p2() const {
+	const GridPt* GridPtOut::get_dep_p2() const {
 		return _impl->get_dep_p2();
 	};
 
