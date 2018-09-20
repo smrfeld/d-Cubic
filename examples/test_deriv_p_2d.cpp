@@ -15,11 +15,14 @@ double fRand(double fMin, double fMax)
 
 int main() {
 
+	// Make dims
 	Dimension1D dim_1(0.0,1.0,30);
 	Dimension1D dim_2(0.0,1.0,17);
 
+	// Make grid
 	Grid grid({dim_1,dim_2});
 
+	// Fill randomly
 	std::vector<int> v({0,0});
 	for (int i=0; i<30; i++) {
 		for (int j=0; j<17; j++) {
@@ -29,8 +32,10 @@ int main() {
 		};
 	};
 
+	// Write to file
 	grid.write_to_file("test_deriv_p_2d.txt");
 
+	// Point to evaluate at
 	std::vector<double> abcissa({0.71,0.23});
 
 	// Derivs
