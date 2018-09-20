@@ -79,7 +79,7 @@ namespace dcu {
 		Interpolate
 		********************/
 
-		double _interpolate(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs, Nbr4 &nbrs_p) const;
+		double _iterate(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, Nbr4 &nbrs_p) const;
 
 		/********************
 		Constructor helpers
@@ -133,8 +133,8 @@ namespace dcu {
 		Get grid points surrounding a point
 		********************/
 
-		Nbr2 get_surrounding_2_grid_pts(std::vector<double> abscissas) const;
-		Nbr4 get_surrounding_4_grid_pts(std::vector<double> abscissas) const;
+		std::pair<Nbr2,std::vector<double>> get_surrounding_2_grid_pts(std::vector<double> abscissas) const;
+		std::pair<Nbr4,std::vector<double>> get_surrounding_4_grid_pts(std::vector<double> abscissas) const;
 
 		/********************
 		Get a point by interpolating
@@ -464,12 +464,15 @@ namespace dcu {
 	Get grid points surrounding a point
 	********************/
 
-	Nbr2 Grid::Impl::get_surrounding_2_grid_pts(std::vector<double> abscissas) const {
+	std::pair<Nbr2,std::vector<double>> Grid::Impl::get_surrounding_2_grid_pts(std::vector<double> abscissas) const {
 		// Check size
 		if (abscissas.size() != _dim_grid) {
 			std::cerr << ">>> Error:Grid::Impl::get_surrounding_2_grid_pts <<< Abscissa size should equal grid size." << std::endl;
 			exit(EXIT_FAILURE);
 		};
+
+		// Frac abscissas
+		std::vector<double> frac_abscissas;
 
 		// Get bounding idxs
 		IdxSet idxs_lower(_dim_grid), idxs_upper(_dim_grid);
@@ -484,6 +487,9 @@ namespace dcu {
 
 			idxs_lower[dim] = bounds.second.first;
 			idxs_upper[dim] = bounds.second.second;
+
+			// Frac
+			frac_abscissas.push_back((abscissas[dim] - _dims[dim].get_pt_at_idx(idxs_lower[dim])) / (_dims[dim].get_pt_at_idx(idxs_upper[dim]) - _dims[dim].get_pt_at_idx(idxs_lower[dim])));
 		};
 
 		// Iterate to fill out the map
@@ -491,7 +497,7 @@ namespace dcu {
 		Nbr2 ret;
 		_iterate_get_surrounding_2_grid_pts(idxs_local,idxs_lower,idxs_upper,ret,0);
 
-		return ret;
+		return std::make_pair(ret,frac_abscissas);
 	};
 
 	void Grid::Impl::_iterate_get_surrounding_2_grid_pts(IdxSet &idxs_local, IdxSet &idxs_lower, IdxSet &idxs_upper, Nbr2 &map, int dim) const {
@@ -521,12 +527,15 @@ namespace dcu {
 		};
 	};
 
-	Nbr4 Grid::Impl::get_surrounding_4_grid_pts(std::vector<double> abscissas) const {
+	std::pair<Nbr4,std::vector<double>> Grid::Impl::get_surrounding_4_grid_pts(std::vector<double> abscissas) const {
 		// Check size
 		if (abscissas.size() != _dim_grid) {
 			std::cerr << ">>> Error:Grid::Impl::get_surrounding_4_grid_pts <<< Abscissa size should equal grid size." << std::endl;
 			exit(EXIT_FAILURE);
 		};
+
+		// Frac abscissas
+		std::vector<double> frac_abscissas;
 
 		// Get bounding idxs
 		IdxSet idxs_0(_dim_grid), idxs_1(_dim_grid), idxs_2(_dim_grid), idxs_3(_dim_grid);
@@ -543,6 +552,9 @@ namespace dcu {
 			idxs_2[dim] = bounds.second.second;
 			idxs_0[dim] = idxs_1[dim]-1;
 			idxs_3[dim] = idxs_2[dim]+1;
+
+			// Frac
+			frac_abscissas.push_back((abscissas[dim] - _dims[dim].get_pt_at_idx(idxs_1[dim])) / (_dims[dim].get_pt_at_idx(idxs_2[dim]) - _dims[dim].get_pt_at_idx(idxs_1[dim])));
 		};
 
 		// Iterate to fill out the map
@@ -550,7 +562,7 @@ namespace dcu {
 		Nbr4 ret;
 		_iterate_get_surrounding_4_grid_pts(idxs_local,idxs_0,idxs_1,idxs_2,idxs_3,ret,0);
 
-		return ret;
+		return std::make_pair(ret,frac_abscissas);
 	};	
 
 	void Grid::Impl::_iterate_get_surrounding_4_grid_pts(IdxSet &idxs_local, IdxSet &idxs_0, IdxSet &idxs_1, IdxSet &idxs_2, IdxSet &idxs_3, Nbr4 &nbr4, int dim) const {
@@ -609,8 +621,26 @@ namespace dcu {
 	Get a point by interpolating
 	********************/
 
-	double Grid::Impl::get_val(std::vector<double> abscissas) {
+	double Grid::Impl::_iterate(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, Nbr4 &nbrs_p) const {
+
+		//
 		return 0.0;
+	};
+
+	double Grid::Impl::get_val(std::vector<double> abscissas) {
+		// Stopping
+		int d = get_no_dims();
+
+		// Idxs
+		IdxSet idxs_j(d-1);
+
+		// nbrs p and frac
+		auto pr = get_surrounding_4_grid_pts(abscissas);
+		Nbr4 nbrs_p = pr.first;
+		std::vector<double> frac_abscissas = pr.second;
+
+		// Iterate
+		return _iterate(1,d,frac_abscissas,idxs_j,nbrs_p);
 	};
 
 	/********************
@@ -1094,10 +1124,10 @@ namespace dcu {
 	Get grid points surrounding a point
 	********************/
 
-	Nbr2 Grid::get_surrounding_2_grid_pts(std::vector<double> abscissas) const {
+	std::pair<Nbr2,std::vector<double>> Grid::get_surrounding_2_grid_pts(std::vector<double> abscissas) const {
 		return _impl->get_surrounding_2_grid_pts(abscissas);
 	};
-	Nbr4 Grid::get_surrounding_4_grid_pts(std::vector<double> abscissas) const {
+	std::pair<Nbr4,std::vector<double>> Grid::get_surrounding_4_grid_pts(std::vector<double> abscissas) const {
 		return _impl->get_surrounding_4_grid_pts(abscissas);
 	};
 
