@@ -39,7 +39,7 @@ namespace dcu {
 		Constructor
 		********************/
 
-		Impl(IdxSet idxs, int no_idxs_possible);
+		Impl(IdxSet idxs, int no_idxs_possible_in_each_dim);
 		Impl(IdxSet idxs, const std::vector<Dimension1D*> dims);
 		Impl(IdxSet idxs, const std::vector<Dimension1D>& dims);
 		Impl(const Impl& other);
@@ -101,9 +101,9 @@ namespace dcu {
 	Constructor
 	********************/
 
-	GridPtKey::Impl::Impl(IdxSet idxs, int no_idxs_possible) {
+	GridPtKey::Impl::Impl(IdxSet idxs, int no_idxs_possible_in_each_dim) {
 		for (auto i=0; i<idxs.size(); i++) {
-			_no_idxs_possible.push_back(no_idxs_possible);
+			_no_idxs_possible.push_back(no_idxs_possible_in_each_dim);
 		};
 		_shared_constructor(idxs);
 	};
@@ -283,7 +283,7 @@ namespace dcu {
 	Constructor
 	********************/
 
-	GridPtKey::GridPtKey(IdxSet idxs, int no_idxs_possible) : _impl(new Impl(idxs,no_idxs_possible)) {};
+	GridPtKey::GridPtKey(IdxSet idxs, int no_idxs_possible_in_each_dim) : _impl(new Impl(idxs,no_idxs_possible_in_each_dim)) {};
 	GridPtKey::GridPtKey(IdxSet idxs, const std::vector<Dimension1D*> dims) : _impl(new Impl(idxs,dims)) {};
 	GridPtKey::GridPtKey(IdxSet idxs, const std::vector<Dimension1D>& dims) : _impl(new Impl(idxs,dims)) {};
 	GridPtKey::GridPtKey(const GridPtKey& other) : _impl(new Impl(*other._impl)) {};
@@ -321,6 +321,36 @@ namespace dcu {
 		return _impl->print();
 	};
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	/********************
 	Comparators
 	********************/
@@ -338,4 +368,5 @@ namespace dcu {
 	bool operator ==(const GridPtKey& x, const GridPtKey& y) {
 		return x.get_linear() == y.get_linear();
 	};
+
 };

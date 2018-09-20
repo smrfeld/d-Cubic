@@ -31,7 +31,7 @@ namespace dcu {
 		Constructor
 		********************/
 
-		GridPtKey(IdxSet idxs, int no_idxs_possible);
+		GridPtKey(IdxSet idxs, int no_idxs_possible_in_each_dim);
 		GridPtKey(IdxSet idxs, const std::vector<Dimension1D*> dims);
 		GridPtKey(IdxSet idxs, const std::vector<Dimension1D>& dims);
 		GridPtKey(const GridPtKey& other);

@@ -8,9 +8,9 @@
 #include <vector>
 #endif
 
-#ifndef MAP_H
-#define MAP_H
-#include <map>
+#ifndef UNORDERED_MAP_H
+#define UNORDERED_MAP_H
+#include <unordered_map>
 #endif
 
 /************************************
@@ -24,9 +24,35 @@ namespace dcu {
 	class GridPt;
 	class GridPtOut;
 	class GridPtKey;
+	enum class GridPtType: unsigned int;
 	class IdxSet;
-	struct Nbr4;
-	struct Nbr2;
+
+	/****************************************
+	Hash for an unordered map
+	****************************************/
+
+	// Hash
+	struct hash_gpk {
+	    size_t operator() ( const GridPtKey &grid_pt_key ) const;
+	};
+
+	/****************************************
+	Neighborhood of points surrounding a point, 2 in each dim
+	****************************************/
+
+	struct Nbr2 {
+		std::unordered_map<GridPtKey, const GridPt*, hash_gpk> in;
+	};
+
+	/****************************************
+	Neighborhood of points surrounding a point, 4 in each dim
+	****************************************/
+
+	struct Nbr4 {
+		std::unordered_map<GridPtKey, GridPtType, hash_gpk> types;
+		std::unordered_map<GridPtKey, const GridPt*, hash_gpk> in;
+		std::unordered_map<GridPtKey, const GridPtOut*, hash_gpk> out;
+	};
 
 	/****************************************
 	Grid
@@ -63,12 +89,12 @@ namespace dcu {
 		Get grid points
 		********************/
 
-		const std::map<GridPtKey, GridPt*>& get_grid_points() const;
+		const std::unordered_map<GridPtKey, GridPt*, hash_gpk>& get_grid_points() const;
 		const GridPt* get_grid_point(std::vector<int> grid_idxs) const;
 		const GridPt* get_grid_point(IdxSet idx_set) const;
 		const GridPt* get_grid_point(GridPtKey key) const;
 
-		const std::map<GridPtKey, GridPtOut*>& get_grid_points_outside() const;
+		const std::unordered_map<GridPtKey, GridPtOut*, hash_gpk>& get_grid_points_outside() const;
 		const GridPtOut* get_grid_point_outside(std::vector<int> grid_idxs) const;
 		const GridPtOut* get_grid_point_outside(IdxSet idx_set) const;
 		const GridPtOut* get_grid_point_outside(GridPtKey key) const;

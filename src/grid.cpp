@@ -21,6 +21,43 @@
 namespace dcu {
 
 	/****************************************
+	Hash for an unordered map
+	****************************************/
+
+	// Hash
+    size_t hash_gpk::operator() (const GridPtKey &grid_pt_key ) const {
+        return std::hash<int>()(grid_pt_key.get_linear());
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/****************************************
 	Grid implementation
 	****************************************/
 
@@ -37,10 +74,10 @@ namespace dcu {
 		int _no_pts_grid;
 
 		// Grid points
-		std::map<GridPtKey, GridPt*> _grid_pts;
+		std::unordered_map<GridPtKey, GridPt*, hash_gpk> _grid_pts;
 
 		// Outside grid points
-		std::map<GridPtKey, GridPtOut*> _grid_pts_out;
+		std::unordered_map<GridPtKey, GridPtOut*, hash_gpk> _grid_pts_out;
 
 		/********************
 		Make grid
@@ -63,7 +100,7 @@ namespace dcu {
 		Get surrounding
 		********************/
 
-		void _iterate_get_surrounding_2_grid_pts(IdxSet &idxs_local, IdxSet &idxs_lower, IdxSet &idxs_upper, Nbr2 &map, int dim) const;
+		void _iterate_get_surrounding_2_grid_pts(IdxSet &idxs_local, IdxSet &idxs_lower, IdxSet &idxs_upper, Nbr2 &nbr2, int dim) const;
 
 		void _iterate_get_surrounding_4_grid_pts(IdxSet &idxs_local, IdxSet &idxs_0, IdxSet &idxs_1, IdxSet &idxs_2, IdxSet &idxs_3, Nbr4 &nbr4, int dim) const;
 
@@ -113,12 +150,12 @@ namespace dcu {
 		Get grid points
 		********************/
 
-		const std::map<GridPtKey, GridPt*>& get_grid_points() const;
+		const std::unordered_map<GridPtKey, GridPt*, hash_gpk>& get_grid_points() const;
 		const GridPt* get_grid_point(std::vector<int> grid_idxs) const;
 		const GridPt* get_grid_point(IdxSet idx_set) const;
 		const GridPt* get_grid_point(GridPtKey key) const;
 
-		const std::map<GridPtKey, GridPtOut*>& get_grid_points_outside() const;
+		const std::unordered_map<GridPtKey, GridPtOut*, hash_gpk>& get_grid_points_outside() const;
 		const GridPtOut* get_grid_point_outside(std::vector<int> grid_idxs) const;
 		const GridPtOut* get_grid_point_outside(IdxSet idx_set) const;
 		const GridPtOut* get_grid_point_outside(GridPtKey key) const;
@@ -420,7 +457,7 @@ namespace dcu {
 	Get grid point
 	********************/
 
-	const std::map<GridPtKey, GridPt*>& Grid::Impl::get_grid_points() const {
+	const std::unordered_map<GridPtKey, GridPt*, hash_gpk>& Grid::Impl::get_grid_points() const {
 		return _grid_pts;
 	};
 	const GridPt* Grid::Impl::get_grid_point(std::vector<int> grid_idxs) const {
@@ -437,7 +474,7 @@ namespace dcu {
 		return it->second;
 	};
 
-	const std::map<GridPtKey, GridPtOut*>& Grid::Impl::get_grid_points_outside() const {
+	const std::unordered_map<GridPtKey, GridPtOut*, hash_gpk>& Grid::Impl::get_grid_points_outside() const {
 		return _grid_pts_out;
 	};
 	const GridPtOut* Grid::Impl::get_grid_point_outside(std::vector<int> grid_idxs) const {
@@ -507,14 +544,14 @@ namespace dcu {
 		return std::make_pair(ret,frac_abscissas);
 	};
 
-	void Grid::Impl::_iterate_get_surrounding_2_grid_pts(IdxSet &idxs_local, IdxSet &idxs_lower, IdxSet &idxs_upper, Nbr2 &map, int dim) const {
+	void Grid::Impl::_iterate_get_surrounding_2_grid_pts(IdxSet &idxs_local, IdxSet &idxs_lower, IdxSet &idxs_upper, Nbr2 &nbr2, int dim) const {
 		if (dim != _dim_grid) {
 			// Deeper!
 			// Can be lower (=0) or higher (=+1) in this dim
 			idxs_local[dim] = 0;
-			_iterate_get_surrounding_2_grid_pts(idxs_local,idxs_lower,idxs_upper,map,dim+1);
+			_iterate_get_surrounding_2_grid_pts(idxs_local,idxs_lower,idxs_upper,nbr2,dim+1);
 			idxs_local[dim] = 1;
-			_iterate_get_surrounding_2_grid_pts(idxs_local,idxs_lower,idxs_upper,map,dim+1);
+			_iterate_get_surrounding_2_grid_pts(idxs_local,idxs_lower,idxs_upper,nbr2,dim+1);
 
 		} else {
 			// Do something
@@ -529,8 +566,8 @@ namespace dcu {
 				};
 			};
 
-			// Add to map
-			map.in[GridPtKey(idxs_local,2)] = get_grid_point(idxs_grid_pt);
+			// Add to nbr2
+			nbr2.in[GridPtKey(idxs_local,2)] = get_grid_point(idxs_grid_pt);
 		};
 	};
 
@@ -564,7 +601,7 @@ namespace dcu {
 			frac_abscissas.push_back((abscissas[dim] - _dims[dim].get_pt_at_idx(idxs_1[dim])) / (_dims[dim].get_pt_at_idx(idxs_2[dim]) - _dims[dim].get_pt_at_idx(idxs_1[dim])));
 		};
 
-		// Iterate to fill out the map
+		// Iterate to fill out the nbr4
 		IdxSet idxs_local(_dim_grid);
 		Nbr4 ret;
 		_iterate_get_surrounding_4_grid_pts(idxs_local,idxs_0,idxs_1,idxs_2,idxs_3,ret,0);
@@ -629,13 +666,13 @@ namespace dcu {
 	********************/
 
 	double Grid::Impl::_iterate_interpolate(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, Nbr4 &nbrs_p) const {
+		double p0,p1,p2,p3;
 
 		if (delta == d) {
 			// Arrived; regular 1D interpolation
-			double p0,p1,p2,p3;
 
 			idxs_j[0] = 0;
-			GridPtKey key = GridPtKey(idxs_j,_dims);
+			GridPtKey key = GridPtKey(idxs_j,4);
 			GridPtType type = nbrs_p.types[key];
 			if (type == GridPtType::INSIDE) {
 				p0 = nbrs_p.in[key]->get_ordinate();
@@ -644,7 +681,7 @@ namespace dcu {
 			};
 
 			idxs_j[0] = 1;
-			key = GridPtKey(idxs_j,_dims);
+			key = GridPtKey(idxs_j,4);
 			type = nbrs_p.types[key];
 			if (type == GridPtType::INSIDE) {
 				p1 = nbrs_p.in[key]->get_ordinate();
@@ -653,7 +690,7 @@ namespace dcu {
 			};
 
 			idxs_j[0] = 2;
-			key = GridPtKey(idxs_j,_dims);
+			key = GridPtKey(idxs_j,4);
 			type = nbrs_p.types[key];
 			if (type == GridPtType::INSIDE) {
 				p2 = nbrs_p.in[key]->get_ordinate();
@@ -662,7 +699,7 @@ namespace dcu {
 			};
 
 			idxs_j[0] = 3;
-			key = GridPtKey(idxs_j,_dims);
+			key = GridPtKey(idxs_j,4);
 			type = nbrs_p.types[key];
 			if (type == GridPtType::INSIDE) {
 				p3 = nbrs_p.in[key]->get_ordinate();
@@ -672,20 +709,18 @@ namespace dcu {
 
 			return interpolate_1d_by_ref(frac_abscissas[d-delta+1-1],p0,p1,p2,p3);
 		} else {
-			double p0,p1,p2,p3;
 
 			// Deeper
 			idxs_j[d-delta+1-1] = 0;
-			p0 = _iterate_interpolate(delta, d, frac_abscissas, idxs_j, nbrs_p);
+			p0 = _iterate_interpolate(delta+1, d, frac_abscissas, idxs_j, nbrs_p);
 
 			idxs_j[d-delta+1-1] = 1;
-			p1 = _iterate_interpolate(delta, d, frac_abscissas, idxs_j, nbrs_p);
+			p1 = _iterate_interpolate(delta+1, d, frac_abscissas, idxs_j, nbrs_p);
 
 			idxs_j[d-delta+1-1] = 2;
-			p2 = _iterate_interpolate(delta, d, frac_abscissas, idxs_j, nbrs_p);			
-
+			p2 = _iterate_interpolate(delta+1, d, frac_abscissas, idxs_j, nbrs_p);			
 			idxs_j[d-delta+1-1] = 3;
-			p3 = _iterate_interpolate(delta, d, frac_abscissas, idxs_j, nbrs_p);
+			p3 = _iterate_interpolate(delta+1, d, frac_abscissas, idxs_j, nbrs_p);
 
 			return interpolate_1d_by_ref(frac_abscissas[d-delta+1-1],p0,p1,p2,p3);
 		};
@@ -818,282 +853,6 @@ namespace dcu {
 		f.close();
 	};
 
-	/********************
-	Project
-	********************/
-
-	/*
-	void Grid::Impl::project() {
-
-		if (DIAG_PROJ) {
-			std::cout << ">>> Grid::Impl::project <<<" << std::endl;
-		};
-
-		// Entries in the vec/matrix
-		std::map<GridPtKey, std::map<GridPtKey,double> > a_matr;
-		std::map<GridPtKey, double> b_vec;
-
-		// Global coeff map
-		std::map<GridPtKey, double> global_coeffs;
-
-		// Declarations
-		std::vector<double> abscissas,abscissas_next,frac_abscissas;
-		double path;
-		std::map<GridPtKey, double> local_coeffs;
-		std::shared_ptr<DataPt> data_pt, data_pt_next;
-		Nbr4 nbr4;
-		double coeff;
-		IdxSet idxs_local(_dim_grid);
-		IdxSet idxs_global(_dim_grid);
-		IdxSet idxs_dep_1(_dim_grid),idxs_dep_2(_dim_grid);
-		std::vector<GridPtKey> keys;
-		double xk,xl;
-
-		// Go through all data points except the last
-		for (auto i_pt=0; i_pt<_data_pts.size()-1; i_pt++) {
-			if (DIAG_PROJ) {
-				std::cout << ">>> Grid::Impl::project <<< Doing pt: " << i_pt << " / " << _data_pts.size()-2 << std::endl;
-			};
-
-			data_pt = _data_pts[i_pt];
-			data_pt_next = _data_pts[i_pt+1];
-
-			// Get abscissas
-			abscissas = data_pt->get_abscissas();
-			abscissas_next = data_pt_next->get_abscissas();
-
-			// Calculate path element
-			path = 0.0;
-			for (auto dim=0; dim<_dim_grid; dim++) {
-				path += pow(abscissas_next[dim]-abscissas[dim],2);
-			};
-			path = sqrt(path);
-
-			if (DIAG_PROJ) {
-				std::cout << ">>> Grid::Impl::project <<<     Calculated path length: " << path << std::endl;
-			};
-
-			// Get frac abscissas
-			frac_abscissas = data_pt->get_frac_abscissas();
-
-			// Iterate such that local_coeffs holds the local map of coeffs for the surrounding nbr4
-			local_coeffs.clear();
-			_iterate_form_coeffs(local_coeffs,frac_abscissas,_dim_grid-1,idxs_local,1.0);
-
-			if (DIAG_PROJ) {
-				std::cout << ">>> Grid::Impl::project <<<     Local coeffs:" << std::endl;
-				for (auto &pr: local_coeffs) {
-					std::cout << "                             " << pr.first << " " << pr.second << std::endl;
-				};
-			};
-
-			// Now grab the nbr4
-			nbr4 = data_pt->get_nbr4();
-
-			// Go through each point; add INSIDE to the global map
-			// Skip OUTSIDE
-			global_coeffs.clear();
-			for (auto &pr: nbr4.types) {
-				if (pr.second == GridPtType::INSIDE) {
-					// Get global idxs
-					idxs_global = nbr4.in[pr.first]->get_idxs();
-
-					// Get coeff
-					coeff = local_coeffs[pr.first];
-
-					// std::cout << "Getting coeff of local idx: " << pr.first << " : " << coeff << std::endl;
-
-					// Add to global map
-					global_coeffs[GridPtKey(idxs_global,_dims)] = coeff;
-				};
-			};
-
-			// Corrections for OUTSIDE pts
-			for (auto &pr: nbr4.types) {
-				if (pr.second == GridPtType::OUTSIDE) {
-					// Need to correct the coeffs
-
-					// Get the coeff from the local map
-					coeff = local_coeffs[pr.first];
-
-					// Get the idxs of the two dep pts
-					idxs_dep_1 = nbr4.out[pr.first]->get_dep_p1()->get_idxs();
-					idxs_dep_2 = nbr4.out[pr.first]->get_dep_p2()->get_idxs();
-
-					// Adjust coeffs
-					global_coeffs[GridPtKey(idxs_dep_1,_dims)] += 2.0 * coeff;
-					global_coeffs[GridPtKey(idxs_dep_2,_dims)] -= coeff;
-				};
-			};
-
-			if (DIAG_PROJ) {
-				std::cout << ">>> Grid::Impl::project <<<     Got coeffs for all neighborhood pts" << std::endl;
-			};
-
-			// All keys in global_coeffs
-			keys.clear();
-			for (auto &pr: global_coeffs) {
-				keys.push_back(pr.first);	
-			};
-
-			if (DIAG_PROJ) {
-				std::cout << ">>> Grid::Impl::project <<<     Adding to matrix,vector...." << std::endl;
-			};
-
-			// Now add to the matrix/vector
-			for (auto k=0; k<keys.size(); k++) {
-				GridPtKey idx_k = keys[k];
-				xk = global_coeffs[idx_k];
-
-				// Add to vec
-				auto it = b_vec.find(idx_k);
-				if (it == b_vec.end()) {
-					b_vec[idx_k] = xk * data_pt->get_ordinate() * path;
-				} else {
-					b_vec[idx_k] += xk * data_pt->get_ordinate() * path;
-				};
-
-				for (auto l=k; l<keys.size(); l++) {
-					GridPtKey idx_l = keys[l];
-					xl = global_coeffs[idx_l];
-
-					// Add to matr
-					auto it1 = a_matr.find(idx_k);
-					if (it1 == a_matr.end()) {
-						a_matr[idx_k][idx_l] = xk * xl * path;
-						if (k!=l) {
-							a_matr[idx_l][idx_k] = xk * xl * path;
-						};
-					} else {
-						auto it2 = it1->second.find(idx_k);
-						if (it2 == it1->second.end()) {
-							a_matr[idx_k][idx_l] = xk * xl * path;
-							if (k!=l) {
-								a_matr[idx_l][idx_k] = xk * xl * path;
-							};
-						} else {
-							a_matr[idx_k][idx_l] += xk * xl * path;
-							if (k!=l) {
-								a_matr[idx_l][idx_k] += xk * xl * path;
-							};
-						};
-					};
-				};
-			};
-		};
-
-		if (DIAG_PROJ) {
-			std::cout << ">>> Grid::Impl::project <<< Done looping through data." << std::endl;
-			std::cout << ">>> Grid::Impl::project <<< The A matrix size is: " << a_matr.size() << std::endl;
-			std::cout << ">>> Grid::Impl::project <<< The b vector size is: " << b_vec.size() << std::endl;
-			std::cout << ">>> Grid::Impl::project <<< Now constructing the armadillo objects!" << std::endl;
-		};
-
-		// Get size
-		int n = a_matr.size();
-		if (a_matr.size() != b_vec.size()) {
-			std::cerr << ">>> Error: Grid::Impl::project <<< b vec size = " << b_vec.size() << " but A matrix size = " << a_matr.size() << std::endl;
-			exit(EXIT_FAILURE);
-		};
-
-		// arma::sp_mat A(n,n);
-		arma::mat A(n,n);
-		arma::vec b(n),x(n);
-
-		// Grab all the keys
-		std::vector<GridPtKey> keys2;
-		for (auto &pr: b_vec) {
-			keys2.push_back(pr.first);
-		};
-
-		// Make the matrix,vector
-		for (auto i=0; i<keys2.size(); i++) {
-
-			// vec
-			b(i) = b_vec[keys2[i]];
-
-			for (auto j=0; j<keys2.size(); j++) {
-
-				// matr
-				A(i,j) = a_matr[keys2[i]][keys2[j]];
-
-			};
-		};
-
-		if (DIAG_PROJ) {
-			A.print("A:");
-			b.print("b:");
-			std::cout << ">>> Grid::Impl::project <<< Solving..." << std::endl;
-		};
-
-		// Solve
-		// x = spsolve(A, b, "lapack");
-		x = solve(A,b);
-
-		if (DIAG_PROJ) {
-			std::cout << ">>> Grid::Impl::project <<< Done!" << std::endl;
-			x.print("x:");
-			std::cout << ">>> Grid::Impl::project <<< Next: setting in grid" << std::endl;
-		};
-
-		// Set solution in the grid
-		for (auto &pr: _grid_pts) {
-			auto it = std::find(keys2.begin(), keys2.end(), pr.first);
-			if (it == keys2.end()) {
-				// Not found -> 0
-				pr.second->set_ordinate(0.0);
-			} else {
-				// Found; set from x
-				int i = it - keys2.begin();
-				pr.second->set_ordinate(x(i));
-			};
-		};
-
-		if (DIAG_PROJ) {
-			std::cout << ">>> Grid::Impl::project <<< Finished!" << std::endl;
-		};
-
-	};
-
-	void Grid::Impl::_iterate_form_coeffs(std::map<GridPtKey, double> &coeffs_store, std::vector<double> &frac_abscissas, int dim_to_iterate_interpolate_in, IdxSet &idxs_p, double coeff_p) {
-
-		if (dim_to_iterate_interpolate_in != -1) {
-			// Deeper!
-
-			// Grab the pt in this dim
-			double x = frac_abscissas[dim_to_iterate_interpolate_in];
-
-			// p0
-			idxs_p[dim_to_iterate_interpolate_in] = 0;		
-			_iterate_form_coeffs( coeffs_store, frac_abscissas, dim_to_iterate_interpolate_in-1, idxs_p, coeff_p*(-0.5*x+pow(x,2)-0.5*pow(x,3)) );
-
-			// p1
-			idxs_p[dim_to_iterate_interpolate_in] = 1;		
-			_iterate_form_coeffs( coeffs_store, frac_abscissas, dim_to_iterate_interpolate_in-1, idxs_p, coeff_p*(1.0-2.5*pow(x,2)+1.5*pow(x,3)) );
-
-			// p2
-			idxs_p[dim_to_iterate_interpolate_in] = 2;		
-			_iterate_form_coeffs( coeffs_store, frac_abscissas, dim_to_iterate_interpolate_in-1, idxs_p, coeff_p*(0.5*x + 2.0 * pow(x,2) -1.5*pow(x,3)) );
-
-			// p3
-			idxs_p[dim_to_iterate_interpolate_in] = 3;		
-			_iterate_form_coeffs( coeffs_store, frac_abscissas, dim_to_iterate_interpolate_in-1, idxs_p, coeff_p*(-0.5*pow(x,2)+0.5*pow(x,3)) );
-
-		} else {
-			// Do something
-
-			// Print the idx and coeff
-			// std::cout << idxs_p << " coeff: " << coeff_p << std::endl;
-
-			// Add to the map
-			coeffs_store[GridPtKey(idxs_p,4)] = coeff_p;
-		};
-	};
-	*/
-
-
-
-
 
 
 
@@ -1164,7 +923,7 @@ namespace dcu {
 	Get grid pts
 	********************/
 
-	const std::map<GridPtKey, GridPt*>& Grid::get_grid_points() const {
+	const std::unordered_map<GridPtKey, GridPt*, hash_gpk>& Grid::get_grid_points() const {
 		return _impl->get_grid_points();
 	};
 	const GridPt* Grid::get_grid_point(std::vector<int> grid_idxs) const {
@@ -1177,7 +936,7 @@ namespace dcu {
 		return _impl->get_grid_point(key);
 	};
 
-	const std::map<GridPtKey, GridPtOut*>& Grid::get_grid_points_outside() const {
+	const std::unordered_map<GridPtKey, GridPtOut*, hash_gpk>& Grid::get_grid_points_outside() const {
 		return _impl->get_grid_points_outside();
 	};
 	const GridPtOut* Grid::get_grid_point_outside(std::vector<int> grid_idxs) const {

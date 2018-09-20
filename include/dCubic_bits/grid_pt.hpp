@@ -3,9 +3,9 @@
 #include <vector>
 #endif
 
-#ifndef MAP_H
-#define MAP_H
-#include <map>
+#ifndef UNORDERED_MAP_H
+#define UNORDERED_MAP_H
+#include <unordered_map>
 #endif
 
 /************************************
@@ -25,24 +25,6 @@ namespace dcu {
 	****************************************/
 
 	enum class GridPtType: unsigned int { INSIDE, OUTSIDE };
-
-	/****************************************
-	Neighborhood of points surrounding a point, 2 in each dim
-	****************************************/
-
-	struct Nbr2 {
-		std::map<GridPtKey, const GridPt*> in;
-	};
-
-	/****************************************
-	Neighborhood of points surrounding a point, 4 in each dim
-	****************************************/
-
-	struct Nbr4 {
-		std::map<GridPtKey, GridPtType> types;
-		std::map<GridPtKey, const GridPt*> in;
-		std::map<GridPtKey, const GridPtOut*> out;
-	};
 
 	/****************************************
 	Interior grid pt
