@@ -123,9 +123,11 @@ namespace dcu {
 		Get derivative
 		********************/
 
-		double get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> grid_idxs);
-		double get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet idx_set);
-		double get_deriv_wrt_pt_value(std::vector<double> abscissas, GridPtKey grid_pt_key);
+		// Here: grid_idxs/idx_set/grid_pt_key are 0,1,2,3 each
+		// i.e. refer to p! not global idxs
+		double get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> local_grid_idxs);
+		double get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet local_idx_set);
+		double get_deriv_wrt_pt_value(std::vector<double> abscissas, GridPtKey local_grid_pt_key);
 
 		double get_deriv_wrt_x(std::vector<double> abscissas, int k);
 

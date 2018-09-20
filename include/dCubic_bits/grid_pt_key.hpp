@@ -10,8 +10,8 @@
 namespace dcu {
 
 	// Forward
-	class IdxSet;
 	class Dimension1D;
+	class IdxSet;
 	enum class GridPtType: unsigned int;
 
 	/****************************************
@@ -52,6 +52,17 @@ namespace dcu {
 
 		// Set from linear
 		void set_from_linear(int idx_linear);
+
+		/********************
+		From IdxSet
+		********************/
+
+		int operator [](int idx) const;
+		int & operator [](int idx);
+
+		int size() const;
+
+		bool find(int val);
 
 		std::string print() const;
 	};

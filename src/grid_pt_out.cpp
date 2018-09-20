@@ -30,6 +30,9 @@ namespace dcu {
 		// Dependencies
 		const GridPt* _p1, *_p2;
 
+		// Which dims are outside
+		std::vector<bool> _outside_dims;
+
 		// Constructor helpers
 		void _clean_up();
 		void _copy(const Impl& other);
@@ -41,7 +44,7 @@ namespace dcu {
 		Constructor
 		********************/
 
-		Impl(IdxSet idxs, std::vector<double> abscissas, const GridPt* p1, const GridPt* p2);
+		Impl(IdxSet idxs, std::vector<double> abscissas, const GridPt* p1, const GridPt* p2, std::vector<bool> outside_dims);
 		Impl(const Impl& other);
 		Impl(Impl&& other);
 		Impl& operator=(const Impl &other);
@@ -66,6 +69,10 @@ namespace dcu {
 		// Get dependent points
 		const GridPt* get_dep_p1() const;
 		const GridPt* get_dep_p2() const;
+
+		// Which dims are outside
+		const std::vector<bool>& get_outside_dims() const;
+		bool is_outside_in_dim(int dim) const;
 
 		/********************
 		Print
@@ -99,7 +106,7 @@ namespace dcu {
 	Implementation
 	****************************************/
 
-	GridPtOut::Impl::Impl(IdxSet idxs, std::vector<double> abscissas, const GridPt* p1, const GridPt* p2) : _p1(p1), _p2(p2) {
+	GridPtOut::Impl::Impl(IdxSet idxs, std::vector<double> abscissas, const GridPt* p1, const GridPt* p2, std::vector<bool> outside_dims) : _p1(p1), _p2(p2) {
 		// Check lengths
 		if (idxs.size() != abscissas.size()) {
 			std::cout << ">>> Error: GridPt::Impl::Impl <<< Sizes must match." << std::endl;
@@ -109,6 +116,7 @@ namespace dcu {
 		// Store
 		_idxs = idxs;
 		_abcissas = abscissas;
+		_outside_dims = outside_dims;
 	};
 	GridPtOut::Impl::Impl(const Impl& other) {
 		_copy(other);
@@ -149,6 +157,7 @@ namespace dcu {
 		_abcissas = other._abcissas;
 		_p1 = other._p1;
 		_p2 = other._p2;
+		_outside_dims = other._outside_dims;
 	};
 	void GridPtOut::Impl::_move(Impl& other)
 	{
@@ -159,6 +168,7 @@ namespace dcu {
 		other._abcissas.clear();
 		other._p1 = nullptr;
 		other._p2 = nullptr;
+		other._outside_dims.clear();
 	};
 
 	/********************
@@ -192,6 +202,18 @@ namespace dcu {
 	};
 	const GridPt* GridPtOut::Impl::get_dep_p2() const {
 		return _p2;
+	};
+
+	// Which dims are outside
+	const std::vector<bool>& GridPtOut::Impl::get_outside_dims() const {
+		return _outside_dims;
+	};
+	bool GridPtOut::Impl::is_outside_in_dim(int dim) const {
+		if (dim >= _outside_dims.size() || dim < 0) {
+			std::cout << ">>> Error: GridPtOut::Impl::is_outside_in_dim <<< dim: " << dim << " is outside 0-" << _outside_dims.size() << std::endl;
+			exit(EXIT_FAILURE);
+		};
+		return _outside_dims[dim];
 	};
 
 	/********************
@@ -239,7 +261,7 @@ namespace dcu {
 	Constructor
 	********************/
 
-	GridPtOut::GridPtOut(IdxSet idxs, std::vector<double> abscissas, const GridPt* p1, const GridPt* p2) : _impl(new Impl(idxs,abscissas, p1, p2)) {};
+	GridPtOut::GridPtOut(IdxSet idxs, std::vector<double> abscissas, const GridPt* p1, const GridPt* p2, std::vector<bool> outside_dims) : _impl(new Impl(idxs,abscissas, p1, p2, outside_dims)) {};
 	GridPtOut::GridPtOut(const GridPtOut& other) : _impl(new Impl(*other._impl)) {};
 	GridPtOut::GridPtOut(GridPtOut&& other) : _impl(std::move(other._impl)) {};
 	GridPtOut& GridPtOut::operator=(const GridPtOut &other) {
@@ -283,6 +305,14 @@ namespace dcu {
 	};
 	const GridPt* GridPtOut::get_dep_p2() const {
 		return _impl->get_dep_p2();
+	};
+
+	// Which dims are outside
+	const std::vector<bool>& GridPtOut::get_outside_dims() const {
+		return _impl->get_outside_dims();
+	};
+	bool GridPtOut::is_outside_in_dim(int dim) const {
+		return _impl->is_outside_in_dim(dim);
 	};
 
 	/********************

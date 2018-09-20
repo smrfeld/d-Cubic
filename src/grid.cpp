@@ -401,14 +401,18 @@ namespace dcu {
 
 			// Find the two pts
 			IdxSet p1_idxs(_dim_grid), p2_idxs(_dim_grid);
+			std::vector<bool> dims_outside;
 			for (auto dim2=0; dim2<_dim_grid; dim2++) {
 				if (grid_pt_idxs[dim2] == -1) {
+					dims_outside.push_back(true);
 					p1_idxs[dim2] = grid_pt_idxs[dim2] + 1;
 					p2_idxs[dim2] = grid_pt_idxs[dim2] + 2;
 				} else if (grid_pt_idxs[dim2] == _dims[dim2].get_no_pts()) {
+					dims_outside.push_back(true);
 					p1_idxs[dim2] = grid_pt_idxs[dim2] - 1;
 					p2_idxs[dim2] = grid_pt_idxs[dim2] - 2;
 				} else {
+					dims_outside.push_back(false);
 					p1_idxs[dim2] = grid_pt_idxs[dim2];
 					p2_idxs[dim2] = grid_pt_idxs[dim2];
 				};
@@ -417,7 +421,7 @@ namespace dcu {
 			const GridPt *p2 = get_grid_point(p2_idxs);
 
 			// Make the outside grid point
-			_grid_pts_out[GridPtKey(grid_pt_idxs,_dims)] = new GridPtOut(grid_pt_idxs,abscissas,p1,p2);
+			_grid_pts_out[GridPtKey(grid_pt_idxs,_dims)] = new GridPtOut(grid_pt_idxs,abscissas,p1,p2,dims_outside);
 			// std::cout << "Made outside pt: " << grid_pt_idxs << " = " << _grid_pts_out[GridPtKey(grid_pt_idxs,GridPtType::OUTSIDE,_dims)]->print_abscissa() << std::endl;
 		};
 	};
@@ -755,14 +759,59 @@ namespace dcu {
 	Get derivative
 	********************/
 
-	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> grid_idxs) {
-		return 0.0;
+	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> local_grid_idxs) {
+		return get_deriv_wrt_pt_value(abscissas,IdxSet(local_grid_idxs));
 	};
-	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet idx_set) {
-		return 0.0;
+	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet local_idx_set) {
+		return get_deriv_wrt_pt_value(abscissas,GridPtKey(local_idx_set,_dims));
 	};
-	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, GridPtKey grid_pt_key) {
-		return 0.0;
+	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, GridPtKey local_grid_pt_key) {
+		int d = get_no_dims();
+
+		// nbrs p and frac
+		auto pr = get_surrounding_4_grid_pts(abscissas);
+		Nbr4 nbrs_p = pr.first;
+		std::vector<double> frac_abscissas = pr.second;
+
+		// Type
+		if (nbrs_p.types[local_grid_pt_key] == GridPtType::INSIDE) {
+
+			// Inside
+
+			double ret=1.0;
+			for (auto alpha=1; alpha<=d; alpha++) {
+				ret *= get_deriv_wrt_p_1d_by_ref(frac_abscissas[d-alpha+1-1], local_grid_pt_key[d-alpha+1-1]);
+			};
+			return ret;
+
+		} else {
+
+			// Outside
+
+			// Get pt
+			const GridPtOut* gpo = nbrs_p.out[local_grid_pt_key];
+
+			double ret=1.0;
+			for (auto alpha=1; alpha<=d; alpha++) {
+				// Outside in this dim?
+				if (gpo->is_outside_in_dim(d-alpha+1-1)) {
+					// Outside
+					// Which side?
+					if (local_grid_pt_key[d-alpha+1-1] == 0) {
+						ret *= get_deriv_wrt_p_1d_by_ref(frac_abscissas[d-alpha+1-1], local_grid_pt_key[d-alpha+1-1], true, true);
+					} else if (local_grid_pt_key[d-alpha+1-1] == 3) {
+						ret *= get_deriv_wrt_p_1d_by_ref(frac_abscissas[d-alpha+1-1], local_grid_pt_key[d-alpha+1-1], true, false);
+					} else {
+						std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_pt_value <<< Something doesn't make sense here - this grid pt is marked as an OUTSIDE one, but it does not have idx 0 or 3 in this dim...." << std::endl;
+						exit(EXIT_FAILURE);
+					};
+				} else {
+					// Inside
+					ret *= get_deriv_wrt_p_1d_by_ref(frac_abscissas[d-alpha+1-1], local_grid_pt_key[d-alpha+1-1]);
+				};
+			};
+			return ret;
+		};
 	};
 
 	double Grid::Impl::get_deriv_wrt_x(std::vector<double> abscissas, int k) {

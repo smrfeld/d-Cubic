@@ -31,7 +31,7 @@ namespace dcu {
 		********************/
 
 		// Value = 2 p1 - p2
-		GridPtOut(IdxSet idxs, std::vector<double> abscissas, const GridPt* p1, const GridPt* p2);
+		GridPtOut(IdxSet idxs, std::vector<double> abscissas, const GridPt* p1, const GridPt* p2, std::vector<bool> outside_dims);
 		GridPtOut(const GridPtOut& other);
 		GridPtOut(GridPtOut&& other);
 		GridPtOut& operator=(const GridPtOut &other);
@@ -56,6 +56,10 @@ namespace dcu {
 		// Get dependent points
 		const GridPt* get_dep_p1() const;
 		const GridPt* get_dep_p2() const;
+
+		// Which dims are outside
+		const std::vector<bool>& get_outside_dims() const;
+		bool is_outside_in_dim(int dim) const;
 
 		/********************
 		Print

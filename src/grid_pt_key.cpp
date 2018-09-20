@@ -61,7 +61,19 @@ namespace dcu {
 		// Set from linear
 		void set_from_linear(int idx_linear);
 
+		/********************
+		From IdxSet
+		********************/
+
+		int operator [](int idx) const;
+		int & operator [](int idx);
+
+		int size() const;
+
+		bool find(int val);
+
 		std::string print() const;
+
 	};
 
 
@@ -234,7 +246,25 @@ namespace dcu {
 		};
 	};
  
- 	// Print
+	/********************
+	From IdxSet
+	********************/
+
+	int GridPtKey::Impl::operator [](int idx) const {
+		return _idxs[idx];
+	};
+	int & GridPtKey::Impl::operator [](int idx) {
+		return _idxs[idx];
+	};
+
+	int GridPtKey::Impl::size() const {
+		return _idxs.size();
+	};
+
+	bool GridPtKey::Impl::find(int val) {
+		return _idxs.find(val);
+	};
+
  	std::string GridPtKey::Impl::print() const {
  		return _idxs.print();
  	};
@@ -317,13 +347,28 @@ namespace dcu {
 		_impl->set_from_linear(idx_linear);
 	};
 
+	/********************
+	From IdxSet
+	********************/
+
+	int GridPtKey::operator [](int idx) const {
+		return _impl->operator[](idx);
+	};
+	int & GridPtKey::operator [](int idx) {
+		return _impl->operator[](idx);
+	};
+
+	int GridPtKey::size() const {
+		return _impl->size();
+	};
+
+	bool GridPtKey::find(int val) {
+		return _impl->find(val);
+	};
+
 	std::string GridPtKey::print() const {
 		return _impl->print();
 	};
-
-
-
-
 
 
 
