@@ -64,7 +64,15 @@ f(x ; p_0, p_1, p_2, p_3) = \left ( - \frac{1}{2} p_0 + \frac{3}{2} p_1 - \frac{
 \end{equation}
 %---------------
 
-Here, assume the case where the point does not fall near the boundary, i.e. all the grid points $p_0,p_1,p_2,p_3$ exist (else they need to be approximated).
+In case the point falls near the boundary, then either the point $p_0$ or $p_3$ does not exist, and needs to be approximated. The best approximation is a linear one:
+%---------------
+\begin{equation}
+\begin{split}
+p_0 &\approx 2 p_1 - p_2 \\
+\text{or} \quad p_3 &\approx 2 p_2 - p_1
+\end{split}
+\end{equation}
+%---------------
 
 %%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%
@@ -78,12 +86,32 @@ The derivatives with respect to a grid point values are:
 %---------------
 \begin{equation}
 \begin{split}
-\frac{\partial f}{\partial p_0} &= - \frac{1}{2} x^3 + x^2 - \frac{1}{2} x \\
-\frac{\partial f}{\partial p_1} &= \frac{3}{2} x^3 - \frac{5}{2} x^2 + 1 \\
-\frac{\partial f}{\partial p_2} &= - \frac{3}{2} x^3 + 2 x^2 + \frac{1}{2} x \\
-\frac{\partial f}{\partial p_3} &= \frac{1}{2} x^3 - \frac{1}{2} x^2
+\frac{d f}{d p_0} &= - \frac{1}{2} x^3 + x^2 - \frac{1}{2} x \\
+\frac{d f}{d p_1} &= \frac{3}{2} x^3 - \frac{5}{2} x^2 + 1 \\
+\frac{d f}{d p_2} &= - \frac{3}{2} x^3 + 2 x^2 + \frac{1}{2} x \\
+\frac{d f}{d p_3} &= \frac{1}{2} x^3 - \frac{1}{2} x^2
 \end{split}
 \label{eq:derivValue}
+\end{equation}
+%---------------
+If the point falls near the boundary, and we approximate $p_0 \approx 2 p_1 - p_2$, we have instead:
+%---------------
+\begin{equation}
+\begin{split}
+\frac{d f}{d p_1} &= \frac{\partial f}{\partial p_1} + \frac{\partial f}{\partial p_0} \frac{\partial p_0}{\partial p_1} =  \frac{1}{2} x^3 - \frac{1}{2} x^2 - x + 1 \\
+\frac{d f}{d p_2} &= \frac{\partial f}{\partial p_2} + \frac{\partial f}{\partial p_0} \frac{\partial p_0}{\partial p_2} = - x^3 + x^2 + x \\
+\frac{d f}{d p_3} &= \frac{1}{2} x^3 - \frac{1}{2} x^2
+\end{split}
+\end{equation}
+%---------------
+If it falls near the other boundary and we approximate $p_3 \approx 2 p_2 - p_1$, we have:
+%---------------
+\begin{equation}
+\begin{split}
+\frac{d f}{d p_0} &= - \frac{1}{2} x^3 + x^2 - \frac{1}{2} x \\
+\frac{d f}{d p_1} &= \frac{\partial f}{\partial p_1} + \frac{\partial f}{\partial p_3} \frac{\partial p_3}{\partial p_1} =  x^3 - 2 x^2 + 1 \\
+\frac{d f}{d p_2} &= \frac{\partial f}{\partial p_2} + \frac{\partial f}{\partial p_3} \frac{\partial p_3}{\partial p_2} = - \frac{1}{2} x^3 + x^2 + \frac{1}{2} x
+\end{split}
 \end{equation}
 %---------------
 
@@ -107,6 +135,8 @@ The derivative with respect to the point $\tilde{x}$ is:
 \label{eq:derivAbs}
 \end{equation}
 %---------------
+If the point falls near the boundary, the result is unchanged.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

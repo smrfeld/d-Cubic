@@ -196,9 +196,9 @@ namespace dcu {
 		double interpolate_1d(double x_frac, double p0, double p1, double p2, double p3) const;
 		double interpolate_1d_by_ref(const double &x_frac, const double &p0, const double &p1, const double &p2, const double &p3) const;
 
-		double get_deriv_wrt_p_1d(double x_frac, int p);
-		double get_deriv_wrt_p_1d_by_ref(const double &x_frac, int p) const;
-		
+		double get_deriv_wrt_p_1d(double x_frac, int p, bool is_at_end=false, bool is_at_p0_end=true);
+		double get_deriv_wrt_p_1d_by_ref(const double &x_frac, int p, bool is_at_end=false, bool is_at_p0_end=true) const;		
+
 		double get_deriv_wrt_x_1d(double x_frac, double p0, double p1, double p2, double p3);
 		double get_deriv_wrt_x_1d_by_ref(const double &x_frac, const double &p0, const double &p1, const double &p2, const double &p3) const;
 
@@ -780,29 +780,73 @@ namespace dcu {
 		return (-0.5*p0 + 1.5*p1 - 1.5*p2 + 0.5*p3)*pow(x_frac,3) + (p0 - 2.5*p1 + 2.0*p2 - 0.5*p3)*pow(x_frac,2) + (-0.5*p0 + 0.5*p2)*x_frac + p1;
 	};
 
-	double Grid::Impl::get_deriv_wrt_p_1d(double x_frac, int p) {
+	double Grid::Impl::get_deriv_wrt_p_1d(double x_frac, int p, bool is_at_end, bool is_at_p0_end) {
 		if (p==0) {
-			return -0.5*pow(x_frac,3) + pow(x_frac,2) - 0.5*x_frac;
+			if (is_at_end && is_at_p0_end) {
+				std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_p_1d <<< at p0 boundary => p0 is out of the grid; cannot take derivative!" << std::endl;
+				exit(EXIT_FAILURE);
+			} else {
+				return -0.5*pow(x_frac,3) + pow(x_frac,2) - 0.5*x_frac;
+			};
 		} else if (p==1) {
-			return 1.5*pow(x_frac,3) - 2.5*pow(x_frac,2) + 1.0;
+			if (!is_at_end) {
+				return 1.5*pow(x_frac,3) - 2.5*pow(x_frac,2) + 1.0;
+			} else if (is_at_p0_end) {
+				return 0.5*pow(x_frac,3) - 0.5*pow(x_frac,2) - x_frac + 1.0;
+			} else {
+				return pow(x_frac,3) - 2.0 * pow(x_frac,2) + 1.0;
+			};
 		} else if (p==2) {
-			return -1.5*pow(x_frac,3) + 2.0*pow(x_frac,2) + 0.5*x_frac;
+			if (!is_at_end) {
+				return -1.5*pow(x_frac,3) + 2.0*pow(x_frac,2) + 0.5*x_frac;
+			} else if (is_at_p0_end) {
+				return -pow(x_frac,3) + pow(x_frac,2) + x_frac;
+			} else {
+				return -0.5 * pow(x_frac,3) + pow(x_frac,2) + 0.5 * x_frac;
+			};
 		} else if (p==3) {
-			return 0.5*pow(x_frac,3) - 0.5*pow(x_frac,2);
+			if (is_at_end && is_at_p0_end) {
+				std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_p_1d <<< at p3 boundary => p3 is out of the grid; cannot take derivative!" << std::endl;
+				exit(EXIT_FAILURE);
+			} else {
+				return 0.5*pow(x_frac,3) - 0.5*pow(x_frac,2);
+			};
 		} else {
 			std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_p_1d <<< p should be 0,1,2,3" << std::endl;
 			exit(EXIT_FAILURE);
 		};
 	};
-	double Grid::Impl::get_deriv_wrt_p_1d_by_ref(const double &x_frac, int p) const {
+	double Grid::Impl::get_deriv_wrt_p_1d_by_ref(const double &x_frac, int p, bool is_at_end, bool is_at_p0_end) const {
 		if (p==0) {
-			return -0.5*pow(x_frac,3) + pow(x_frac,2) - 0.5*x_frac;
+			if (is_at_end && is_at_p0_end) {
+				std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_p_1d <<< at p0 boundary => p0 is out of the grid; cannot take derivative!" << std::endl;
+				exit(EXIT_FAILURE);
+			} else {
+				return -0.5*pow(x_frac,3) + pow(x_frac,2) - 0.5*x_frac;
+			};
 		} else if (p==1) {
-			return 1.5*pow(x_frac,3) - 2.5*pow(x_frac,2) + 1.0;
+			if (!is_at_end) {
+				return 1.5*pow(x_frac,3) - 2.5*pow(x_frac,2) + 1.0;
+			} else if (is_at_p0_end) {
+				return 0.5*pow(x_frac,3) - 0.5*pow(x_frac,2) - x_frac + 1.0;
+			} else {
+				return pow(x_frac,3) - 2.0 * pow(x_frac,2) + 1.0;
+			};
 		} else if (p==2) {
-			return -1.5*pow(x_frac,3) + 2.0*pow(x_frac,2) + 0.5*x_frac;
+			if (!is_at_end) {
+				return -1.5*pow(x_frac,3) + 2.0*pow(x_frac,2) + 0.5*x_frac;
+			} else if (is_at_p0_end) {
+				return -pow(x_frac,3) + pow(x_frac,2) + x_frac;
+			} else {
+				return -0.5 * pow(x_frac,3) + pow(x_frac,2) + 0.5 * x_frac;
+			};
 		} else if (p==3) {
-			return 0.5*pow(x_frac,3) - 0.5*pow(x_frac,2);
+			if (is_at_end && is_at_p0_end) {
+				std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_p_1d <<< at p3 boundary => p3 is out of the grid; cannot take derivative!" << std::endl;
+				exit(EXIT_FAILURE);
+			} else {
+				return 0.5*pow(x_frac,3) - 0.5*pow(x_frac,2);
+			};
 		} else {
 			std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_p_1d <<< p should be 0,1,2,3" << std::endl;
 			exit(EXIT_FAILURE);
@@ -1047,11 +1091,11 @@ namespace dcu {
 		return _impl->interpolate_1d_by_ref(x_frac,p0,p1,p2,p3);
 	};
 
-	double Grid::get_deriv_wrt_p_1d(double x_frac, int p) {
-		return _impl->get_deriv_wrt_p_1d(x_frac,p);
+	double Grid::get_deriv_wrt_p_1d(double x_frac, int p, bool is_at_end, bool is_at_p0_end) {
+		return _impl->get_deriv_wrt_p_1d(x_frac,p,is_at_end,is_at_p0_end);
 	};
-	double Grid::get_deriv_wrt_p_1d_by_ref(const double &x_frac, int p) const {
-		return _impl->get_deriv_wrt_p_1d_by_ref(x_frac,p);
+	double Grid::get_deriv_wrt_p_1d_by_ref(const double &x_frac, int p, bool is_at_end, bool is_at_p0_end) const {
+		return _impl->get_deriv_wrt_p_1d(x_frac,p,is_at_end,is_at_p0_end);
 	};
 	
 	double Grid::get_deriv_wrt_x_1d(double x_frac, double p0, double p1, double p2, double p3) {

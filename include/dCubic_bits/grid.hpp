@@ -136,8 +136,8 @@ namespace dcu {
 		double interpolate_1d(double x_frac, double p0, double p1, double p2, double p3) const;
 		double interpolate_1d_by_ref(const double &x_frac, const double &p0, const double &p1, const double &p2, const double &p3) const;
 
-		double get_deriv_wrt_p_1d(double x_frac, int p);
-		double get_deriv_wrt_p_1d_by_ref(const double &x_frac, int p) const;
+		double get_deriv_wrt_p_1d(double x_frac, int p, bool is_at_end=false, bool is_at_p0_end=true);
+		double get_deriv_wrt_p_1d_by_ref(const double &x_frac, int p, bool is_at_end=false, bool is_at_p0_end=true) const;
 		
 		double get_deriv_wrt_x_1d(double x_frac, double p0, double p1, double p2, double p3);
 		double get_deriv_wrt_x_1d_by_ref(const double &x_frac, const double &p0, const double &p1, const double &p2, const double &p3) const;
