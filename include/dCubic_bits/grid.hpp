@@ -83,6 +83,7 @@ namespace dcu {
 		Get grid points surrounding a point
 		********************/
 
+		// Second arg = fractions between 0,1 in each dim
 		std::pair<Nbr2,std::vector<double>> get_surrounding_2_grid_pts(std::vector<double> abscissas) const;
 		std::pair<Nbr4,std::vector<double>> get_surrounding_4_grid_pts(std::vector<double> abscissas) const;
 
@@ -90,7 +91,7 @@ namespace dcu {
 		Get a point by interpolating
 		********************/
 
-		double get_val(std::vector<double> abscissas);
+		double get_val(std::vector<double> abscissas) const;
 
 		/********************
 		Get derivative
@@ -101,6 +102,13 @@ namespace dcu {
 		double get_deriv_wrt_pt_value(std::vector<double> abscissas, GridPtKey grid_pt_key);
 
 		double get_deriv_wrt_x(std::vector<double> abscissas, int k);
+
+		/********************
+		1D funcs
+		********************/
+
+		double interpolate_1d(double x, double p0, double p1, double p2, double p3) const;
+		double interpolate_1d_by_ref(const double &x, const double &p0, const double &p1, const double &p2, const double &p3) const;
 
 		/********************
 		Read/write grid

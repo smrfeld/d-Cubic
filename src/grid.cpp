@@ -73,13 +73,13 @@ namespace dcu {
 
 		// Start with coeff_p = 1.0
 		// Dimension1D to interpolate in starts at _grid_dim-1
-		// void _iterate_form_coeffs(std::map<GridPtKey, double> &coeffs_store, std::vector<double> &frac_abscissas, int dim_to_interpolate_in, IdxSet &idxs_p, double coeff_p);
+		// void _iterate_form_coeffs(std::map<GridPtKey, double> &coeffs_store, std::vector<double> &frac_abscissas, int dim_to_iterate_interpolate_in, IdxSet &idxs_p, double coeff_p);
 
 		/********************
 		Interpolate
 		********************/
 
-		double _iterate(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, Nbr4 &nbrs_p) const;
+		double _iterate_interpolate(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, Nbr4 &nbrs_p) const;
 
 		/********************
 		Constructor helpers
@@ -140,7 +140,7 @@ namespace dcu {
 		Get a point by interpolating
 		********************/
 
-		double get_val(std::vector<double> abscissas);
+		double get_val(std::vector<double> abscissas) const;
 
 		/********************
 		Get derivative
@@ -151,6 +151,13 @@ namespace dcu {
 		double get_deriv_wrt_pt_value(std::vector<double> abscissas, GridPtKey grid_pt_key);
 
 		double get_deriv_wrt_x(std::vector<double> abscissas, int k);
+
+		/********************
+		1D funcs
+		********************/
+
+		double interpolate_1d(double x, double p0, double p1, double p2, double p3) const;
+		double interpolate_1d_by_ref(const double &x, const double &p0, const double &p1, const double &p2, const double &p3) const;
 
 		/********************
 		Read/write grid
@@ -621,18 +628,78 @@ namespace dcu {
 	Get a point by interpolating
 	********************/
 
-	double Grid::Impl::_iterate(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, Nbr4 &nbrs_p) const {
+	double Grid::Impl::_iterate_interpolate(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, Nbr4 &nbrs_p) const {
 
-		//
-		return 0.0;
+		if (delta == d) {
+			// Arrived; regular 1D interpolation
+			double p0,p1,p2,p3;
+
+			idxs_j[0] = 0;
+			GridPtKey key = GridPtKey(idxs_j,_dims);
+			GridPtType type = nbrs_p.types[key];
+			if (type == GridPtType::INSIDE) {
+				p0 = nbrs_p.in[key]->get_ordinate();
+			} else {
+				p0 = nbrs_p.out[key]->get_ordinate();
+			};
+
+			idxs_j[0] = 1;
+			key = GridPtKey(idxs_j,_dims);
+			type = nbrs_p.types[key];
+			if (type == GridPtType::INSIDE) {
+				p1 = nbrs_p.in[key]->get_ordinate();
+			} else {
+				p1 = nbrs_p.out[key]->get_ordinate();
+			};
+
+			idxs_j[0] = 2;
+			key = GridPtKey(idxs_j,_dims);
+			type = nbrs_p.types[key];
+			if (type == GridPtType::INSIDE) {
+				p2 = nbrs_p.in[key]->get_ordinate();
+			} else {
+				p2 = nbrs_p.out[key]->get_ordinate();
+			};
+
+			idxs_j[0] = 3;
+			key = GridPtKey(idxs_j,_dims);
+			type = nbrs_p.types[key];
+			if (type == GridPtType::INSIDE) {
+				p3 = nbrs_p.in[key]->get_ordinate();
+			} else {
+				p3 = nbrs_p.out[key]->get_ordinate();
+			};
+
+			return interpolate_1d_by_ref(frac_abscissas[d-delta+1-1],p0,p1,p2,p3);
+		} else {
+			double p0,p1,p2,p3;
+
+			// Deeper
+			idxs_j[d-delta+1-1] = 0;
+			p0 = _iterate_interpolate(delta, d, frac_abscissas, idxs_j, nbrs_p);
+
+			idxs_j[d-delta+1-1] = 1;
+			p1 = _iterate_interpolate(delta, d, frac_abscissas, idxs_j, nbrs_p);
+
+			idxs_j[d-delta+1-1] = 2;
+			p2 = _iterate_interpolate(delta, d, frac_abscissas, idxs_j, nbrs_p);			
+
+			idxs_j[d-delta+1-1] = 3;
+			p3 = _iterate_interpolate(delta, d, frac_abscissas, idxs_j, nbrs_p);
+
+			return interpolate_1d_by_ref(frac_abscissas[d-delta+1-1],p0,p1,p2,p3);
+		};
 	};
 
-	double Grid::Impl::get_val(std::vector<double> abscissas) {
+	double Grid::Impl::get_val(std::vector<double> abscissas) const {
+		// Delta
+		int delta = 1;
+
 		// Stopping
 		int d = get_no_dims();
 
 		// Idxs
-		IdxSet idxs_j(d-1);
+		IdxSet idxs_j(d);
 
 		// nbrs p and frac
 		auto pr = get_surrounding_4_grid_pts(abscissas);
@@ -640,7 +707,7 @@ namespace dcu {
 		std::vector<double> frac_abscissas = pr.second;
 
 		// Iterate
-		return _iterate(1,d,frac_abscissas,idxs_j,nbrs_p);
+		return _iterate_interpolate(delta,d,frac_abscissas,idxs_j,nbrs_p);
 	};
 
 	/********************
@@ -659,6 +726,17 @@ namespace dcu {
 
 	double Grid::Impl::get_deriv_wrt_x(std::vector<double> abscissas, int k) {
 		return 0.0;
+	};
+
+	/********************
+	1D funcs
+	********************/
+
+	double Grid::Impl::interpolate_1d(double x, double p0, double p1, double p2, double p3) const {
+		return (-0.5*p0 + 1.5*p1 - 1.5*p2 + 0.5*p3)*pow(x,3) + (p0 - 2.5*p1 + 2.0*p2 - 0.5*p3)*pow(x,2) + (-0.5*p0 + 0.5*p2)*x + p1;
+	};
+	double Grid::Impl::interpolate_1d_by_ref(const double &x, const double &p0, const double &p1, const double &p2, const double &p3) const {
+		return (-0.5*p0 + 1.5*p1 - 1.5*p2 + 0.5*p3)*pow(x,3) + (p0 - 2.5*p1 + 2.0*p2 - 0.5*p3)*pow(x,2) + (-0.5*p0 + 0.5*p2)*x + p1;
 	};
 
 	/********************
@@ -977,29 +1055,29 @@ namespace dcu {
 
 	};
 
-	void Grid::Impl::_iterate_form_coeffs(std::map<GridPtKey, double> &coeffs_store, std::vector<double> &frac_abscissas, int dim_to_interpolate_in, IdxSet &idxs_p, double coeff_p) {
+	void Grid::Impl::_iterate_form_coeffs(std::map<GridPtKey, double> &coeffs_store, std::vector<double> &frac_abscissas, int dim_to_iterate_interpolate_in, IdxSet &idxs_p, double coeff_p) {
 
-		if (dim_to_interpolate_in != -1) {
+		if (dim_to_iterate_interpolate_in != -1) {
 			// Deeper!
 
 			// Grab the pt in this dim
-			double x = frac_abscissas[dim_to_interpolate_in];
+			double x = frac_abscissas[dim_to_iterate_interpolate_in];
 
 			// p0
-			idxs_p[dim_to_interpolate_in] = 0;		
-			_iterate_form_coeffs( coeffs_store, frac_abscissas, dim_to_interpolate_in-1, idxs_p, coeff_p*(-0.5*x+pow(x,2)-0.5*pow(x,3)) );
+			idxs_p[dim_to_iterate_interpolate_in] = 0;		
+			_iterate_form_coeffs( coeffs_store, frac_abscissas, dim_to_iterate_interpolate_in-1, idxs_p, coeff_p*(-0.5*x+pow(x,2)-0.5*pow(x,3)) );
 
 			// p1
-			idxs_p[dim_to_interpolate_in] = 1;		
-			_iterate_form_coeffs( coeffs_store, frac_abscissas, dim_to_interpolate_in-1, idxs_p, coeff_p*(1.0-2.5*pow(x,2)+1.5*pow(x,3)) );
+			idxs_p[dim_to_iterate_interpolate_in] = 1;		
+			_iterate_form_coeffs( coeffs_store, frac_abscissas, dim_to_iterate_interpolate_in-1, idxs_p, coeff_p*(1.0-2.5*pow(x,2)+1.5*pow(x,3)) );
 
 			// p2
-			idxs_p[dim_to_interpolate_in] = 2;		
-			_iterate_form_coeffs( coeffs_store, frac_abscissas, dim_to_interpolate_in-1, idxs_p, coeff_p*(0.5*x + 2.0 * pow(x,2) -1.5*pow(x,3)) );
+			idxs_p[dim_to_iterate_interpolate_in] = 2;		
+			_iterate_form_coeffs( coeffs_store, frac_abscissas, dim_to_iterate_interpolate_in-1, idxs_p, coeff_p*(0.5*x + 2.0 * pow(x,2) -1.5*pow(x,3)) );
 
 			// p3
-			idxs_p[dim_to_interpolate_in] = 3;		
-			_iterate_form_coeffs( coeffs_store, frac_abscissas, dim_to_interpolate_in-1, idxs_p, coeff_p*(-0.5*pow(x,2)+0.5*pow(x,3)) );
+			idxs_p[dim_to_iterate_interpolate_in] = 3;		
+			_iterate_form_coeffs( coeffs_store, frac_abscissas, dim_to_iterate_interpolate_in-1, idxs_p, coeff_p*(-0.5*pow(x,2)+0.5*pow(x,3)) );
 
 		} else {
 			// Do something
@@ -1135,7 +1213,7 @@ namespace dcu {
 	Get a point by interpolating
 	********************/
 
-	double Grid::get_val(std::vector<double> abscissas) {
+	double Grid::get_val(std::vector<double> abscissas) const {
 		return _impl->get_val(abscissas);
 	};
 
@@ -1156,6 +1234,18 @@ namespace dcu {
 	double Grid::get_deriv_wrt_x(std::vector<double> abscissas, int k) {
 		return _impl->get_deriv_wrt_x(abscissas,k);
 	};
+
+	/********************
+	1D funcs
+	********************/
+
+	double Grid::interpolate_1d(double x, double p0, double p1, double p2, double p3) const {
+		return interpolate_1d(x,p0,p1,p2,p3);
+	};
+	double Grid::interpolate_1d_by_ref(const double &x, const double &p0, const double &p1, const double &p2, const double &p3) const {
+		return interpolate_1d_by_ref(x,p0,p1,p2,p3);
+	};
+
 
 	/********************
 	Read/write grid
