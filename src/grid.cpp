@@ -119,6 +119,12 @@ namespace dcu {
 		double _iterate_interpolate(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, Nbr4 &nbrs_p) const;
 
 		/********************
+		Derivative wrt x
+		********************/
+
+		double _iterate_deriv_x(int delta, int k, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, Nbr4 &nbrs_p) const;
+
+		/********************
 		Constructor helpers
 		********************/
 
@@ -187,6 +193,10 @@ namespace dcu {
 		double get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet idx_set);
 		double get_deriv_wrt_pt_value(std::vector<double> abscissas, GridPtKey grid_pt_key);
 
+		/********************
+		Get derivative wrt x
+		********************/
+
 		double get_deriv_wrt_x(std::vector<double> abscissas, int k);
 
 		/********************
@@ -196,8 +206,8 @@ namespace dcu {
 		double interpolate_1d(double x_frac, double p0, double p1, double p2, double p3) const;
 		double interpolate_1d_by_ref(const double &x_frac, const double &p0, const double &p1, const double &p2, const double &p3) const;
 
-		double get_deriv_wrt_p_1d(double x_frac, int p, bool is_at_end=false, bool is_at_p0_end=true);
-		double get_deriv_wrt_p_1d_by_ref(const double &x_frac, int p, bool is_at_end=false, bool is_at_p0_end=true) const;		
+		double get_deriv_wrt_p_1d(double x_frac, int p, LocInDim loc);
+		double get_deriv_wrt_p_1d_by_ref(const double &x_frac, int p, LocInDim loc) const;		
 
 		double get_deriv_wrt_x_1d(double x_frac, double p0, double p1, double p2, double p3);
 		double get_deriv_wrt_x_1d_by_ref(const double &x_frac, const double &p0, const double &p1, const double &p2, const double &p3) const;
@@ -401,18 +411,18 @@ namespace dcu {
 
 			// Find the two pts
 			IdxSet p1_idxs(_dim_grid), p2_idxs(_dim_grid);
-			std::vector<bool> dims_outside;
+			std::vector<LocInDim> locs;
 			for (auto dim2=0; dim2<_dim_grid; dim2++) {
 				if (grid_pt_idxs[dim2] == -1) {
-					dims_outside.push_back(true);
+					locs.push_back(LocInDim::P0_OUTSIDE);
 					p1_idxs[dim2] = grid_pt_idxs[dim2] + 1;
 					p2_idxs[dim2] = grid_pt_idxs[dim2] + 2;
 				} else if (grid_pt_idxs[dim2] == _dims[dim2].get_no_pts()) {
-					dims_outside.push_back(true);
+					locs.push_back(LocInDim::P3_OUTSIDE);
 					p1_idxs[dim2] = grid_pt_idxs[dim2] - 1;
 					p2_idxs[dim2] = grid_pt_idxs[dim2] - 2;
 				} else {
-					dims_outside.push_back(false);
+					locs.push_back(LocInDim::INSIDE);
 					p1_idxs[dim2] = grid_pt_idxs[dim2];
 					p2_idxs[dim2] = grid_pt_idxs[dim2];
 				};
@@ -421,7 +431,7 @@ namespace dcu {
 			const GridPt *p2 = get_grid_point(p2_idxs);
 
 			// Make the outside grid point
-			_grid_pts_out[GridPtKey(grid_pt_idxs,_dims)] = new GridPtOut(grid_pt_idxs,abscissas,p1,p2,dims_outside);
+			_grid_pts_out[GridPtKey(grid_pt_idxs,_dims)] = new GridPtOut(grid_pt_idxs,abscissas,p1,p2,locs);
 			// std::cout << "Made outside pt: " << grid_pt_idxs << " = " << _grid_pts_out[GridPtKey(grid_pt_idxs,GridPtType::OUTSIDE,_dims)]->print_abscissa() << std::endl;
 		};
 	};
@@ -780,7 +790,7 @@ namespace dcu {
 
 			double ret=1.0;
 			for (auto alpha=1; alpha<=d; alpha++) {
-				ret *= get_deriv_wrt_p_1d_by_ref(frac_abscissas[d-alpha+1-1], local_grid_pt_key[d-alpha+1-1]);
+				ret *= get_deriv_wrt_p_1d_by_ref(frac_abscissas[d-alpha+1-1], local_grid_pt_key[d-alpha+1-1], LocInDim::INSIDE);
 			};
 			return ret;
 
@@ -792,25 +802,52 @@ namespace dcu {
 			const GridPtOut* gpo = nbrs_p.out[local_grid_pt_key];
 
 			double ret=1.0;
+			LocInDim loc;
 			for (auto alpha=1; alpha<=d; alpha++) {
-				// Outside in this dim?
-				if (gpo->is_outside_in_dim(d-alpha+1-1)) {
-					// Outside
-					// Which side?
-					if (local_grid_pt_key[d-alpha+1-1] == 0) {
-						ret *= get_deriv_wrt_p_1d_by_ref(frac_abscissas[d-alpha+1-1], local_grid_pt_key[d-alpha+1-1], true, true);
-					} else if (local_grid_pt_key[d-alpha+1-1] == 3) {
-						ret *= get_deriv_wrt_p_1d_by_ref(frac_abscissas[d-alpha+1-1], local_grid_pt_key[d-alpha+1-1], true, false);
-					} else {
-						std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_pt_value <<< Something doesn't make sense here - this grid pt is marked as an OUTSIDE one, but it does not have idx 0 or 3 in this dim...." << std::endl;
-						exit(EXIT_FAILURE);
-					};
-				} else {
-					// Inside
-					ret *= get_deriv_wrt_p_1d_by_ref(frac_abscissas[d-alpha+1-1], local_grid_pt_key[d-alpha+1-1]);
-				};
+				// Get loc in this dim
+				loc = gpo->get_loc_in_dim(d-alpha+1-1);
+				ret *= get_deriv_wrt_p_1d_by_ref(frac_abscissas[d-alpha+1-1], local_grid_pt_key[d-alpha+1-1], loc);
 			};
 			return ret;
+		};
+	};
+
+	/********************
+	Get derivative wrt x
+	********************/
+
+	double Grid::Impl::_iterate_deriv_x(int delta, int k, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, Nbr4 &nbrs_p) const {
+		if (delta == d-k+1) { // Evaluate the derivative
+
+			idxs_j[k-1] = 0;
+			double p0 = _iterate_interpolate(d-k+2,d,frac_abscissas,idxs_j,nbrs_p);
+
+			idxs_j[k-1] = 1;
+			double p1 = _iterate_interpolate(d-k+2,d,frac_abscissas,idxs_j,nbrs_p);
+
+			idxs_j[k-1] = 2;
+			double p2 = _iterate_interpolate(d-k+2,d,frac_abscissas,idxs_j,nbrs_p);
+
+			idxs_j[k-1] = 3;
+			double p3 = _iterate_interpolate(d-k+2,d,frac_abscissas,idxs_j,nbrs_p);
+
+			return get_deriv_wrt_x_1d_by_ref(frac_abscissas[k-1],p0,p1,p2,p3);
+
+		} else { // Deeper
+
+			idxs_j[d-delta+1-1] = 0;
+			double dp0dxk = _iterate_deriv_x(delta+1,k,d,frac_abscissas,idxs_j,nbrs_p);
+			//double dfdp0 = get_deriv_wrt_p_1d_by_ref(frac_abscissas[d-delta+1-1],0,);
+
+			idxs_j[d-delta+1-1] = 1;
+			double dp1dxk = _iterate_deriv_x(delta+1,k,d,frac_abscissas,idxs_j,nbrs_p);
+
+			idxs_j[d-delta+1-1] = 2;
+			double dp2dxk = _iterate_deriv_x(delta+1,k,d,frac_abscissas,idxs_j,nbrs_p);
+
+			idxs_j[d-delta+1-1] = 3;
+			double dp3dxk = _iterate_deriv_x(delta+1,k,d,frac_abscissas,idxs_j,nbrs_p);
+
 		};
 	};
 
@@ -829,77 +866,81 @@ namespace dcu {
 		return (-0.5*p0 + 1.5*p1 - 1.5*p2 + 0.5*p3)*pow(x_frac,3) + (p0 - 2.5*p1 + 2.0*p2 - 0.5*p3)*pow(x_frac,2) + (-0.5*p0 + 0.5*p2)*x_frac + p1;
 	};
 
-	double Grid::Impl::get_deriv_wrt_p_1d(double x_frac, int p, bool is_at_end, bool is_at_p0_end) {
-		if (p==0) {
-			if (is_at_end && is_at_p0_end) {
-				std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_p_1d <<< at p0 boundary => p0 is out of the grid; cannot take derivative!" << std::endl;
-				exit(EXIT_FAILURE);
-			} else {
+	double Grid::Impl::get_deriv_wrt_p_1d(double x_frac, int p, LocInDim loc) {
+		if (loc == LocInDim::INSIDE) {
+			if (p==0) {
 				return -0.5*pow(x_frac,3) + pow(x_frac,2) - 0.5*x_frac;
-			};
-		} else if (p==1) {
-			if (!is_at_end) {
+			} else if (p==1) {
 				return 1.5*pow(x_frac,3) - 2.5*pow(x_frac,2) + 1.0;
-			} else if (is_at_p0_end) {
-				return 0.5*pow(x_frac,3) - 0.5*pow(x_frac,2) - x_frac + 1.0;
-			} else {
-				return pow(x_frac,3) - 2.0 * pow(x_frac,2) + 1.0;
-			};
-		} else if (p==2) {
-			if (!is_at_end) {
+			} else if (p==2) {
 				return -1.5*pow(x_frac,3) + 2.0*pow(x_frac,2) + 0.5*x_frac;
-			} else if (is_at_p0_end) {
-				return -pow(x_frac,3) + pow(x_frac,2) + x_frac;
-			} else {
-				return -0.5 * pow(x_frac,3) + pow(x_frac,2) + 0.5 * x_frac;
-			};
-		} else if (p==3) {
-			if (is_at_end && is_at_p0_end) {
-				std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_p_1d <<< at p3 boundary => p3 is out of the grid; cannot take derivative!" << std::endl;
-				exit(EXIT_FAILURE);
-			} else {
+			} else if (p==3) {
 				return 0.5*pow(x_frac,3) - 0.5*pow(x_frac,2);
 			};
-		} else {
-			std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_p_1d <<< p should be 0,1,2,3" << std::endl;
-			exit(EXIT_FAILURE);
+		} else if (loc == LocInDim::P0_OUTSIDE) {
+			if (p==0) {
+				std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_p_1d <<< at p0 boundary => p0 is out of the grid; cannot take derivative!" << std::endl;
+				exit(EXIT_FAILURE);
+			} else if (p==1) {
+				return 0.5*pow(x_frac,3) - 0.5*pow(x_frac,2) - x_frac + 1.0;
+			} else if (p==2) {
+				return -pow(x_frac,3) + pow(x_frac,2) + x_frac;
+			} else if (p==3) {
+				return 0.5*pow(x_frac,3) - 0.5*pow(x_frac,2);
+			};
+		} else if (loc == LocInDim::P3_OUTSIDE) {
+			if (p==0) {
+				return -0.5*pow(x_frac,3) + pow(x_frac,2) - 0.5*x_frac;
+			} else if (p==1) {
+				return pow(x_frac,3) - 2.0 * pow(x_frac,2) + 1.0;
+			} else if (p==2) {
+				return -0.5 * pow(x_frac,3) + pow(x_frac,2) + 0.5 * x_frac;
+			} else if (p==3) {
+				std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_p_1d <<< at p3 boundary => p3 is out of the grid; cannot take derivative!" << std::endl;
+				exit(EXIT_FAILURE);
+			};
 		};
+		// Never get here
+		std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_p_1d <<< p should be 0,1,2,3" << std::endl;
+		exit(EXIT_FAILURE);
 	};
-	double Grid::Impl::get_deriv_wrt_p_1d_by_ref(const double &x_frac, int p, bool is_at_end, bool is_at_p0_end) const {
-		if (p==0) {
-			if (is_at_end && is_at_p0_end) {
-				std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_p_1d <<< at p0 boundary => p0 is out of the grid; cannot take derivative!" << std::endl;
-				exit(EXIT_FAILURE);
-			} else {
+	double Grid::Impl::get_deriv_wrt_p_1d_by_ref(const double &x_frac, int p, LocInDim loc) const {
+		if (loc == LocInDim::INSIDE) {
+			if (p==0) {
 				return -0.5*pow(x_frac,3) + pow(x_frac,2) - 0.5*x_frac;
-			};
-		} else if (p==1) {
-			if (!is_at_end) {
+			} else if (p==1) {
 				return 1.5*pow(x_frac,3) - 2.5*pow(x_frac,2) + 1.0;
-			} else if (is_at_p0_end) {
-				return 0.5*pow(x_frac,3) - 0.5*pow(x_frac,2) - x_frac + 1.0;
-			} else {
-				return pow(x_frac,3) - 2.0 * pow(x_frac,2) + 1.0;
-			};
-		} else if (p==2) {
-			if (!is_at_end) {
+			} else if (p==2) {
 				return -1.5*pow(x_frac,3) + 2.0*pow(x_frac,2) + 0.5*x_frac;
-			} else if (is_at_p0_end) {
-				return -pow(x_frac,3) + pow(x_frac,2) + x_frac;
-			} else {
-				return -0.5 * pow(x_frac,3) + pow(x_frac,2) + 0.5 * x_frac;
-			};
-		} else if (p==3) {
-			if (is_at_end && is_at_p0_end) {
-				std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_p_1d <<< at p3 boundary => p3 is out of the grid; cannot take derivative!" << std::endl;
-				exit(EXIT_FAILURE);
-			} else {
+			} else if (p==3) {
 				return 0.5*pow(x_frac,3) - 0.5*pow(x_frac,2);
 			};
-		} else {
-			std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_p_1d <<< p should be 0,1,2,3" << std::endl;
-			exit(EXIT_FAILURE);
+		} else if (loc == LocInDim::P0_OUTSIDE) {
+			if (p==0) {
+				std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_p_1d <<< at p0 boundary => p0 is out of the grid; cannot take derivative!" << std::endl;
+				exit(EXIT_FAILURE);
+			} else if (p==1) {
+				return 0.5*pow(x_frac,3) - 0.5*pow(x_frac,2) - x_frac + 1.0;
+			} else if (p==2) {
+				return -pow(x_frac,3) + pow(x_frac,2) + x_frac;
+			} else if (p==3) {
+				return 0.5*pow(x_frac,3) - 0.5*pow(x_frac,2);
+			};
+		} else if (loc == LocInDim::P3_OUTSIDE) {
+			if (p==0) {
+				return -0.5*pow(x_frac,3) + pow(x_frac,2) - 0.5*x_frac;
+			} else if (p==1) {
+				return pow(x_frac,3) - 2.0 * pow(x_frac,2) + 1.0;
+			} else if (p==2) {
+				return -0.5 * pow(x_frac,3) + pow(x_frac,2) + 0.5 * x_frac;
+			} else if (p==3) {
+				std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_p_1d <<< at p3 boundary => p3 is out of the grid; cannot take derivative!" << std::endl;
+				exit(EXIT_FAILURE);
+			};
 		};
+		// Never get here
+		std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_p_1d <<< p should be 0,1,2,3" << std::endl;
+		exit(EXIT_FAILURE);
 	};
 	
 	double Grid::Impl::get_deriv_wrt_x_1d(double x_frac, double p0, double p1, double p2, double p3) {
@@ -1125,6 +1166,10 @@ namespace dcu {
 		return _impl->get_deriv_wrt_pt_value(abscissas,grid_pt_key);
 	};
 
+	/********************
+	Get derivative wrt x
+	********************/
+
 	double Grid::get_deriv_wrt_x(std::vector<double> abscissas, int k) {
 		return _impl->get_deriv_wrt_x(abscissas,k);
 	};
@@ -1140,11 +1185,11 @@ namespace dcu {
 		return _impl->interpolate_1d_by_ref(x_frac,p0,p1,p2,p3);
 	};
 
-	double Grid::get_deriv_wrt_p_1d(double x_frac, int p, bool is_at_end, bool is_at_p0_end) {
-		return _impl->get_deriv_wrt_p_1d(x_frac,p,is_at_end,is_at_p0_end);
+	double Grid::get_deriv_wrt_p_1d(double x_frac, int p, LocInDim loc) {
+		return _impl->get_deriv_wrt_p_1d(x_frac,p,loc);
 	};
-	double Grid::get_deriv_wrt_p_1d_by_ref(const double &x_frac, int p, bool is_at_end, bool is_at_p0_end) const {
-		return _impl->get_deriv_wrt_p_1d(x_frac,p,is_at_end,is_at_p0_end);
+	double Grid::get_deriv_wrt_p_1d_by_ref(const double &x_frac, int p, LocInDim loc) const {
+		return _impl->get_deriv_wrt_p_1d(x_frac,p,loc);
 	};
 	
 	double Grid::get_deriv_wrt_x_1d(double x_frac, double p0, double p1, double p2, double p3) {

@@ -26,6 +26,7 @@ namespace dcu {
 	class GridPtKey;
 	enum class GridPtType: unsigned int;
 	class IdxSet;
+	enum class LocInDim: unsigned int;
 
 	/****************************************
 	Hash for an unordered map
@@ -120,7 +121,7 @@ namespace dcu {
 		double get_val(std::vector<double> abscissas) const;
 
 		/********************
-		Get derivative
+		Get derivative wrt a point value p
 		********************/
 
 		// Here: grid_idxs/idx_set/grid_pt_key are 0,1,2,3 each
@@ -128,6 +129,10 @@ namespace dcu {
 		double get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> local_grid_idxs);
 		double get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet local_idx_set);
 		double get_deriv_wrt_pt_value(std::vector<double> abscissas, GridPtKey local_grid_pt_key);
+
+		/********************
+		Get derivative wrt x
+		********************/
 
 		double get_deriv_wrt_x(std::vector<double> abscissas, int k);
 
@@ -138,8 +143,8 @@ namespace dcu {
 		double interpolate_1d(double x_frac, double p0, double p1, double p2, double p3) const;
 		double interpolate_1d_by_ref(const double &x_frac, const double &p0, const double &p1, const double &p2, const double &p3) const;
 
-		double get_deriv_wrt_p_1d(double x_frac, int p, bool is_at_end=false, bool is_at_p0_end=true);
-		double get_deriv_wrt_p_1d_by_ref(const double &x_frac, int p, bool is_at_end=false, bool is_at_p0_end=true) const;
+		double get_deriv_wrt_p_1d(double x_frac, int p, LocInDim loc);
+		double get_deriv_wrt_p_1d_by_ref(const double &x_frac, int p, LocInDim loc) const;
 		
 		double get_deriv_wrt_x_1d(double x_frac, double p0, double p1, double p2, double p3);
 		double get_deriv_wrt_x_1d_by_ref(const double &x_frac, const double &p0, const double &p1, const double &p2, const double &p3) const;

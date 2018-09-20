@@ -14,6 +14,12 @@ namespace dcu {
 	class IdxSet;
 
 	/****************************************
+	Location of pt in each dim
+	****************************************/
+
+	enum class LocInDim: unsigned int {P0_OUTSIDE, INSIDE, P3_OUTSIDE};
+
+	/****************************************
 	Exterior grid pt
 	****************************************/
 
@@ -31,7 +37,7 @@ namespace dcu {
 		********************/
 
 		// Value = 2 p1 - p2
-		GridPtOut(IdxSet idxs, std::vector<double> abscissas, const GridPt* p1, const GridPt* p2, std::vector<bool> outside_dims);
+		GridPtOut(IdxSet idxs, std::vector<double> abscissas, const GridPt* p1, const GridPt* p2, std::vector<LocInDim> loc);
 		GridPtOut(const GridPtOut& other);
 		GridPtOut(GridPtOut&& other);
 		GridPtOut& operator=(const GridPtOut &other);
@@ -58,8 +64,8 @@ namespace dcu {
 		const GridPt* get_dep_p2() const;
 
 		// Which dims are outside
-		const std::vector<bool>& get_outside_dims() const;
-		bool is_outside_in_dim(int dim) const;
+		const std::vector<LocInDim>& get_locs() const;
+		LocInDim get_loc_in_dim(int dim) const;
 
 		/********************
 		Print
