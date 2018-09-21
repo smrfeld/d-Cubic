@@ -13,6 +13,11 @@
 #include <unordered_map>
 #endif
 
+#ifndef IDX_SET_H
+#define IDX_SET_H
+#include "idx_set.hpp"
+#endif
+
 /************************************
 * Namespace for dcu
 ************************************/
@@ -25,8 +30,6 @@ namespace dcu {
 	class GridPtOut;
 	class GridPtKey;
 	enum class GridPtType: unsigned int;
-	class IdxSet;
-	enum class LocInDim: unsigned int;
 
 	/****************************************
 	Hash for an unordered map
@@ -42,7 +45,7 @@ namespace dcu {
 	****************************************/
 
 	struct Nbr2 {
-		std::vector<int> idxs_i;
+		IdxSet idxs_i;
 		std::unordered_map<GridPtKey, const GridPt*, hash_gpk> in;
 		std::vector<double> frac_abscissas;
 	};
@@ -52,12 +55,11 @@ namespace dcu {
 	****************************************/
 
 	struct Nbr4 {
-		std::vector<int> idxs_i;
+		IdxSet idxs_i;
 		std::unordered_map<GridPtKey, GridPtType, hash_gpk> types;
 		std::unordered_map<GridPtKey, const GridPt*, hash_gpk> in;
 		std::unordered_map<GridPtKey, const GridPtOut*, hash_gpk> out;
 		std::vector<double> frac_abscissas;
-		std::vector<LocInDim> locs;
 	};
 
 	/****************************************

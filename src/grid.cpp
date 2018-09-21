@@ -5,7 +5,6 @@
 #include "../include/dCubic_bits/grid_pt.hpp"
 #include "../include/dCubic_bits/grid_pt_out.hpp"
 #include "../include/dCubic_bits/grid_pt_key.hpp"
-#include "../include/dCubic_bits/idx_set.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -137,7 +136,7 @@ namespace dcu {
 		Deriv wrt p
 		********************/
 
-		double _iterate_deriv_pt_value(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, P4 &p, std::vector<int> &idxs_i, IdxSet &idxs_k) const;
+		double _iterate_deriv_pt_value(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, P4 &p, IdxSet &idxs_i, IdxSet &idxs_k) const;
 
 		/********************
 		Derivative wrt x
@@ -623,7 +622,7 @@ namespace dcu {
 		};
 
 		// Set idxs_i
-		nbr2.idxs_i = idxs_lower.get_vector_idxs();
+		nbr2.idxs_i = idxs_lower;
 
 		// Iterate to fill out the map
 		IdxSet idxs_local(_dim_grid);
@@ -687,19 +686,10 @@ namespace dcu {
 
 			// Frac
 			nbr4.frac_abscissas.push_back((abscissas[dim] - _dims[dim].get_pt_at_idx(idxs_1[dim])) / (_dims[dim].get_pt_at_idx(idxs_2[dim]) - _dims[dim].get_pt_at_idx(idxs_1[dim])));
-
-			// Loc
-			if (idxs_0[dim] < 0) {
-				nbr4.locs.push_back(LocInDim::P0_OUTSIDE);
-			} else if (idxs_3[dim] >= _dims[dim].get_no_pts()) {
-				nbr4.locs.push_back(LocInDim::P3_OUTSIDE);
-			} else {
-				nbr4.locs.push_back(LocInDim::INSIDE);
-			};
 		};
 
 		// Set idxs_i
-		nbr4.idxs_i = idxs_1.get_vector_idxs();
+		nbr4.idxs_i = idxs_1;
 
 		// Iterate to fill out the nbr4
 		IdxSet idxs_local(_dim_grid);
@@ -826,7 +816,7 @@ namespace dcu {
 	Get derivative
 	********************/
 
-	double Grid::Impl::_iterate_deriv_pt_value(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, P4 &p, std::vector<int> &idxs_i, IdxSet &idxs_k) const {
+	double Grid::Impl::_iterate_deriv_pt_value(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, P4 &p, IdxSet &idxs_i, IdxSet &idxs_k) const {
 
 		if (delta == d) {
 			// Done; evaluate
@@ -845,8 +835,8 @@ namespace dcu {
 			
 
 				// Form the new idxs
-				IdxSet idxs_j_global = idxs_j - 1 + IdxSet(idxs_i);
-				IdxSet idxs_k_global = idxs_k - 1 + IdxSet(idxs_i);
+				IdxSet idxs_j_global = idxs_j - 1 + idxs_i;
+				IdxSet idxs_k_global = idxs_k - 1 + idxs_i;
 
 				// Apply M mapping
 				IdxSet idxs_m = apply_m_mapping_by_ref(idxs_j_global);
