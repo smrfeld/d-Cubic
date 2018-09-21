@@ -943,6 +943,16 @@ namespace dcu {
 		} else {
 			// Case 2: At least one dimension near boundary
 
+			// Check that we are not taking an illegal derivative
+			// i.e. if i=0, j=0 => illegal
+			// if i=n-2, j=3 => illegal
+			for (auto dim=0; dim<d; dim++) {
+				if ((nbr4.idxs_i[dim] == 0 && idxs_k[dim] == 0) || (nbr4.idxs_i[dim] == _dims[dim].get_no_pts()-2 && idxs_k[dim] == 3)) {
+					std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_pt_value <<< The pt specified to take a derivative with respect to is not a real point (an exterior point that is estimated by a linear approx) - this is not allowed!" << std::endl;
+					exit(EXIT_FAILURE);
+				};
+			};
+
 			// Init idx set
 			IdxSet4 idxs_j(d);
 
