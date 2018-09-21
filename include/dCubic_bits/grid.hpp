@@ -43,6 +43,7 @@ namespace dcu {
 
 	struct Nbr2 {
 		std::unordered_map<GridPtKey, const GridPt*, hash_gpk> in;
+		std::vector<double> frac_abscissas;
 	};
 
 	/****************************************
@@ -53,6 +54,28 @@ namespace dcu {
 		std::unordered_map<GridPtKey, GridPtType, hash_gpk> types;
 		std::unordered_map<GridPtKey, const GridPt*, hash_gpk> in;
 		std::unordered_map<GridPtKey, const GridPtOut*, hash_gpk> out;
+		std::vector<double> frac_abscissas;
+		std::vector<LocInDim> locs;
+	};
+
+	/****************************************
+	Ordinates associated with a Nbr2
+	****************************************/
+
+	struct P2 {
+		std::unordered_map<GridPtKey, double, hash_gpk> p;
+
+		P2(Nbr2 nbr2);
+	};
+
+	/****************************************
+	Ordinates associated with a Nbr4
+	****************************************/
+
+	struct P4 {
+		std::unordered_map<GridPtKey, double, hash_gpk> p;
+
+		P4(Nbr4 nbr4);
 	};
 
 	/****************************************
@@ -111,8 +134,8 @@ namespace dcu {
 		********************/
 
 		// Second arg = fractions between 0,1 in each dim
-		std::pair<Nbr2,std::vector<double>> get_surrounding_2_grid_pts(std::vector<double> abscissas) const;
-		std::pair<Nbr4,std::vector<double>> get_surrounding_4_grid_pts(std::vector<double> abscissas) const;
+		Nbr2 get_surrounding_2_grid_pts(std::vector<double> abscissas) const;
+		Nbr4 get_surrounding_4_grid_pts(std::vector<double> abscissas) const;
 
 		/********************
 		Get a point by interpolating
@@ -137,17 +160,18 @@ namespace dcu {
 		double get_deriv_wrt_x(std::vector<double> abscissas, int k);
 
 		/********************
-		1D funcs
+		1D
 		********************/
 
-		double interpolate_1d(double x_frac, double p0, double p1, double p2, double p3) const;
-		double interpolate_1d_by_ref(const double &x_frac, const double &p0, const double &p1, const double &p2, const double &p3) const;
+		double f1d_interpolate(double x_frac, double p0, double p1, double p2, double p3) const;
+		double f1d_interpolate_by_ref(const double &x_frac, const double &p0, const double &p1, const double &p2, const double &p3) const;
 
-		double get_deriv_wrt_p_1d(double x_frac, int p, LocInDim loc);
-		double get_deriv_wrt_p_1d_by_ref(const double &x_frac, int p, LocInDim loc) const;
-		
-		double get_deriv_wrt_x_1d(double x_frac, double p0, double p1, double p2, double p3);
-		double get_deriv_wrt_x_1d_by_ref(const double &x_frac, const double &p0, const double &p1, const double &p2, const double &p3) const;
+		// p_idx = 0,1,2,3, depending on loc
+		double f1d_deriv_pt_value(double x_frac, int p_idx) const;
+		double f1d_deriv_pt_value_by_ref(const double &x_frac, int p_idx) const;
+
+		double f1d_deriv_x(double x_frac, double p0, double p1, double p2, double p3) const;
+		double f1d_deriv_x_by_ref(const double &x_frac, const double &p0, const double &p1, const double &p2, const double &p3) const;
 
 		/********************
 		Read/write grid
