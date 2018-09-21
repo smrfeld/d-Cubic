@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include <random>
+#include <ctime>
 
 using namespace std;
 using namespace dcu;
@@ -14,6 +15,9 @@ double fRand(double fMin, double fMax)
 }
 
 int main() {
+
+	// Seed
+	srand( time( NULL ) );
 
 	// Make dim
 	Dimension1D dim(0.0,1.0,30);

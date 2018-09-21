@@ -1,10 +1,10 @@
-#include "../include/dCubic_bits/grid.hpp"
+#include "../include/dcubic_bits/grid.hpp"
 
 // Other headers
-#include "../include/dCubic_bits/dimension_1d.hpp"
-#include "../include/dCubic_bits/grid_pt.hpp"
-#include "../include/dCubic_bits/grid_pt_out.hpp"
-#include "../include/dCubic_bits/grid_pt_key.hpp"
+#include "../include/dcubic_bits/dimension_1d.hpp"
+#include "../include/dcubic_bits/grid_pt.hpp"
+#include "../include/dcubic_bits/grid_pt_out.hpp"
+#include "grid_pt_key.hpp"
 
 #include <fstream>
 #include <iostream>

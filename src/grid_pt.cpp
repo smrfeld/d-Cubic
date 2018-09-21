@@ -1,9 +1,8 @@
-#include "../include/dCubic_bits/grid_pt.hpp"
+#include "../include/dcubic_bits/grid_pt.hpp"
 
 // Other headers
-#include "../include/dCubic_bits/idx_set.hpp"
-#include "../include/dCubic_bits/grid_pt_key.hpp"
-#include "../include/dCubic_bits/grid_pt_out.hpp"
+#include "../include/dcubic_bits/idx_set.hpp"
+#include "../include/dcubic_bits/grid_pt_out.hpp"
 
 #include <iostream>
 #include <sstream>

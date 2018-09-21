@@ -1,4 +1,4 @@
-#include "../include/dCubic_bits/idx_set.hpp"
+#include "../include/dcubic_bits/idx_set.hpp"
 
 #include <iostream>
 #include <sstream>

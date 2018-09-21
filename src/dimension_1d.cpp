@@ -1,4 +1,4 @@
-#include "../include/dCubic_bits/dimension_1d.hpp"
+#include "../include/dcubic_bits/dimension_1d.hpp"
 
 /************************************
 * Namespace for dcu

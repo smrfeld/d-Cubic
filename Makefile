@@ -7,7 +7,7 @@ CXXFLAGS = -std=c++14 -fPIC -O3 -g
 # linking flags
 LDFLAGS = -shared
 # target lib
-TARGET_LIB = lib/libdCubic.so
+TARGET_LIB = lib/libdcubic.so
 # build dir
 BUILD_DIR = build
 # source dir
@@ -52,7 +52,7 @@ clean:
 install:
 	mkdir -p $(INSTALL_LIB_DIR)
 	mkdir -p $(INSTALL_INCLUDE_DIR)
-	mkdir -p $(INSTALL_INCLUDE_DIR)/dCubic_bits
+	mkdir -p $(INSTALL_INCLUDE_DIR)/dcubic_bits
 	cp -p $(TARGET_LIB) $(INSTALL_LIB_DIR)
-	cp -p include/dCubic_bits/*.hpp $(INSTALL_INCLUDE_DIR)/dCubic_bits
-	cp -p include/dCubic $(INSTALL_INCLUDE_DIR)
+	cp -p include/dcubic_bits/*.hpp $(INSTALL_INCLUDE_DIR)/dcubic_bits
+	cp -p include/dcubic $(INSTALL_INCLUDE_DIR)
