@@ -32,7 +32,7 @@ int main() {
 	grid.write_to_file("test_interp_2d.txt");
 
 	double x = grid.get_val({0.71,0.33});
-	std::cout << x << std::endl;
+	std::cout << "Val @ 0.71, 0.33 = " << x << std::endl;
 
 	return 0;
 };
