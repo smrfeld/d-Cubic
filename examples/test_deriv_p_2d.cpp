@@ -1,8 +1,9 @@
-#include <dCubic>
+#include <dcubic>
 
 #include <iostream>
 
 #include <random>
+#include <ctime>
 
 using namespace std;
 using namespace dcu;
@@ -14,6 +15,9 @@ double fRand(double fMin, double fMax)
 }
 
 int main() {
+
+	// Seed
+	srand( time( NULL ) );
 
 	// Make dims
 	Dimension1D dim_1(0.0,1.0,30);
@@ -28,7 +32,7 @@ int main() {
 		for (int j=0; j<17; j++) {
 			v[0] = i;
 			v[1] = j;
- 			grid.set_grid_point_ordinate(grid.get_grid_point(v), fRand(0.0,5.0));
+			grid.get_grid_point_ref(v).set_ordinate(fRand(0.0,5.0));
 		};
 	};
 

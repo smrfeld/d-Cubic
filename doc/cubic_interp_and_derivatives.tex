@@ -55,7 +55,7 @@ Given a point $\tilde{x}$, define the index $i \in \{ 0,1, \dots, n-2 \}$ such t
 
 Consider two scenarios:
 \begin{enumerate}
-\item \textbf{Case \#1:} the point is not near the boundary, i.e. $i \neq 0 \cap i \neq i-2$.
+\item \textbf{Case \#1:} the point $\tilde{x}$ is not near the boundary, i.e. $i \neq 0 \cap i \neq n-2$.
 
 We can then define the local neighborhood of 4 values:
 %---------------
@@ -76,17 +76,17 @@ p_j = t_{i-1+j}
 %---------------
 for $j=0,1,2,3$.
 
-When does such a scenario occur?
+How can we describe the condition for this case?
 
 If the index $i$ falls on the lower boundary, it is $\delta_{i,0}$. A further necessary condition is that the point being queried is at that boundary, i.e. if $i=0$, then only $j=0$ is approximated; if $i=n-2$, then only $j=3$ is approximated. The condition then is $\delta_{i,0} \delta_{j,0}$.
 
 At the other boundary, the condition is $\delta_{i,n-2} \delta_{j,3}$.
 
-If the first condition is not met, the original $t_{i-1+j}$ holds and it is $1-\delta_{i,0} \delta_{j,0}$ and $1-\delta_{i,n-2} \delta_{j,3}$.
+If the first condition is not met, it is $1-\delta_{i,0} \delta_{j,0}$ and $1-\delta_{i,n-2} \delta_{j,3}$.
 
 If both are not met, it is $(1-\delta_{i,0} \delta_{j,0}) (1-\delta_{i,n-2} \delta_{j,3})$.
 
-\item \textbf{Case \#2:} the point is near the boundary, i.e. $( i = 0 \cap j = 0) \cup ( i = n-2 \cap j = 3 )$.
+\item \textbf{Case \#2:} the point is near the boundary - but this only affects $p_0$ or $p_3$. The condition for this case is then: $( i = 0 \cap j = 0) \cup ( i = n-2 \cap j = 3 )$.
 
 In this case, we must approximate the values at the boundary. The best approximation is a linear one:
 %---------------
@@ -319,7 +319,7 @@ Combined with the upper boundary, the full condition for no points to fall near 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CASE 2
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\item \textbf{Case \#2}: at least one point falls near the boundary, i.e. $( i_\delta = 0 \cap j_\delta = 0 ) \cup ( i_\delta = n^{\langle \delta \rangle}-2 \cap j_\delta = 3)$ for at least one $\delta$.
+\item \textbf{Case \#2}: at least one point falls near the boundary i.e. $( i_\delta = 0 \cap j_\delta = 0 ) \cup ( i_\delta = n^{\langle \delta \rangle}-2 \cap j_\delta = 3)$ for at least one $\delta$.
 
 When this event occurs, some points $p$ must be approximated by others. Define the mappings acting on indexes $i_\delta$:
 %---------------
@@ -695,7 +695,7 @@ We are left with:
 The algorithm here is therefore split:
 \begin{enumerate}
 % Case 1
-\item Case \#1: the point is interior, i.e. away from the boundary in \textbf{all} dimensions. To check this, check that $i_\delta \neq 0 \cap i_\delta \neq n^{\langle \delta \rangle} -2$ for \textbf{all} $\delta=0,\dots,d-1$.
+\item Case \#1: the point is interior, i.e. away from the boundary in \textbf{all} dimensions, i.e. $i_\delta \neq 0 \cap i_\delta \neq n^{\langle \delta \rangle} -2$ for \textbf{all} $\delta=0,\dots,d-1$.
 
 Here the case easy, and does not require recursion! The answer is:
 %---------------
@@ -735,7 +735,7 @@ which can be evaluated using~(\ref{eq:derivValue}).
 \end{enumerate}
 \item else:
 \begin{enumerate}
-\item if $j_\delta = k_\delta$ for all $\delta=0,\dots,d-1$: return 1
+\item if $\langle j_0, \dots, j_{d-1} \rangle = \langle k_0, \dots, k_{d-1} \rangle$: return 1
 \item else: return 0
 \end{enumerate}
 \end{enumerate}
@@ -893,13 +893,12 @@ since $\xb$ refers to a fraction between $0,1$.
 %%%%%%%%%%%%%%%%%%
 
 \begin{enumerate}
-\item function \textbf{iterate\_deriv}($\delta$,$k$,$d$,$\xb$,$(j_0, \dots, j_{k-1})$, $p^{[d]:\langle 0:d-1 \rangle}$): \\
+\item function \textbf{iterate\_deriv\_x}($\delta$,$k$,$d$,$\xb$,$(j_0, \dots, j_{k-1})$, $p^{[d]:\langle 0:d-1 \rangle}$): \\
 // This evaluates $\partial p^{[\delta]: \langle 0:\delta-1 \rangle} / \partial x_k = $ the left hand of~(\ref{eq:recDer})
 \begin{enumerate}
 \item if $\delta == k$: // Evaluate using~(\ref{eq:evalk})
 \begin{enumerate}
-\item $p^{[k+1]: \langle 0:k-1,0 \rangle}$ = \textbf{iterate}($k+1$, $d$, $\xb$, $(j_{0}, \dots, j_{k-1}, j_k=0)$, $p^{[d]:\langle 0:d-1 \rangle}$) \\
-// Recall that \textbf{iterate}($k+1,\dots$) returns $p^{[k+1]}$
+\item $p^{[k+1]: \langle 0:k-1,0 \rangle}$ = \textbf{iterate}($k+1$, $d$, $\xb$, $(j_{0}, \dots, j_{k-1}, j_k=0)$, $p^{[d]:\langle 0:d-1 \rangle}$)
 \item $p^{[k+1]: \langle 0:k-1,1 \rangle}$ = \textbf{iterate}($k+1$, $d$, $\xb$, $(j_{0}, \dots, j_{k-1}, j_k=1)$, $p^{[d]:\langle 0:d-1 \rangle}$)
 \item $p^{[k+1]: \langle 0:k-1,2 \rangle}$ = \textbf{iterate}($k+1$, $d$, $\xb$, $(j_{0}, \dots, j_{k-1}, j_k=2)$, $p^{[d]:\langle 0:d-1 \rangle}$)
 \item $p^{[k+1]: \langle 0:k-1,3 \rangle}$ = \textbf{iterate}($k+1$, $d$, $\xb$, $(j_{0}, \dots, j_{k-1}, j_k=3)$, $p^{[d]:\langle 0:d-1 \rangle}$)
@@ -917,10 +916,10 @@ $ // using~(\ref{eq:derivAbs})
 \end{enumerate}
 \item else: // Recurse using~(\ref{eq:recDer})
 \begin{enumerate}
-\item $\partial p^{[\delta+1]: \langle 0:\delta-1,0 \rangle} / \partial x_k$ = \textbf{iterate\_deriv}($\delta+1$,$k$,$d$,$\xb$,$(j_0, \dots, j_{\delta+1} = 0,\dots, j_{k-1})$,$p^{[d]:\langle 0:d-1 \rangle}$)
-\item $\partial p^{[\delta+1]: \langle 0:\delta-1,0 \rangle} / \partial x_k$ = \textbf{iterate\_deriv}($\delta+1$,$k$,$d$,$\xb$,$(j_0, \dots, j_{\delta+1} = 0,\dots, j_{k-1})$,$p^{[d]:\langle 0:d-1 \rangle}$)
-\item $\partial p^{[\delta+1]: \langle 0:\delta-1,0 \rangle} / \partial x_k$ = \textbf{iterate\_deriv}($\delta+1$,$k$,$d$,$\xb$,$(j_0, \dots, j_{\delta+1} = 0,\dots, j_{k-1})$,$p^{[d]:\langle 0:d-1 \rangle}$)
-\item $\partial p^{[\delta+1]: \langle 0:\delta-1,0 \rangle} / \partial x_k$ = \textbf{iterate\_deriv}($\delta+1$,$k$,$d$,$\xb$,$(j_0, \dots, j_{\delta+1} = 0,\dots, j_{k-1})$,$p^{[d]:\langle 0:d-1 \rangle}$)
+\item $\partial p^{[\delta+1]: \langle 0:\delta-1,0 \rangle} / \partial x_k$ = \textbf{iterate\_deriv\_x}($\delta+1$,$k$,$d$,$\xb$,$(j_0, \dots, j_{\delta+1} = 0,\dots, j_{k-1})$,$p^{[d]:\langle 0:d-1 \rangle}$)
+\item $\partial p^{[\delta+1]: \langle 0:\delta-1,0 \rangle} / \partial x_k$ = \textbf{iterate\_deriv\_x}($\delta+1$,$k$,$d$,$\xb$,$(j_0, \dots, j_{\delta+1} = 0,\dots, j_{k-1})$,$p^{[d]:\langle 0:d-1 \rangle}$)
+\item $\partial p^{[\delta+1]: \langle 0:\delta-1,0 \rangle} / \partial x_k$ = \textbf{iterate\_deriv\_x}($\delta+1$,$k$,$d$,$\xb$,$(j_0, \dots, j_{\delta+1} = 0,\dots, j_{k-1})$,$p^{[d]:\langle 0:d-1 \rangle}$)
+\item $\partial p^{[\delta+1]: \langle 0:\delta-1,0 \rangle} / \partial x_k$ = \textbf{iterate\_deriv\_x}($\delta+1$,$k$,$d$,$\xb$,$(j_0, \dots, j_{\delta+1} = 0,\dots, j_{k-1})$,$p^{[d]:\langle 0:d-1 \rangle}$)
 \item return $
 \sum_{j_\delta=0}^3 
 \frac{
@@ -936,7 +935,7 @@ $ // = right side of~(\ref{eq:recDer})
 \end{enumerate}
 \end{enumerate}
 
-\item To start: \textbf{iterate\_deriv}($0$,$k$,$d$,$\xb$,$(j_0, \dots, j_{k-1})$,$p^{[d]:\langle 0:d-1 \rangle}$)
+\item To start: \textbf{iterate\_deriv\_x}($0$,$k$,$d$,$\xb$,$(j_0, \dots, j_{k-1})$,$p^{[d]:\langle 0:d-1 \rangle}$)
 \end{enumerate}
 
 \end{document}
