@@ -128,14 +128,6 @@ namespace dcu {
 		void _iterate_get_surrounding_4_grid_pts(IdxSet &idxs_local, IdxSet &idxs_0, IdxSet &idxs_1, IdxSet &idxs_2, IdxSet &idxs_3, Nbr4 &nbr4, int dim) const;
 
 		/********************
-		Form the coeffs
-		********************/
-
-		// Start with coeff_p = 1.0
-		// Dimension1D to interpolate in starts at _grid_dim-1
-		// void _iterate_form_coeffs(std::map<GridPtKey, double> &coeffs_store, std::vector<double> &frac_abscissas, int dim_to_iterate_interpolate_in, IdxSet &idxs_p, double coeff_p);
-
-		/********************
 		Interpolate
 		********************/
 
@@ -145,13 +137,13 @@ namespace dcu {
 		Deriv wrt p
 		********************/
 
-		double _iterate_deriv_pt_value(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, P4 &p) const;
+		double _iterate_deriv_pt_value(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, P4 &p, std::vector<int> &idxs_i, IdxSet &idxs_k) const;
 
 		/********************
 		Derivative wrt x
 		********************/
 
-		double _iterate_deriv_x(int delta, int k, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, Nbr4 &nbrs_p) const;
+		double _iterate_deriv_x(int delta, int k, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, P4 &p) const;
 
 		/********************
 		Constructor helpers
@@ -241,6 +233,13 @@ namespace dcu {
 
 		double f1d_deriv_x(double x_frac, double p0, double p1, double p2, double p3) const;
 		double f1d_deriv_x_by_ref(const double &x_frac, const double &p0, const double &p1, const double &p2, const double &p3) const;
+
+	    /********************
+		Apply M or P mappings
+		********************/
+
+	    IdxSet apply_m_mapping_by_ref(const IdxSet &idxs) const;
+	    IdxSet apply_p_mapping_by_ref(const IdxSet &idxs) const;
 
 		/********************
 		Read/write grid
@@ -804,9 +803,6 @@ namespace dcu {
 	};
 
 	double Grid::Impl::get_val(std::vector<double> abscissas) const {
-		// Delta
-		int delta = 1;
-
 		// Stopping
 		int d = get_no_dims();
 
@@ -823,12 +819,89 @@ namespace dcu {
 		P4 p(nbr4);
 
 		// Iterate
-		return _iterate_interpolate(delta,d,frac_abscissas,idxs_j,p);
+		return _iterate_interpolate(0,d,frac_abscissas,idxs_j,p);
 	};
 
 	/********************
 	Get derivative
 	********************/
+
+	double Grid::Impl::_iterate_deriv_pt_value(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, P4 &p, std::vector<int> &idxs_i, IdxSet &idxs_k) const {
+
+		if (delta == d) {
+			// Done; evaluate
+			// Check main condition
+			bool at_least_one_cond_met = false;
+			for (auto dim=0; dim<d; dim++) {
+				if ((idxs_i[dim] == 0 && idxs_j[dim] == 0) || (idxs_i[dim] == _dims[dim].get_no_pts()-2 && idxs_j[dim] == 3)) {
+					at_least_one_cond_met = true;
+					break;
+				};
+			};
+
+			if (at_least_one_cond_met) {
+
+				// Yes, at least one
+			
+
+				// Form the new idxs
+				IdxSet idxs_j_global = idxs_j - 1 + IdxSet(idxs_i);
+				IdxSet idxs_k_global = idxs_k - 1 + IdxSet(idxs_i);
+
+				// Apply M mapping
+				IdxSet idxs_m = apply_m_mapping_by_ref(idxs_j_global);
+
+				// Check
+				if (idxs_m == idxs_k_global) {
+					return 2.0;
+				};
+
+				// Apply P mapping
+				IdxSet idxs_p = apply_p_mapping_by_ref(idxs_j_global);
+
+				// Check
+				if (idxs_p == idxs_k_global) {
+					return -1.0;
+				};
+
+				// Failed
+				// This means that this point = idxs_j is an outside grid point, but does not depend on the point we are differentiating WRT
+				return 0.0;
+
+			} else {
+
+				// Not at_least_one_cond_met - evaluate the delta
+				if (idxs_j == idxs_k) {
+					return 1.0;
+				} else {
+					return 0.0;
+				};
+
+			};
+
+		} else {
+			// Go deeper
+
+			idxs_j[delta] = 0;
+			double dp0dp = _iterate_deriv_pt_value(delta+1,d,frac_abscissas,idxs_j,p,idxs_i,idxs_k);
+			double dfdp0 = f1d_deriv_pt_value_by_ref(frac_abscissas[delta],0);
+
+			idxs_j[delta] = 1;
+			double dp1dp = _iterate_deriv_pt_value(delta+1,d,frac_abscissas,idxs_j,p,idxs_i,idxs_k);
+			double dfdp1 = f1d_deriv_pt_value_by_ref(frac_abscissas[delta],1);
+
+			idxs_j[delta] = 2;
+			double dp2dp = _iterate_deriv_pt_value(delta+1,d,frac_abscissas,idxs_j,p,idxs_i,idxs_k);
+			double dfdp2 = f1d_deriv_pt_value_by_ref(frac_abscissas[delta],2);
+
+			idxs_j[delta] = 3;
+			double dp3dp = _iterate_deriv_pt_value(delta+1,d,frac_abscissas,idxs_j,p,idxs_i,idxs_k);
+			double dfdp3 = f1d_deriv_pt_value_by_ref(frac_abscissas[delta],3);
+
+			return dfdp0 * dp0dp + dfdp1 * dp1dp + dfdp2 * dp2dp + dfdp3 * dp3dp;
+		};
+	};
+
 
 	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> local_grid_idxs) {
 		return get_deriv_wrt_pt_value(abscissas,IdxSet(local_grid_idxs));
@@ -870,8 +943,12 @@ namespace dcu {
 		} else {
 			// Case 2: At least one dimension near boundary
 
-			return 0.0;
+			// Init idx set
+			IdxSet idxs_j(d);
+			IdxSet idxs_k = local_grid_pt_key.get_idx_set();
 
+			// Iterate
+			return _iterate_deriv_pt_value(0, d,frac_abscissas, idxs_j, p, nbr4.idxs_i, idxs_k);
 		};
 	};
 
@@ -879,45 +956,64 @@ namespace dcu {
 	Get derivative wrt x
 	********************/
 
-	double Grid::Impl::_iterate_deriv_x(int delta, int k, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, Nbr4 &nbrs_p) const {
-		/*
-		if (delta == d-k+1) { // Evaluate the derivative
+	double Grid::Impl::_iterate_deriv_x(int delta, int k, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, P4 &p) const {
+		
+		if (delta == k) { // Evaluate the derivative
 
-			idxs_j[k-1] = 0;
-			double p0 = _iterate_interpolate(d-k+2,d,frac_abscissas,idxs_j,nbrs_p);
+			idxs_j[k] = 0;
+			double p0 = _iterate_interpolate(k+1,d,frac_abscissas,idxs_j,p);
 
-			idxs_j[k-1] = 1;
-			double p1 = _iterate_interpolate(d-k+2,d,frac_abscissas,idxs_j,nbrs_p);
+			idxs_j[k] = 1;
+			double p1 = _iterate_interpolate(k+1,d,frac_abscissas,idxs_j,p);
 
-			idxs_j[k-1] = 2;
-			double p2 = _iterate_interpolate(d-k+2,d,frac_abscissas,idxs_j,nbrs_p);
+			idxs_j[k] = 2;
+			double p2 = _iterate_interpolate(k+1,d,frac_abscissas,idxs_j,p);
 
-			idxs_j[k-1] = 3;
-			double p3 = _iterate_interpolate(d-k+2,d,frac_abscissas,idxs_j,nbrs_p);
+			idxs_j[k] = 3;
+			double p3 = _iterate_interpolate(k+1,d,frac_abscissas,idxs_j,p);
 
-			return get_deriv_wrt_x_f1d_by_ref(frac_abscissas[k-1],p0,p1,p2,p3);
+			return f1d_deriv_x_by_ref(frac_abscissas[k],p0,p1,p2,p3);
 
 		} else { // Deeper
 
-			idxs_j[d-delta+1-1] = 0;
-			double dp0dxk = _iterate_deriv_x(delta+1,k,d,frac_abscissas,idxs_j,nbrs_p);
-			//double dfdp0 = get_deriv_wrt_p_f1d_by_ref(frac_abscissas[d-delta+1-1],0,);
+			idxs_j[delta+1] = 0;
+			double dp0dxk = _iterate_deriv_x(delta+1,k,d,frac_abscissas,idxs_j,p);
+			double dfdp0 = f1d_deriv_pt_value_by_ref(frac_abscissas[delta],0);
 
-			idxs_j[d-delta+1-1] = 1;
-			double dp1dxk = _iterate_deriv_x(delta+1,k,d,frac_abscissas,idxs_j,nbrs_p);
+			idxs_j[delta+1] = 1;
+			double dp1dxk = _iterate_deriv_x(delta+1,k,d,frac_abscissas,idxs_j,p);
+			double dfdp1 = f1d_deriv_pt_value_by_ref(frac_abscissas[delta],1);
 
-			idxs_j[d-delta+1-1] = 2;
-			double dp2dxk = _iterate_deriv_x(delta+1,k,d,frac_abscissas,idxs_j,nbrs_p);
+			idxs_j[delta+1] = 2;
+			double dp2dxk = _iterate_deriv_x(delta+1,k,d,frac_abscissas,idxs_j,p);
+			double dfdp2 = f1d_deriv_pt_value_by_ref(frac_abscissas[delta],2);
 
-			idxs_j[d-delta+1-1] = 3;
-			double dp3dxk = _iterate_deriv_x(delta+1,k,d,frac_abscissas,idxs_j,nbrs_p);
+			idxs_j[delta+1] = 3;
+			double dp3dxk = _iterate_deriv_x(delta+1,k,d,frac_abscissas,idxs_j,p);
+			double dfdp3 = f1d_deriv_pt_value_by_ref(frac_abscissas[delta],3);
 
+			return dfdp0 * dp0dxk + dfdp1 * dp1dxk + dfdp2 * dp2dxk + dfdp3 * dp3dxk;
 		};
-		*/
 	};
 
 	double Grid::Impl::get_deriv_wrt_x(std::vector<double> abscissas, int k) {
-		return 0.0;
+		// Stopping
+		int d = get_no_dims();
+
+		// Idxs
+		IdxSet idxs_j(d);
+
+		// nbrs p
+		Nbr4 nbr4 = get_surrounding_4_grid_pts(abscissas);
+
+		// Frac
+		std::vector<double> frac_abscissas = nbr4.frac_abscissas;
+
+		// Convert nbr to p
+		P4 p(nbr4);
+
+		// Iterate
+		return _iterate_deriv_x(0,k,d,frac_abscissas,idxs_j,p);
 	};
 
 	/********************
@@ -957,6 +1053,33 @@ namespace dcu {
 	double Grid::Impl::f1d_deriv_x_by_ref(const double &x_frac, const double &p0, const double &p1, const double &p2, const double &p3) const {
 		return 3.0*(-0.5*p0 + 1.5*p1 - 1.5*p2 + 0.5*p3)*pow(x_frac,2) + 2.0*(p0 - 2.5*p1 + 2.0*p2 - 0.5*p3)*x_frac + (-0.5*p0 + 0.5*p2);
 	};
+
+    /********************
+	Apply M or P mappings
+	********************/
+
+    IdxSet Grid::Impl::apply_m_mapping_by_ref(const IdxSet &idxs) const {
+		IdxSet idxs_m = idxs;
+		for (auto dim=0; dim<get_no_dims(); dim++) {
+			if (idxs_m[dim] == -1) {
+				idxs_m[dim] += 1;
+			} else if (idxs_m[dim] == _dims[dim].get_no_pts()) {
+				idxs_m[dim] -= 1;
+			};
+		};
+		return idxs_m;
+    };
+    IdxSet Grid::Impl::apply_p_mapping_by_ref(const IdxSet &idxs) const {
+		IdxSet idxs_p = idxs;
+		for (auto dim=0; dim<get_no_dims(); dim++) {
+			if (idxs_p[dim] == -1) {
+				idxs_p[dim] += 2;
+			} else if (idxs_p[dim] == _dims[dim].get_no_pts()) {
+				idxs_p[dim] -= 2;
+			};
+		};
+		return idxs_p;
+    };
 
 	/********************
 	Read/write grid
@@ -1217,4 +1340,17 @@ namespace dcu {
 	void Grid::write_to_file(std::string fname) const {
 		_impl->write_to_file(fname);
 	};
+
+    /********************
+	Apply M or P mappings
+	********************/
+
+    IdxSet Grid::apply_m_mapping_by_ref(const IdxSet &idxs) const {
+    	return apply_m_mapping_by_ref(idxs);
+    };
+    IdxSet Grid::apply_p_mapping_by_ref(const IdxSet &idxs) const {
+    	return apply_p_mapping_by_ref(idxs);
+    };
+
+
 };

@@ -727,13 +727,17 @@ which can be evaluated using~(\ref{eq:derivValue}).
 \begin{enumerate}
 \item if $\delta == d$: // We have a complete set of idxs to evaluate~(\ref{eq:shit})
 \begin{enumerate}
-\item if $(i_\delta=0 \cap j_\delta =0) \cup (i_\delta=n^{\langle \delta \rangle} -2 \cup j_\delta = 3)$ for \textbf{at least} one $\delta=0,\dots,d-1$:
+\item if $(i_\delta=0 \cap j_\delta =0) \cup (i_\delta=n^{\langle \delta \rangle} -2 \cap j_\delta = 3)$ for \textbf{at least} one $\delta=0,\dots,d-1$:
 \begin{enumerate}
 \item if ${\cal M} \langle i_0 - 1 + j_0 : i_{d-1} - 1 + j_{d-1} \rangle == \langle i_0 - 1 + k_0 : i_{d-1} - 1 + k_{d-1} \rangle$: return 2
 \item if ${\cal P} \langle i_0 - 1 + j_0 : i_{d-1} - 1 + j_{d-1} \rangle == \langle i_0 - 1 + k_0 : i_{d-1} - 1 + k_{d-1} \rangle$: return -1
 \item else: return 0
 \end{enumerate}
+\item else:
+\begin{enumerate}
+\item if $j_\delta = k_\delta$ for all $\delta=0,\dots,d-1$: return 1
 \item else: return 0
+\end{enumerate}
 \end{enumerate}
 \item else: // Go deeper
 \begin{enumerate}

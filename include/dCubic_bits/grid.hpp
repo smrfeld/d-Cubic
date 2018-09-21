@@ -175,6 +175,13 @@ namespace dcu {
 		double f1d_deriv_x(double x_frac, double p0, double p1, double p2, double p3) const;
 		double f1d_deriv_x_by_ref(const double &x_frac, const double &p0, const double &p1, const double &p2, const double &p3) const;
 
+	    /********************
+		Apply M or P mappings
+		********************/
+
+	    IdxSet apply_m_mapping_by_ref(const IdxSet &idxs) const;
+	    IdxSet apply_p_mapping_by_ref(const IdxSet &idxs) const;
+
 		/********************
 		Read/write grid
 		********************/

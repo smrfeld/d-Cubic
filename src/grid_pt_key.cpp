@@ -61,6 +61,9 @@ namespace dcu {
 		// Set from linear
 		void set_from_linear(int idx_linear);
 
+		// IdxSet
+		IdxSet get_idx_set() const;
+
 		/********************
 		From IdxSet
 		********************/
@@ -246,6 +249,12 @@ namespace dcu {
 		};
 	};
  
+	// IdxSet
+	IdxSet GridPtKey::Impl::get_idx_set() const {
+		return _idxs;
+	};
+
+
 	/********************
 	From IdxSet
 	********************/
@@ -345,6 +354,11 @@ namespace dcu {
 	// Set from linear
 	void GridPtKey::set_from_linear(int idx_linear) {
 		_impl->set_from_linear(idx_linear);
+	};
+
+	// IdxSet
+	IdxSet GridPtKey::get_idx_set() const {
+		return _impl->get_idx_set();
 	};
 
 	/********************

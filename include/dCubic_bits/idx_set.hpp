@@ -58,4 +58,15 @@ namespace dcu {
 
 	// Printing
     std::ostream& operator<< (std::ostream& stream, const IdxSet& idxs);
+
+    // Comparator
+    bool operator==(const IdxSet &lhs, const IdxSet &rhs);
+
+    // Math
+    IdxSet operator+(IdxSet lhs, const IdxSet& rhs);
+    IdxSet operator-(IdxSet lhs, const IdxSet& rhs);
+    IdxSet operator+(IdxSet lhs, int rhs);
+    IdxSet operator-(IdxSet lhs, int rhs);
+
 };
+

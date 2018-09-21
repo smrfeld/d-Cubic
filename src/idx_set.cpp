@@ -108,5 +108,42 @@ namespace dcu {
 	std::ostream& operator<<(std::ostream& stream, const IdxSet& idxs) {
 		stream << idxs.print();
 		return stream;
-	 };
+	};
+
+    // Comparator
+    bool operator==(const IdxSet &lhs, const IdxSet &rhs) {
+    	for (auto i=0; i<lhs.size(); i++) {
+    		if (lhs[i] != rhs[i]) {
+    			return false;
+    		};
+    	};
+    	return true;
+    };
+
+	// Math
+    IdxSet operator+(IdxSet lhs, const IdxSet& rhs) {
+    	for (auto i=0; i<lhs.size(); i++) {
+    		lhs[i] += rhs[i];
+    	};
+    	return lhs;
+    };
+    IdxSet operator-(IdxSet lhs, const IdxSet& rhs) {
+    	for (auto i=0; i<lhs.size(); i++) {
+    		lhs[i] -= rhs[i];
+    	};
+    	return lhs;
+    };
+    IdxSet operator+(IdxSet lhs, int rhs) {
+    	for (auto i=0; i<lhs.size(); i++) {
+    		lhs[i] += rhs;
+    	};
+    	return lhs;
+    };
+    IdxSet operator-(IdxSet lhs, int rhs) {
+    	for (auto i=0; i<lhs.size(); i++) {
+    		lhs[i] -= rhs;
+    	};
+    	return lhs;
+    };
+
 };

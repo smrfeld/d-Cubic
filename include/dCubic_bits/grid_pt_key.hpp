@@ -53,6 +53,9 @@ namespace dcu {
 		// Set from linear
 		void set_from_linear(int idx_linear);
 
+		// IdxSet
+		IdxSet get_idx_set() const;
+
 		/********************
 		From IdxSet
 		********************/
