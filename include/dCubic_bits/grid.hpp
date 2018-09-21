@@ -121,12 +121,10 @@ namespace dcu {
 		Const ptrs
 		*****/
 
-		const std::unordered_map<GridPtKey, GridPt*, hash_gpk>& get_grid_points() const;
 		const GridPt* get_grid_point(std::vector<int> grid_idxs) const;
 		const GridPt* get_grid_point(IdxSet idx_set) const;
 		const GridPt* get_grid_point(GridPtKey key) const;
 
-		const std::unordered_map<GridPtKey, GridPtOut*, hash_gpk>& get_grid_points_outside() const;
 		const GridPtOut* get_grid_point_outside(std::vector<int> grid_idxs) const;
 		const GridPtOut* get_grid_point_outside(IdxSet idx_set) const;
 		const GridPtOut* get_grid_point_outside(GridPtKey key) const;
