@@ -39,8 +39,7 @@ int main() {
 	std::vector<double> abcissa({0.46});
 
 	// Derivs
-	double x_deriv;
-	x_deriv = grid.get_deriv_wrt_x(abcissa,0);
+	double x_deriv = grid.get_deriv_wrt_x(abcissa,0);
 	std::cout << "deriv @ " << abcissa[0] << " wrt x = " << x_deriv << std::endl;
 
 	return 0;
