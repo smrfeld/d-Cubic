@@ -230,7 +230,6 @@ namespace dcu {
 		Get derivative
 		********************/
 
-		double get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> grid_idxs);
 		double get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet4 idx_set);
 
 		/********************
@@ -877,6 +876,7 @@ namespace dcu {
 			} else {
 
 				// Not at_least_one_cond_met - evaluate the delta
+				
 				if (idxs_j == idxs_k) {
 					return 1.0;
 				} else {
@@ -909,9 +909,6 @@ namespace dcu {
 	};
 
 
-	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> idxs_k) {
-		return get_deriv_wrt_pt_value(abscissas,IdxSet4(idxs_k));
-	};
 	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet4 idxs_k) {
 		// d
 		int d = get_no_dims();
@@ -1291,9 +1288,6 @@ namespace dcu {
 	Get derivative
 	********************/
 
-	double Grid::get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> grid_idxs) {
-		return _impl->get_deriv_wrt_pt_value(abscissas,grid_idxs);
-	};
 	double Grid::get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet4 idx_set) {
 		return _impl->get_deriv_wrt_pt_value(abscissas,idx_set);
 	};

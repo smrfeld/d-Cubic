@@ -100,19 +100,14 @@ namespace dcu {
 
 	class IdxSet2 : public IdxSet {
 
-		// Helpers
-		void _clean_up();
-		void _copy(const IdxSet2& other);
-		void _move(IdxSet2& other);
-
 	public:
 
 		/********************
 		Constructor
 		********************/
 
-		// Inherited
-		using IdxSet::IdxSet;
+		IdxSet2(int no_idxs);
+		IdxSet2(std::vector<int> idxs);
 
 		/********************
 		Accessors
@@ -164,19 +159,14 @@ namespace dcu {
 
 	class IdxSet4 : public IdxSet {
 
-		// Helpers
-		void _clean_up();
-		void _copy(const IdxSet4& other);
-		void _move(IdxSet2& other);
-
 	public:
 
 		/********************
 		Constructor
 		********************/
 
-		// Inherited
-		using IdxSet::IdxSet;
+		IdxSet4(int no_idxs);
+		IdxSet4(std::vector<int> idxs);
 
 		/********************
 		Accessors
@@ -193,7 +183,7 @@ namespace dcu {
     // Comparator
     bool operator==(const IdxSet4 &lhs, const IdxSet4 &rhs);
     bool operator<(const IdxSet4 &lhs, const IdxSet4 &rhs);
-    
+
     // Math
     IdxSet4 operator+(IdxSet4 lhs, const IdxSet4& rhs);
     IdxSet4 operator-(IdxSet4 lhs, const IdxSet4& rhs);

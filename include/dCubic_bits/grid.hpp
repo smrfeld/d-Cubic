@@ -149,8 +149,6 @@ namespace dcu {
 		Get derivative wrt a point value p
 		********************/
 
-		// Here: idxs_k are 0,1,2,3 each
-		double get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> idxs_k);
 		double get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet4 idxs_k);
 
 		/********************

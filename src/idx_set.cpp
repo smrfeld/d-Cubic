@@ -181,6 +181,16 @@ namespace dcu {
 	IdxSet2
 	****************************************/
 
+	IdxSet2::IdxSet2(int no_idxs) : IdxSet(no_idxs) {};
+	IdxSet2::IdxSet2(std::vector<int> idxs) : IdxSet(idxs) {
+		for (auto const &x: _idxs) {
+			if (x<0 || x>1) {
+				std::cerr << ">>> Error: IdxSet2::IdxSet2 <<< idxs must be 0,1" << std::endl;
+				exit(EXIT_FAILURE);
+			};
+		};
+	};
+
     int IdxSet2::get_linear() const {
 		int ret=0,add=0;
 		for (auto i=0; i<_idxs.size(); i++) {
@@ -291,6 +301,16 @@ namespace dcu {
 	IdxSet4
 	****************************************/
 
+	IdxSet4::IdxSet4(int no_idxs) : IdxSet(no_idxs) {};
+	IdxSet4::IdxSet4(std::vector<int> idxs) : IdxSet(idxs) {
+		for (auto const &x: _idxs) {
+			if (x<0 || x>3) {
+				std::cerr << ">>> Error: IdxSet4::IdxSet4 <<< idxs must be 0,1,2,3" << std::endl;
+				exit(EXIT_FAILURE);
+			};
+		};
+	};
+
     int IdxSet4::get_linear() const {
 		int ret=0,add=0;
 		for (auto i=0; i<_idxs.size(); i++) {
@@ -337,7 +357,7 @@ namespace dcu {
     bool operator<(const IdxSet4 &lhs, const IdxSet4 &rhs) {
     	return lhs.get_linear() < rhs.get_linear();
     };
-    
+
     // Math
     IdxSet4 operator+(IdxSet4 lhs, const IdxSet4& rhs) {
     	for (auto i=0; i<lhs.size(); i++) {
