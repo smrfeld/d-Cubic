@@ -10,6 +10,7 @@
 #include <iostream>
 #include <sstream>
 #include "cmath"
+#include <unordered_map>
 
 #define DIAG_PROJ 0
 
@@ -24,9 +25,11 @@ namespace dcu {
 	****************************************/
 
 	// Hash
-    size_t hash_gpk::operator() (const GridPtKey &grid_pt_key ) const {
-        return std::hash<int>()(grid_pt_key.get_linear());
-    };
+	struct hash_gpk {
+	    size_t operator() (const GridPtKey &grid_pt_key ) const {
+	        return std::hash<int>()(grid_pt_key.get_linear());
+	    };
+	};
 
 	/****************************************
 	Neighborhood of points surrounding a point, 2 in each dim
@@ -134,27 +137,27 @@ namespace dcu {
 		Get surrounding
 		********************/
 
-		void _iterate_get_surrounding_2_grid_pts(IdxSet &idxs_local, IdxSet &idxs_lower, IdxSet &idxs_upper, Nbr2 &nbr2, int dim) const;
+		void _iterate_get_surrounding_2_grid_pts(IdxSet2 &idxs_local, IdxSet &idxs_lower, IdxSet &idxs_upper, Nbr2 &nbr2, int dim) const;
 
-		void _iterate_get_surrounding_4_grid_pts(IdxSet &idxs_local, IdxSet &idxs_0, IdxSet &idxs_1, IdxSet &idxs_2, IdxSet &idxs_3, Nbr4 &nbr4, int dim) const;
+		void _iterate_get_surrounding_4_grid_pts(IdxSet4 &idxs_local, IdxSet &idxs_0, IdxSet &idxs_1, IdxSet &idxs_2, IdxSet &idxs_3, Nbr4 &nbr4, int dim) const;
 
 		/********************
 		Interpolate
 		********************/
 
-		double _iterate_interpolate(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, P4 &p) const;
+		double _iterate_interpolate(int delta, int d, std::vector<double> &frac_abscissas, IdxSet4 &idxs_j, P4 &p) const;
 
 		/********************
 		Deriv wrt p
 		********************/
 
-		double _iterate_deriv_pt_value(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, P4 &p, IdxSet &idxs_i, IdxSet &idxs_k) const;
+		double _iterate_deriv_pt_value(int delta, int d, std::vector<double> &frac_abscissas, IdxSet4 &idxs_j, P4 &p, IdxSet &idxs_i, IdxSet4 &idxs_k) const;
 
 		/********************
 		Derivative wrt x
 		********************/
 
-		double _iterate_deriv_x(int delta, int k, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, P4 &p) const;
+		double _iterate_deriv_x(int delta, int k, int d, std::vector<double> &frac_abscissas, IdxSet4 &idxs_j, P4 &p) const;
 
 		/********************
 		Constructor helpers
@@ -193,20 +196,16 @@ namespace dcu {
 		*****/
 		
 		const GridPt* get_grid_point(IdxSet idx_set) const;
-		const GridPt* get_grid_point(GridPtKey key) const;
 
 		const GridPtOut* get_grid_point_outside(IdxSet idx_set) const;
-		const GridPtOut* get_grid_point_outside(GridPtKey key) const;
 
 		/*****
 		Refs
 		*****/
 
 		GridPt& get_grid_point_ref(IdxSet idx_set);
-		GridPt& get_grid_point_ref(GridPtKey key);
 
 		GridPtOut& get_grid_point_outside_ref(IdxSet idx_set);
-		GridPtOut& get_grid_point_outside_ref(GridPtKey key);
 
 		/********************
 		Set grid point values
@@ -232,7 +231,7 @@ namespace dcu {
 		********************/
 
 		double get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> grid_idxs);
-		double get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet idx_set);
+		double get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet4 idx_set);
 
 		/********************
 		Get derivative wrt x
@@ -568,10 +567,7 @@ namespace dcu {
 	*****/
 
 	const GridPt* Grid::Impl::get_grid_point(IdxSet idx_set) const {
-		return get_grid_point(GridPtKey(idx_set,_dims));
-	};
-	const GridPt* Grid::Impl::get_grid_point(GridPtKey key) const {
-		auto it = _grid_pts.find(key);
+		auto it = _grid_pts.find(GridPtKey(idx_set,_dims));
 		if (it == _grid_pts.end()) {
 			return nullptr;
 		};
@@ -579,10 +575,7 @@ namespace dcu {
 	};
 
 	const GridPtOut* Grid::Impl::get_grid_point_outside(IdxSet idx_set) const {
-		return get_grid_point_outside(GridPtKey(idx_set,_dims));
-	};
-	const GridPtOut* Grid::Impl::get_grid_point_outside(GridPtKey key) const {
-		auto it = _grid_pts_out.find(key);
+		auto it = _grid_pts_out.find(GridPtKey(idx_set,_dims));
 		if (it == _grid_pts_out.end()) {
 			return nullptr;
 		};
@@ -594,10 +587,7 @@ namespace dcu {
 	*****/
 
 	GridPt& Grid::Impl::get_grid_point_ref(IdxSet idx_set) {
-		return get_grid_point_ref(GridPtKey(idx_set,_dims));
-	};
-	GridPt& Grid::Impl::get_grid_point_ref(GridPtKey key) {
-		auto it = _grid_pts.find(key);
+		auto it = _grid_pts.find(GridPtKey(idx_set,_dims));
 		if (it == _grid_pts.end()) {
 			std::cerr << ">>> Error: Grid::Impl::get_grid_point_ref <<< key not found" << std::endl;
 			exit(EXIT_FAILURE);
@@ -606,10 +596,7 @@ namespace dcu {
 	};
 
 	GridPtOut& Grid::Impl::get_grid_point_outside_ref(IdxSet idx_set) {
-		return get_grid_point_outside_ref(GridPtKey(idx_set,_dims));
-	};
-	GridPtOut& Grid::Impl::get_grid_point_outside_ref(GridPtKey key) {
-		auto it = _grid_pts_out.find(key);
+		auto it = _grid_pts_out.find(GridPtKey(idx_set,_dims));
 		if (it == _grid_pts_out.end()) {
 			std::cerr << ">>> Error: Grid::Impl::get_grid_point_outside_ref <<< key not found" << std::endl;
 			exit(EXIT_FAILURE);
@@ -654,13 +641,13 @@ namespace dcu {
 		nbr2.frac_abscissas = frac_abscissas;
 
 		// Iterate to fill out the map
-		IdxSet idxs_local(_dim_grid);
+		IdxSet2 idxs_local(_dim_grid);
 		_iterate_get_surrounding_2_grid_pts(idxs_local,idxs_lower,idxs_upper,nbr2,0);
 
 		return nbr2;
 	};
 
-	void Grid::Impl::_iterate_get_surrounding_2_grid_pts(IdxSet &idxs_local, IdxSet &idxs_lower, IdxSet &idxs_upper, Nbr2 &nbr2, int dim) const {
+	void Grid::Impl::_iterate_get_surrounding_2_grid_pts(IdxSet2 &idxs_local, IdxSet &idxs_lower, IdxSet &idxs_upper, Nbr2 &nbr2, int dim) const {
 		if (dim != _dim_grid) {
 			// Deeper!
 			// Can be lower (=0) or higher (=+1) in this dim
@@ -683,7 +670,7 @@ namespace dcu {
 			};
 
 			// Add to nbr2
-			nbr2.in[GridPtKey(idxs_local,2)] = get_grid_point(idxs_grid_pt);
+			nbr2.in[idxs_local] = get_grid_point(idxs_grid_pt);
 		};
 	};
 
@@ -722,13 +709,13 @@ namespace dcu {
 		nbr4.frac_abscissas = frac_abscissas;
 
 		// Iterate to fill out the nbr4
-		IdxSet idxs_local(_dim_grid);
+		IdxSet4 idxs_local(_dim_grid);
 		_iterate_get_surrounding_4_grid_pts(idxs_local,idxs_0,idxs_1,idxs_2,idxs_3,nbr4,0);
 
 		return nbr4;
 	};	
 
-	void Grid::Impl::_iterate_get_surrounding_4_grid_pts(IdxSet &idxs_local, IdxSet &idxs_0, IdxSet &idxs_1, IdxSet &idxs_2, IdxSet &idxs_3, Nbr4 &nbr4, int dim) const {
+	void Grid::Impl::_iterate_get_surrounding_4_grid_pts(IdxSet4 &idxs_local, IdxSet &idxs_0, IdxSet &idxs_1, IdxSet &idxs_2, IdxSet &idxs_3, Nbr4 &nbr4, int dim) const {
 		if (dim != _dim_grid) {
 			// Deeper!
 			// Can be lower (=0,1) or higher (=2,3) in this dim
@@ -769,13 +756,12 @@ namespace dcu {
 			};
 
 			// Add to nbr4
-			GridPtKey key(idxs_local,4);
 			if (inside) {
-				nbr4.types[key] = GridPtType::INSIDE;
-				nbr4.in[key] = get_grid_point(idxs_grid_pt);
+				nbr4.types[idxs_local] = GridPtType::INSIDE;
+				nbr4.in[idxs_local] = get_grid_point(idxs_grid_pt);
 			} else {
-				nbr4.types[key] = GridPtType::OUTSIDE;
-				nbr4.out[key] = get_grid_point_outside(idxs_grid_pt);
+				nbr4.types[idxs_local] = GridPtType::OUTSIDE;
+				nbr4.out[idxs_local] = get_grid_point_outside(idxs_grid_pt);
 			};
 		};
 	};
@@ -784,23 +770,23 @@ namespace dcu {
 	Get a point by interpolating
 	********************/
 
-	double Grid::Impl::_iterate_interpolate(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, P4 &p) const {
+	double Grid::Impl::_iterate_interpolate(int delta, int d, std::vector<double> &frac_abscissas, IdxSet4 &idxs_j, P4 &p) const {
 		double p0,p1,p2,p3;
 
 		if (delta == d-1) {
 			// Arrived; regular 1D interpolation
 
 			idxs_j[d-1] = 0;
-			p0 = p.p[GridPtKey(idxs_j,4)];
+			p0 = p.p[idxs_j];
 
 			idxs_j[d-1] = 1;
-			p1 = p.p[GridPtKey(idxs_j,4)];
+			p1 = p.p[idxs_j];
 
 			idxs_j[d-1] = 2;
-			p2 = p.p[GridPtKey(idxs_j,4)];
+			p2 = p.p[idxs_j];
 
 			idxs_j[d-1] = 3;
-			p3 = p.p[GridPtKey(idxs_j,4)];
+			p3 = p.p[idxs_j];
 
 			return f1d_interpolate_by_ref(frac_abscissas[d-1],p0,p1,p2,p3);
 		} else {
@@ -827,7 +813,7 @@ namespace dcu {
 		int d = get_no_dims();
 
 		// Idxs
-		IdxSet idxs_j(d);
+		IdxSet4 idxs_j(d);
 
 		// nbrs p
 		Nbr4 nbr4 = get_surrounding_4_grid_pts(abscissas);
@@ -846,7 +832,7 @@ namespace dcu {
 	Get derivative
 	********************/
 
-	double Grid::Impl::_iterate_deriv_pt_value(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, P4 &p, IdxSet &idxs_i, IdxSet &idxs_k) const {
+	double Grid::Impl::_iterate_deriv_pt_value(int delta, int d, std::vector<double> &frac_abscissas, IdxSet4 &idxs_j, P4 &p, IdxSet &idxs_i, IdxSet4 &idxs_k) const {
 
 		if (delta == d) {
 			// Done; evaluate
@@ -924,9 +910,9 @@ namespace dcu {
 
 
 	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> idxs_k) {
-		return get_deriv_wrt_pt_value(abscissas,IdxSet(idxs_k));
+		return get_deriv_wrt_pt_value(abscissas,IdxSet4(idxs_k));
 	};
-	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet idxs_k) {
+	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet4 idxs_k) {
 		// d
 		int d = get_no_dims();
 
@@ -961,7 +947,7 @@ namespace dcu {
 			// Case 2: At least one dimension near boundary
 
 			// Init idx set
-			IdxSet idxs_j(d);
+			IdxSet4 idxs_j(d);
 
 			// Iterate
 			return _iterate_deriv_pt_value(0, d,frac_abscissas, idxs_j, p, nbr4.idxs_i, idxs_k);
@@ -972,7 +958,7 @@ namespace dcu {
 	Get derivative wrt x
 	********************/
 
-	double Grid::Impl::_iterate_deriv_x(int delta, int k, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, P4 &p) const {
+	double Grid::Impl::_iterate_deriv_x(int delta, int k, int d, std::vector<double> &frac_abscissas, IdxSet4 &idxs_j, P4 &p) const {
 		
 		if (delta == k) { // Evaluate the derivative
 
@@ -1017,7 +1003,7 @@ namespace dcu {
 		int d = get_no_dims();
 
 		// Idxs
-		IdxSet idxs_j(d);
+		IdxSet4 idxs_j(d);
 
 		// nbrs p
 		Nbr4 nbr4 = get_surrounding_4_grid_pts(abscissas);
@@ -1256,18 +1242,12 @@ namespace dcu {
 	const GridPt* Grid::get_grid_point(IdxSet idx_set) const {
 		return _impl->get_grid_point(idx_set);
 	};
-	const GridPt* Grid::get_grid_point(GridPtKey key) const {
-		return _impl->get_grid_point(key);
-	};
 
 	const GridPtOut* Grid::get_grid_point_outside(std::vector<int> grid_idxs) const {
 		return get_grid_point_outside(IdxSet(grid_idxs));
 	};
 	const GridPtOut* Grid::get_grid_point_outside(IdxSet idx_set) const {
 		return _impl->get_grid_point_outside(idx_set);
-	};
-	const GridPtOut* Grid::get_grid_point_outside(GridPtKey key) const {
-		return _impl->get_grid_point_outside(key);
 	};
 
 	/*****
@@ -1280,18 +1260,12 @@ namespace dcu {
 	GridPt& Grid::get_grid_point_ref(IdxSet idx_set) {
 		return _impl->get_grid_point_ref(idx_set);
 	};
-	GridPt& Grid::get_grid_point_ref(GridPtKey key) {
-		return _impl->get_grid_point_ref(key);
-	};
 
 	GridPtOut& Grid::get_grid_point_outside_ref(std::vector<int> grid_idxs) {
 		return get_grid_point_outside_ref(IdxSet(grid_idxs));
 	};
 	GridPtOut& Grid::get_grid_point_outside_ref(IdxSet idx_set) {
 		return _impl->get_grid_point_outside_ref(idx_set);
-	};
-	GridPtOut& Grid::get_grid_point_outside_ref(GridPtKey key) {
-		return _impl->get_grid_point_outside_ref(key);
 	};
 
 	/********************
@@ -1320,7 +1294,7 @@ namespace dcu {
 	double Grid::get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> grid_idxs) {
 		return _impl->get_deriv_wrt_pt_value(abscissas,grid_idxs);
 	};
-	double Grid::get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet idx_set) {
+	double Grid::get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet4 idx_set) {
 		return _impl->get_deriv_wrt_pt_value(abscissas,idx_set);
 	};
 

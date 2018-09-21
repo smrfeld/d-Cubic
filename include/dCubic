@@ -6,6 +6,5 @@
 #include "dCubic_bits/grid_pt_out.hpp"
 #include "dCubic_bits/grid_pt.hpp"
 #include "dCubic_bits/grid.hpp"
-#include "dCubic_bits/idx_set.hpp"
 
 #endif

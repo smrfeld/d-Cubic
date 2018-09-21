@@ -16,7 +16,6 @@ namespace dcu {
 
 	// Forwards
 	class IdxSet;
-	class GridPtKey;
 	class GridPt;
 	class GridPtOut;
 

@@ -31,7 +31,6 @@ namespace dcu {
 		Constructor
 		********************/
 
-		// IdxSet();
 		IdxSet(int no_idxs);
 		IdxSet(std::vector<int> idxs);
 		IdxSet(const IdxSet& other);
@@ -51,7 +50,7 @@ namespace dcu {
 
 		bool find(int val) const;
 
-		std::vector<int> get_vector_idxs() const;
+		const std::vector<int>& get_vector_idxs() const;
 
 		std::string print() const;
 	};
@@ -95,6 +94,111 @@ namespace dcu {
 
 
 
+	/****************************************
+	Index set 2
+	****************************************/
+
+	class IdxSet2 : public IdxSet {
+
+		// Helpers
+		void _clean_up();
+		void _copy(const IdxSet2& other);
+		void _move(IdxSet2& other);
+
+	public:
+
+		/********************
+		Constructor
+		********************/
+
+		// Inherited
+		using IdxSet::IdxSet;
+
+		/********************
+		Accessors
+		********************/
+
+		int get_linear() const;
+		void set_from_linear(int idx_linear);
+
+	};
+
+	// Printing
+    std::ostream& operator<< (std::ostream& stream, const IdxSet2& idxs);
+
+    // Comparator
+    bool operator==(const IdxSet2 &lhs, const IdxSet2 &rhs);
+    bool operator<(const IdxSet2 &lhs, const IdxSet2 &rhs);
+
+    // Math
+    IdxSet2 operator+(IdxSet2 lhs, const IdxSet2& rhs);
+    IdxSet2 operator-(IdxSet2 lhs, const IdxSet2& rhs);
+    IdxSet2 operator+(IdxSet2 lhs, int rhs);
+    IdxSet2 operator-(IdxSet2 lhs, int rhs);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/****************************************
+	Index set 4
+	****************************************/
+
+	class IdxSet4 : public IdxSet {
+
+		// Helpers
+		void _clean_up();
+		void _copy(const IdxSet4& other);
+		void _move(IdxSet2& other);
+
+	public:
+
+		/********************
+		Constructor
+		********************/
+
+		// Inherited
+		using IdxSet::IdxSet;
+
+		/********************
+		Accessors
+		********************/
+
+		int get_linear() const;
+		void set_from_linear(int idx_linear);
+
+	};
+
+	// Printing
+    std::ostream& operator<< (std::ostream& stream, const IdxSet4& idxs);
+
+    // Comparator
+    bool operator==(const IdxSet4 &lhs, const IdxSet4 &rhs);
+    bool operator<(const IdxSet4 &lhs, const IdxSet4 &rhs);
+    
+    // Math
+    IdxSet4 operator+(IdxSet4 lhs, const IdxSet4& rhs);
+    IdxSet4 operator-(IdxSet4 lhs, const IdxSet4& rhs);
+    IdxSet4 operator+(IdxSet4 lhs, int rhs);
+    IdxSet4 operator-(IdxSet4 lhs, int rhs);
 
 
 

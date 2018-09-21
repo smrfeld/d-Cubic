@@ -14,7 +14,6 @@ namespace dcu {
 	****************************************/
 
 	// Constructors
-	// IdxSet::IdxSet() {};
 	IdxSet::IdxSet(int no_idxs) {
 		for (auto i=0; i<no_idxs; i++) {
 			_idxs.push_back(0);
@@ -86,7 +85,7 @@ namespace dcu {
 	};
 
 	// Get vector
-	std::vector<int> IdxSet::get_vector_idxs() const {
+	const std::vector<int>& IdxSet::get_vector_idxs() const {
 		return _idxs;
 	};
 
@@ -145,5 +144,225 @@ namespace dcu {
     	};
     	return lhs;
     };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/****************************************
+	IdxSet2
+	****************************************/
+
+    int IdxSet2::get_linear() const {
+		int ret=0,add=0;
+		for (auto i=0; i<_idxs.size(); i++) {
+			add = _idxs[i];
+
+			for (auto j=i+1; j<_idxs.size(); j++) {
+				add *= 2;
+			};
+			ret += add;
+		};
+
+		return ret;
+    };
+
+	void IdxSet2::set_from_linear(int idx_linear) {
+		int idx_working = idx_linear;
+
+		// Determine the idxs
+		int pwr;
+		for (auto dim=0; dim<_idxs.size(); dim++) {
+			pwr = 1;
+			for (auto dim2=dim+1; dim2<_idxs.size(); dim2++) {
+				pwr *= 2;
+			};
+
+			// Add
+			_idxs[dim] = int(idx_working/pwr);
+
+			// Remove
+			idx_working -= _idxs[dim]*pwr;
+		};
+	};
+
+	// Printing
+    std::ostream& operator<< (std::ostream& stream, const IdxSet2& idxs) {
+		stream << idxs.print();
+		return stream;
+    };
+
+    // Comparator
+    bool operator==(const IdxSet2 &lhs, const IdxSet2 &rhs) {
+    	return lhs.get_linear() == rhs.get_linear();
+    };
+    bool operator<(const IdxSet2 &lhs, const IdxSet2 &rhs) {
+    	return lhs.get_linear() < rhs.get_linear();
+    };
+
+    // Math
+    IdxSet2 operator+(IdxSet2 lhs, const IdxSet2& rhs) {
+    	for (auto i=0; i<lhs.size(); i++) {
+    		lhs[i] += rhs[i];
+    	};
+    	return lhs;
+    };
+    IdxSet2 operator-(IdxSet2 lhs, const IdxSet2& rhs) {
+    	for (auto i=0; i<lhs.size(); i++) {
+    		lhs[i] -= rhs[i];
+    	};
+    	return lhs;
+    };
+    IdxSet2 operator+(IdxSet2 lhs, int rhs) {
+    	for (auto i=0; i<lhs.size(); i++) {
+    		lhs[i] += rhs;
+    	};
+    	return lhs;
+    };
+    IdxSet2 operator-(IdxSet2 lhs, int rhs) {
+    	for (auto i=0; i<lhs.size(); i++) {
+    		lhs[i] -= rhs;
+    	};
+    	return lhs;
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/****************************************
+	IdxSet4
+	****************************************/
+
+    int IdxSet4::get_linear() const {
+		int ret=0,add=0;
+		for (auto i=0; i<_idxs.size(); i++) {
+			add = _idxs[i];
+
+			for (auto j=i+1; j<_idxs.size(); j++) {
+				add *= 4;
+			};
+			ret += add;
+		};
+
+		return ret;
+    };
+
+	void IdxSet4::set_from_linear(int idx_linear) {
+		int idx_working = idx_linear;
+
+		// Determine the idxs
+		int pwr;
+		for (auto dim=0; dim<_idxs.size(); dim++) {
+			pwr = 1;
+			for (auto dim2=dim+1; dim2<_idxs.size(); dim2++) {
+				pwr *= 4;
+			};
+
+			// Add
+			_idxs[dim] = int(idx_working/pwr);
+
+			// Remove
+			idx_working -= _idxs[dim]*pwr;
+		};
+	};
+
+	// Printing
+    std::ostream& operator<< (std::ostream& stream, const IdxSet4& idxs) {
+		stream << idxs.print();
+		return stream;
+    };
+
+    // Comparator
+    bool operator==(const IdxSet4 &lhs, const IdxSet4 &rhs) {
+    	return lhs.get_linear() == rhs.get_linear();
+    };
+    bool operator<(const IdxSet4 &lhs, const IdxSet4 &rhs) {
+    	return lhs.get_linear() < rhs.get_linear();
+    };
+    
+    // Math
+    IdxSet4 operator+(IdxSet4 lhs, const IdxSet4& rhs) {
+    	for (auto i=0; i<lhs.size(); i++) {
+    		lhs[i] += rhs[i];
+    	};
+    	return lhs;
+    };
+    IdxSet4 operator-(IdxSet4 lhs, const IdxSet4& rhs) {
+    	for (auto i=0; i<lhs.size(); i++) {
+    		lhs[i] -= rhs[i];
+    	};
+    	return lhs;
+    };
+    IdxSet4 operator+(IdxSet4 lhs, int rhs) {
+    	for (auto i=0; i<lhs.size(); i++) {
+    		lhs[i] += rhs;
+    	};
+    	return lhs;
+    };
+    IdxSet4 operator-(IdxSet4 lhs, int rhs) {
+    	for (auto i=0; i<lhs.size(); i++) {
+    		lhs[i] -= rhs;
+    	};
+    	return lhs;
+    };
+
 
 };

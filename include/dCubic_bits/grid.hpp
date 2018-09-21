@@ -8,9 +8,9 @@
 #include <vector>
 #endif
 
-#ifndef UNORDERED_MAP_H
-#define UNORDERED_MAP_H
-#include <unordered_map>
+#ifndef MAP_H
+#define MAP_H
+#include <map>
 #endif
 
 #ifndef IDX_SET_H
@@ -28,25 +28,7 @@ namespace dcu {
 	class Dimension1D;
 	class GridPt;
 	class GridPtOut;
-	class GridPtKey;
 	enum class GridPtType: unsigned int;
-
-	/****************************************
-	Hash for an unordered map
-	****************************************/
-
-	// Hashes
-	struct hash_gpk {
-	    size_t operator() ( const GridPtKey &grid_pt_key ) const;
-	};
-	/*
-	struct hash_2 {
-	    size_t operator() ( const IdxSet2 &idx_set_2 ) const;
-	};
-	struct hash_4 {
-	    size_t operator() ( const IdxSet4 &idx_set_4 ) const;
-	};
-	*/
 
 	/****************************************
 	Neighborhood of points surrounding a point, 2 in each dim
@@ -54,7 +36,7 @@ namespace dcu {
 
 	struct Nbr2 {
 		IdxSet idxs_i;
-		std::unordered_map<GridPtKey, const GridPt*, hash_gpk> in;
+		std::map<IdxSet2, const GridPt*> in;
 		std::vector<double> frac_abscissas;
 
 		Nbr2(IdxSet idxs_i);
@@ -66,9 +48,9 @@ namespace dcu {
 
 	struct Nbr4 {
 		IdxSet idxs_i;
-		std::unordered_map<GridPtKey, GridPtType, hash_gpk> types;
-		std::unordered_map<GridPtKey, const GridPt*, hash_gpk> in;
-		std::unordered_map<GridPtKey, const GridPtOut*, hash_gpk> out;
+		std::map<IdxSet4, GridPtType> types;
+		std::map<IdxSet4, const GridPt*> in;
+		std::map<IdxSet4, const GridPtOut*> out;
 		std::vector<double> frac_abscissas;
 
 		Nbr4(IdxSet idxs_i);
@@ -79,7 +61,7 @@ namespace dcu {
 	****************************************/
 
 	struct P2 {
-		std::unordered_map<GridPtKey, double, hash_gpk> p;
+		std::map<IdxSet2, double> p;
 
 		P2(Nbr2 nbr2);
 	};
@@ -89,7 +71,7 @@ namespace dcu {
 	****************************************/
 
 	struct P4 {
-		std::unordered_map<GridPtKey, double, hash_gpk> p;
+		std::map<IdxSet4, double> p;
 
 		P4(Nbr4 nbr4);
 	};
@@ -135,11 +117,9 @@ namespace dcu {
 
 		const GridPt* get_grid_point(std::vector<int> grid_idxs) const;
 		const GridPt* get_grid_point(IdxSet idx_set) const;
-		const GridPt* get_grid_point(GridPtKey key) const;
 
 		const GridPtOut* get_grid_point_outside(std::vector<int> grid_idxs) const;
 		const GridPtOut* get_grid_point_outside(IdxSet idx_set) const;
-		const GridPtOut* get_grid_point_outside(GridPtKey key) const;
 
 		/*****
 		Refs
@@ -147,11 +127,9 @@ namespace dcu {
 
 		GridPt& get_grid_point_ref(std::vector<int> grid_idxs);
 		GridPt& get_grid_point_ref(IdxSet idx_set);
-		GridPt& get_grid_point_ref(GridPtKey key);
 
 		GridPtOut& get_grid_point_outside_ref(std::vector<int> grid_idxs);
 		GridPtOut& get_grid_point_outside_ref(IdxSet idx_set);
-		GridPtOut& get_grid_point_outside_ref(GridPtKey key);
 
 		/********************
 		Get grid points surrounding a point
@@ -173,7 +151,7 @@ namespace dcu {
 
 		// Here: idxs_k are 0,1,2,3 each
 		double get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> idxs_k);
-		double get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet idxs_k);
+		double get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet4 idxs_k);
 
 		/********************
 		Get derivative wrt x
