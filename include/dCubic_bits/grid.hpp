@@ -120,7 +120,7 @@ namespace dcu {
 		/*****
 		Const ptrs
 		*****/
-		
+
 		const std::unordered_map<GridPtKey, GridPt*, hash_gpk>& get_grid_points() const;
 		const GridPt* get_grid_point(std::vector<int> grid_idxs) const;
 		const GridPt* get_grid_point(IdxSet idx_set) const;
@@ -161,11 +161,9 @@ namespace dcu {
 		Get derivative wrt a point value p
 		********************/
 
-		// Here: grid_idxs/idx_set/grid_pt_key are 0,1,2,3 each
-		// i.e. refer to p! not global idxs
-		double get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> local_grid_idxs);
-		double get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet local_idx_set);
-		double get_deriv_wrt_pt_value(std::vector<double> abscissas, GridPtKey local_grid_pt_key);
+		// Here: idxs_k are 0,1,2,3 each
+		double get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> idxs_k);
+		double get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet idxs_k);
 
 		/********************
 		Get derivative wrt x

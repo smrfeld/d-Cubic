@@ -223,7 +223,6 @@ namespace dcu {
 
 		double get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> grid_idxs);
 		double get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet idx_set);
-		double get_deriv_wrt_pt_value(std::vector<double> abscissas, GridPtKey grid_pt_key);
 
 		/********************
 		Get derivative wrt x
@@ -918,13 +917,10 @@ namespace dcu {
 	};
 
 
-	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> local_grid_idxs) {
-		return get_deriv_wrt_pt_value(abscissas,IdxSet(local_grid_idxs));
+	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, std::vector<int> idxs_k) {
+		return get_deriv_wrt_pt_value(abscissas,IdxSet(idxs_k));
 	};
-	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet local_idx_set) {
-		return get_deriv_wrt_pt_value(abscissas,GridPtKey(local_idx_set,_dims));
-	};
-	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, GridPtKey local_grid_pt_key) {
+	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet idxs_k) {
 		// d
 		int d = get_no_dims();
 
@@ -951,7 +947,7 @@ namespace dcu {
 
 			double ret=1.0;
 			for (auto alpha=0; alpha<d; alpha++) {
-				ret *= f1d_deriv_pt_value_by_ref(frac_abscissas[alpha], local_grid_pt_key[alpha]);
+				ret *= f1d_deriv_pt_value_by_ref(frac_abscissas[alpha], idxs_k[alpha]);
 			};
 			return ret;
 
@@ -960,7 +956,6 @@ namespace dcu {
 
 			// Init idx set
 			IdxSet idxs_j(d);
-			IdxSet idxs_k = local_grid_pt_key.get_idx_set();
 
 			// Iterate
 			return _iterate_deriv_pt_value(0, d,frac_abscissas, idxs_j, p, nbr4.idxs_i, idxs_k);
@@ -1327,9 +1322,6 @@ namespace dcu {
 	};
 	double Grid::get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet idx_set) {
 		return _impl->get_deriv_wrt_pt_value(abscissas,idx_set);
-	};
-	double Grid::get_deriv_wrt_pt_value(std::vector<double> abscissas, GridPtKey grid_pt_key) {
-		return _impl->get_deriv_wrt_pt_value(abscissas,grid_pt_key);
 	};
 
 	/********************
