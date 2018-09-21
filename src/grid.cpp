@@ -176,15 +176,27 @@ namespace dcu {
 		Get grid points
 		********************/
 
+		/*****
+		Const ptrs
+		*****/
+		
 		const std::unordered_map<GridPtKey, GridPt*, hash_gpk>& get_grid_points() const;
-		const GridPt* get_grid_point(std::vector<int> grid_idxs) const;
 		const GridPt* get_grid_point(IdxSet idx_set) const;
 		const GridPt* get_grid_point(GridPtKey key) const;
 
 		const std::unordered_map<GridPtKey, GridPtOut*, hash_gpk>& get_grid_points_outside() const;
-		const GridPtOut* get_grid_point_outside(std::vector<int> grid_idxs) const;
 		const GridPtOut* get_grid_point_outside(IdxSet idx_set) const;
 		const GridPtOut* get_grid_point_outside(GridPtKey key) const;
+
+		/*****
+		Refs
+		*****/
+
+		GridPt& get_grid_point_ref(IdxSet idx_set);
+		GridPt& get_grid_point_ref(GridPtKey key);
+
+		GridPtOut& get_grid_point_outside_ref(IdxSet idx_set);
+		GridPtOut& get_grid_point_outside_ref(GridPtKey key);
 
 		/********************
 		Set grid point values
@@ -542,11 +554,12 @@ namespace dcu {
 	Get grid point
 	********************/
 
+	/*****
+	Const ptrs
+	*****/
+
 	const std::unordered_map<GridPtKey, GridPt*, hash_gpk>& Grid::Impl::get_grid_points() const {
 		return _grid_pts;
-	};
-	const GridPt* Grid::Impl::get_grid_point(std::vector<int> grid_idxs) const {
-		return get_grid_point(IdxSet(grid_idxs));
 	};
 	const GridPt* Grid::Impl::get_grid_point(IdxSet idx_set) const {
 		return get_grid_point(GridPtKey(idx_set,_dims));
@@ -562,9 +575,6 @@ namespace dcu {
 	const std::unordered_map<GridPtKey, GridPtOut*, hash_gpk>& Grid::Impl::get_grid_points_outside() const {
 		return _grid_pts_out;
 	};
-	const GridPtOut* Grid::Impl::get_grid_point_outside(std::vector<int> grid_idxs) const {
-		return get_grid_point_outside(IdxSet(grid_idxs));
-	};
 	const GridPtOut* Grid::Impl::get_grid_point_outside(IdxSet idx_set) const {
 		return get_grid_point_outside(GridPtKey(idx_set,_dims));
 	};
@@ -576,17 +586,32 @@ namespace dcu {
 		return it->second;	
 	};
 
-	/********************
-	Set grid point values
-	********************/
+	/*****
+	Refs
+	*****/
 
-	void Grid::Impl::set_grid_point_ordinate(const GridPt* grid_pt, double val) {
-		auto it = _grid_pts.find(GridPtKey(grid_pt->get_idxs(),_dims));
+	GridPt& Grid::Impl::get_grid_point_ref(IdxSet idx_set) {
+		return get_grid_point_ref(GridPtKey(idx_set,_dims));
+	};
+	GridPt& Grid::Impl::get_grid_point_ref(GridPtKey key) {
+		auto it = _grid_pts.find(key);
 		if (it == _grid_pts.end()) {
-			std::cerr << ">>> Error: Grid::Impl::set_grid_point_ordinate <<< could not find grid pt: " << grid_pt->print_abscissa() << std::endl;
+			std::cerr << ">>> Error: Grid::Impl::get_grid_point_ref <<< key not found" << std::endl;
 			exit(EXIT_FAILURE);
 		};
-		it->second->set_ordinate(val);
+		return *it->second;
+	};
+
+	GridPtOut& Grid::Impl::get_grid_point_outside_ref(IdxSet idx_set) {
+		return get_grid_point_outside_ref(GridPtKey(idx_set,_dims));
+	};
+	GridPtOut& Grid::Impl::get_grid_point_outside_ref(GridPtKey key) {
+		auto it = _grid_pts_out.find(key);
+		if (it == _grid_pts_out.end()) {
+			std::cerr << ">>> Error: Grid::Impl::get_grid_point_outside_ref <<< key not found" << std::endl;
+			exit(EXIT_FAILURE);
+		};
+		return *it->second;
 	};
 
 	/********************
@@ -1220,11 +1245,15 @@ namespace dcu {
 	Get grid pts
 	********************/
 
+	/*****
+	Const ptrs
+	*****/
+
 	const std::unordered_map<GridPtKey, GridPt*, hash_gpk>& Grid::get_grid_points() const {
 		return _impl->get_grid_points();
 	};
 	const GridPt* Grid::get_grid_point(std::vector<int> grid_idxs) const {
-		return _impl->get_grid_point(grid_idxs);
+		return get_grid_point(IdxSet(grid_idxs));
 	};
 	const GridPt* Grid::get_grid_point(IdxSet idx_set) const {
 		return _impl->get_grid_point(idx_set);
@@ -1237,7 +1266,7 @@ namespace dcu {
 		return _impl->get_grid_points_outside();
 	};
 	const GridPtOut* Grid::get_grid_point_outside(std::vector<int> grid_idxs) const {
-		return _impl->get_grid_point_outside(grid_idxs);
+		return get_grid_point_outside(IdxSet(grid_idxs));
 	};
 	const GridPtOut* Grid::get_grid_point_outside(IdxSet idx_set) const {
 		return _impl->get_grid_point_outside(idx_set);
@@ -1246,12 +1275,28 @@ namespace dcu {
 		return _impl->get_grid_point_outside(key);
 	};
 
-	/********************
-	Set grid point values
-	********************/
+	/*****
+	Refs
+	*****/
 
-	void Grid::set_grid_point_ordinate(const GridPt* grid_pt, double val) {
-		_impl->set_grid_point_ordinate(grid_pt,val);
+	GridPt& Grid::get_grid_point_ref(std::vector<int> grid_idxs) {
+		return get_grid_point_ref(IdxSet(grid_idxs));
+	};
+	GridPt& Grid::get_grid_point_ref(IdxSet idx_set) {
+		return _impl->get_grid_point_ref(idx_set);
+	};
+	GridPt& Grid::get_grid_point_ref(GridPtKey key) {
+		return _impl->get_grid_point_ref(key);
+	};
+
+	GridPtOut& Grid::get_grid_point_outside_ref(std::vector<int> grid_idxs) {
+		return get_grid_point_outside_ref(IdxSet(grid_idxs));
+	};
+	GridPtOut& Grid::get_grid_point_outside_ref(IdxSet idx_set) {
+		return _impl->get_grid_point_outside_ref(idx_set);
+	};
+	GridPtOut& Grid::get_grid_point_outside_ref(GridPtKey key) {
+		return _impl->get_grid_point_outside_ref(key);
 	};
 
 	/********************

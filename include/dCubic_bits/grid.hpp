@@ -117,6 +117,10 @@ namespace dcu {
 		Get grid points
 		********************/
 
+		/*****
+		Const ptrs
+		*****/
+		
 		const std::unordered_map<GridPtKey, GridPt*, hash_gpk>& get_grid_points() const;
 		const GridPt* get_grid_point(std::vector<int> grid_idxs) const;
 		const GridPt* get_grid_point(IdxSet idx_set) const;
@@ -127,11 +131,17 @@ namespace dcu {
 		const GridPtOut* get_grid_point_outside(IdxSet idx_set) const;
 		const GridPtOut* get_grid_point_outside(GridPtKey key) const;
 
-		/********************
-		Set grid point values
-		********************/
+		/*****
+		Refs
+		*****/
 
-		void set_grid_point_ordinate(const GridPt* grid_pt, double val);
+		GridPt& get_grid_point_ref(std::vector<int> grid_idxs);
+		GridPt& get_grid_point_ref(IdxSet idx_set);
+		GridPt& get_grid_point_ref(GridPtKey key);
+
+		GridPtOut& get_grid_point_outside_ref(std::vector<int> grid_idxs);
+		GridPtOut& get_grid_point_outside_ref(IdxSet idx_set);
+		GridPtOut& get_grid_point_outside_ref(GridPtKey key);
 
 		/********************
 		Get grid points surrounding a point
