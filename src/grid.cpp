@@ -29,6 +29,18 @@ namespace dcu {
     };
 
 	/****************************************
+	Neighborhood of points surrounding a point, 2 in each dim
+	****************************************/
+
+    Nbr2::Nbr2(IdxSet idxs_i) : idxs_i(idxs_i) {};
+
+	/****************************************
+	Neighborhood of points surrounding a point, 4 in each dim
+	****************************************/
+
+    Nbr4::Nbr4(IdxSet idxs_i) : idxs_i(idxs_i) {};
+
+	/****************************************
 	Ordinates associated with a Nbr2
 	****************************************/
 
@@ -616,8 +628,8 @@ namespace dcu {
 			exit(EXIT_FAILURE);
 		};
 
-		// Returned
-		Nbr2 nbr2;
+		// Frac abscissas
+		std::vector<double> frac_abscissas;
 
 		// Get bounding idxs
 		IdxSet idxs_lower(_dim_grid), idxs_upper(_dim_grid);
@@ -634,11 +646,12 @@ namespace dcu {
 			idxs_upper[dim] = bounds.second.second;
 
 			// Frac
-			nbr2.frac_abscissas.push_back((abscissas[dim] - _dims[dim].get_pt_at_idx(idxs_lower[dim])) / (_dims[dim].get_pt_at_idx(idxs_upper[dim]) - _dims[dim].get_pt_at_idx(idxs_lower[dim])));
+			frac_abscissas.push_back((abscissas[dim] - _dims[dim].get_pt_at_idx(idxs_lower[dim])) / (_dims[dim].get_pt_at_idx(idxs_upper[dim]) - _dims[dim].get_pt_at_idx(idxs_lower[dim])));
 		};
 
-		// Set idxs_i
-		nbr2.idxs_i = idxs_lower;
+		// Returned
+		Nbr2 nbr2(idxs_lower);
+		nbr2.frac_abscissas = frac_abscissas;
 
 		// Iterate to fill out the map
 		IdxSet idxs_local(_dim_grid);
@@ -681,8 +694,8 @@ namespace dcu {
 			exit(EXIT_FAILURE);
 		};
 
-		// Returned
-		Nbr4 nbr4;
+		// Frac abscissas
+		std::vector<double> frac_abscissas;
 
 		// Get bounding idxs
 		IdxSet idxs_0(_dim_grid), idxs_1(_dim_grid), idxs_2(_dim_grid), idxs_3(_dim_grid);
@@ -701,11 +714,12 @@ namespace dcu {
 			idxs_3[dim] = idxs_2[dim]+1;
 
 			// Frac
-			nbr4.frac_abscissas.push_back((abscissas[dim] - _dims[dim].get_pt_at_idx(idxs_1[dim])) / (_dims[dim].get_pt_at_idx(idxs_2[dim]) - _dims[dim].get_pt_at_idx(idxs_1[dim])));
+			frac_abscissas.push_back((abscissas[dim] - _dims[dim].get_pt_at_idx(idxs_1[dim])) / (_dims[dim].get_pt_at_idx(idxs_2[dim]) - _dims[dim].get_pt_at_idx(idxs_1[dim])));
 		};
 
-		// Set idxs_i
-		nbr4.idxs_i = idxs_1;
+		// Returned
+		Nbr4 nbr4(idxs_1);
+		nbr4.frac_abscissas = frac_abscissas;
 
 		// Iterate to fill out the nbr4
 		IdxSet idxs_local(_dim_grid);

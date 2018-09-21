@@ -14,7 +14,7 @@ namespace dcu {
 	****************************************/
 
 	// Constructors
-	IdxSet::IdxSet() {};
+	// IdxSet::IdxSet() {};
 	IdxSet::IdxSet(int no_idxs) {
 		for (auto i=0; i<no_idxs; i++) {
 			_idxs.push_back(0);

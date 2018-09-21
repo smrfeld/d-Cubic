@@ -98,7 +98,7 @@ namespace dcu {
 	Implementation
 	****************************************/
 
-	GridPt::Impl::Impl(IdxSet idxs, std::vector<double> abscissas) {
+	GridPt::Impl::Impl(IdxSet idxs, std::vector<double> abscissas) : _idxs(idxs) {
 		// Check lengths
 		if (idxs.size() != abscissas.size()) {
 			std::cout << ">>> Error: GridPt::Impl::Impl <<< Sizes must match." << std::endl;
@@ -106,16 +106,15 @@ namespace dcu {
 		};
 
 		// Store
-		_idxs = idxs;
 		_abcissas = abscissas;
 
 		// Init
 		_ordinate = 0.0;
 	};
-	GridPt::Impl::Impl(const Impl& other) {
+	GridPt::Impl::Impl(const Impl& other) : _idxs(other._idxs) {
 		_copy(other);
 	};
-	GridPt::Impl::Impl(Impl&& other) {
+	GridPt::Impl::Impl(Impl&& other) : _idxs(std::move(other._idxs)) {
 		_move(other);
 	};
     GridPt::Impl& GridPt::Impl::operator=(const Impl& other) {
@@ -160,7 +159,7 @@ namespace dcu {
 		// Reset other
 		other._abcissas.clear();
 		other._ordinate = 0.0;
-		other._idxs = IdxSet();
+		// other._idxs = IdxSet();
 	};
 
 	/********************

@@ -106,7 +106,7 @@ namespace dcu {
 	Implementation
 	****************************************/
 
-	GridPtOut::Impl::Impl(IdxSet idxs, std::vector<double> abscissas, const GridPt* p1, const GridPt* p2, std::vector<LocInDim> loc) : _p1(p1), _p2(p2) {
+	GridPtOut::Impl::Impl(IdxSet idxs, std::vector<double> abscissas, const GridPt* p1, const GridPt* p2, std::vector<LocInDim> loc) : _p1(p1), _p2(p2), _idxs(idxs) {
 		// Check lengths
 		if (idxs.size() != abscissas.size()) {
 			std::cout << ">>> Error: GridPt::Impl::Impl <<< Sizes must match." << std::endl;
@@ -114,14 +114,13 @@ namespace dcu {
 		};
 
 		// Store
-		_idxs = idxs;
 		_abcissas = abscissas;
 		_locs = loc;
 	};
-	GridPtOut::Impl::Impl(const Impl& other) {
+	GridPtOut::Impl::Impl(const Impl& other) : _idxs(other._idxs) {
 		_copy(other);
 	};
-	GridPtOut::Impl::Impl(Impl&& other) {
+	GridPtOut::Impl::Impl(Impl&& other) : _idxs(std::move(other._idxs)) {
 		_move(other);
 	};
     GridPtOut::Impl& GridPtOut::Impl::operator=(const Impl& other) {
@@ -164,7 +163,7 @@ namespace dcu {
 		_copy(other);
 
 		// Reset other
-		other._idxs = IdxSet();
+		// other._idxs = IdxSet();
 		other._abcissas.clear();
 		other._p1 = nullptr;
 		other._p2 = nullptr;

@@ -15,15 +15,15 @@ namespace dcu {
 
 	class IdxSet {
 
-	private:
-		
-		// Idxs
-		std::vector<int> _idxs;
-
 		// Helpers
 		void _clean_up();
 		void _copy(const IdxSet& other);
 		void _move(IdxSet& other);
+
+	protected:
+		
+		// Idxs
+		std::vector<int> _idxs;
 
 	public:
 
@@ -31,7 +31,7 @@ namespace dcu {
 		Constructor
 		********************/
 
-		IdxSet();
+		// IdxSet();
 		IdxSet(int no_idxs);
 		IdxSet(std::vector<int> idxs);
 		IdxSet(const IdxSet& other);
@@ -67,6 +67,38 @@ namespace dcu {
     IdxSet operator-(IdxSet lhs, const IdxSet& rhs);
     IdxSet operator+(IdxSet lhs, int rhs);
     IdxSet operator-(IdxSet lhs, int rhs);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 };
 

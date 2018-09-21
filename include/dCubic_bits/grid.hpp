@@ -35,10 +35,18 @@ namespace dcu {
 	Hash for an unordered map
 	****************************************/
 
-	// Hash
+	// Hashes
 	struct hash_gpk {
 	    size_t operator() ( const GridPtKey &grid_pt_key ) const;
 	};
+	/*
+	struct hash_2 {
+	    size_t operator() ( const IdxSet2 &idx_set_2 ) const;
+	};
+	struct hash_4 {
+	    size_t operator() ( const IdxSet4 &idx_set_4 ) const;
+	};
+	*/
 
 	/****************************************
 	Neighborhood of points surrounding a point, 2 in each dim
@@ -48,6 +56,8 @@ namespace dcu {
 		IdxSet idxs_i;
 		std::unordered_map<GridPtKey, const GridPt*, hash_gpk> in;
 		std::vector<double> frac_abscissas;
+
+		Nbr2(IdxSet idxs_i);
 	};
 
 	/****************************************
@@ -60,6 +70,8 @@ namespace dcu {
 		std::unordered_map<GridPtKey, const GridPt*, hash_gpk> in;
 		std::unordered_map<GridPtKey, const GridPtOut*, hash_gpk> out;
 		std::vector<double> frac_abscissas;
+
+		Nbr4(IdxSet idxs_i);
 	};
 
 	/****************************************
