@@ -38,11 +38,8 @@ int main() {
 	// Point to evaluate at
 	std::vector<double> abcissa({0.023});
 
-	// Derivs
-
-	// NOTE: derivative wrt p0 is forbidden
-	// This should be enforced somewhere?
-	std::vector<int> local_idxs({0});
+	// NOTE: derivative wrt p0 will throw an error, since it is out of the grid
+	IdxSet4 local_idxs({0});
 	double x_deriv;
 	for (int i=1; i<=3; i++) {
 		local_idxs[0] = i;

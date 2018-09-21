@@ -441,25 +441,19 @@ is the desired interpolated value we seek.
 %%%%%%%%%%%%%%%%%%
 
 \begin{enumerate}
-\item function \textbf{iterate}($\delta$, $d$, $\xb$, $(j_1, \dots, j_{d-1})$, $p^{[d]:\langle 0:d-1 \rangle}$): \\
+\item function \textbf{iterate}($\delta$, $d$, $\xb$, $(j_0, \dots, j_{d-1})$, $p^{[d]:\langle 0:d-1 \rangle}$): \\
 // This calculates $p^{[\delta]: \langle 0:\delta-1 \rangle} = $ left side of~(\ref{eq:rec})
 \begin{enumerate}
-\item if $\delta$ == $d-1$: // Arrived at~(\ref{eq:iterate1}) which we can do with the points given
+\item if $\delta$ == $d$: // Arrived at $p^{[d]}$ - this we can just return
 \begin{enumerate}
-\item return $f \left ( 
-x_{d-1} ; 
-p^{[d]: \langle 0:d-2,0 \rangle},
-p^{[d]: \langle 0:d-2,1 \rangle},
-p^{[d]: \langle 0:d-2,2 \rangle},
-p^{[d]: \langle 0:d-2,3 \rangle}
-\right )$ // $= p^{[d-1]}$
+\item return $p^{[d]: \langle j_0, \dots, j_{d-1} \rangle}$
 \end{enumerate}
 \item else: // Calculate the right side of~(\ref{eq:rec})
 \begin{enumerate}
-\item $p^{[\delta+1]: \langle 0: \delta-1,0 \rangle} = $ \textbf{iterate}($\delta+1$, $d$, $\xb$, $( j_1, \dots, j_{\delta}=0, \dots, j_{d-1} )$, $p^{[d]:\langle 0:d-1 \rangle}$)
-\item $p^{[\delta+1]: \langle 0: \delta-1,1 \rangle} = $ \textbf{iterate}($\delta+1$, $d$, $\xb$, $( j_1, \dots, j_{\delta}=1, \dots, j_{d-1} )$, $p^{[d]:\langle 0:d-1 \rangle}$)
-\item $p^{[\delta+1]: \langle 0: \delta-1,2 \rangle} = $ \textbf{iterate}($\delta+1$, $d$, $\xb$, $( j_1, \dots, j_{\delta}=2, \dots, j_{d-1} )$, $p^{[d]:\langle 0:d-1 \rangle}$)
-\item $p^{[\delta+1]: \langle 0: \delta-1,3 \rangle} = $ \textbf{iterate}($\delta+1$, $d$, $\xb$, $( j_1, \dots, j_{\delta}=3, \dots, j_{d-1} )$, $p^{[d]:\langle 0:d-1 \rangle}$)
+\item $p^{[\delta+1]: \langle 0: \delta-1,0 \rangle} = $ \textbf{iterate}($\delta+1$, $d$, $\xb$, $( j_0, \dots, j_{\delta}=0, \dots, j_{d-1} )$, $p^{[d]:\langle 0:d-1 \rangle}$)
+\item $p^{[\delta+1]: \langle 0: \delta-1,1 \rangle} = $ \textbf{iterate}($\delta+1$, $d$, $\xb$, $( j_0, \dots, j_{\delta}=1, \dots, j_{d-1} )$, $p^{[d]:\langle 0:d-1 \rangle}$)
+\item $p^{[\delta+1]: \langle 0: \delta-1,2 \rangle} = $ \textbf{iterate}($\delta+1$, $d$, $\xb$, $( j_0, \dots, j_{\delta}=2, \dots, j_{d-1} )$, $p^{[d]:\langle 0:d-1 \rangle}$)
+\item $p^{[\delta+1]: \langle 0: \delta-1,3 \rangle} = $ \textbf{iterate}($\delta+1$, $d$, $\xb$, $( j_0, \dots, j_{\delta}=3, \dots, j_{d-1} )$, $p^{[d]:\langle 0:d-1 \rangle}$)
 \item return $f \left ( 
 x_{\delta} ; 
 p^{[\delta+1]: \langle 0:\delta-1,0 \rangle},
@@ -470,7 +464,7 @@ p^{[\delta+1]: \langle 0:\delta-1,3 \rangle}
 \end{enumerate}
 \end{enumerate}
 
-\item To start: \textbf{iterate}(0,$d$,$\xb$,$(j_1,\dots,j_{d-1})$,$p^{[d]:\langle 0:d-1 \rangle}$)
+\item To start: \textbf{iterate}(0,$d$,$\xb$,$(j_0,\dots,j_{d-1})$,$p^{[d]:\langle 0:d-1 \rangle}$)
 \end{enumerate}
 
 %%%%%%%%%%%%%%%%%%
@@ -916,10 +910,10 @@ $ // using~(\ref{eq:derivAbs})
 \end{enumerate}
 \item else: // Recurse using~(\ref{eq:recDer})
 \begin{enumerate}
-\item $\partial p^{[\delta+1]: \langle 0:\delta-1,0 \rangle} / \partial x_k$ = \textbf{iterate\_deriv\_x}($\delta+1$,$k$,$d$,$\xb$,$(j_0, \dots, j_{\delta+1} = 0,\dots, j_{k-1})$,$p^{[d]:\langle 0:d-1 \rangle}$)
-\item $\partial p^{[\delta+1]: \langle 0:\delta-1,0 \rangle} / \partial x_k$ = \textbf{iterate\_deriv\_x}($\delta+1$,$k$,$d$,$\xb$,$(j_0, \dots, j_{\delta+1} = 0,\dots, j_{k-1})$,$p^{[d]:\langle 0:d-1 \rangle}$)
-\item $\partial p^{[\delta+1]: \langle 0:\delta-1,0 \rangle} / \partial x_k$ = \textbf{iterate\_deriv\_x}($\delta+1$,$k$,$d$,$\xb$,$(j_0, \dots, j_{\delta+1} = 0,\dots, j_{k-1})$,$p^{[d]:\langle 0:d-1 \rangle}$)
-\item $\partial p^{[\delta+1]: \langle 0:\delta-1,0 \rangle} / \partial x_k$ = \textbf{iterate\_deriv\_x}($\delta+1$,$k$,$d$,$\xb$,$(j_0, \dots, j_{\delta+1} = 0,\dots, j_{k-1})$,$p^{[d]:\langle 0:d-1 \rangle}$)
+\item $\partial p^{[\delta+1]: \langle 0:\delta-1,0 \rangle} / \partial x_k$ = \textbf{iterate\_deriv\_x}($\delta+1$,$k$,$d$,$\xb$,$(j_0, \dots, j_{\delta} = 0,\dots, j_{k-1})$,$p^{[d]:\langle 0:d-1 \rangle}$)
+\item $\partial p^{[\delta+1]: \langle 0:\delta-1,1 \rangle} / \partial x_k$ = \textbf{iterate\_deriv\_x}($\delta+1$,$k$,$d$,$\xb$,$(j_0, \dots, j_{\delta} = 1,\dots, j_{k-1})$,$p^{[d]:\langle 0:d-1 \rangle}$)
+\item $\partial p^{[\delta+1]: \langle 0:\delta-1,2 \rangle} / \partial x_k$ = \textbf{iterate\_deriv\_x}($\delta+1$,$k$,$d$,$\xb$,$(j_0, \dots, j_{\delta} = 2,\dots, j_{k-1})$,$p^{[d]:\langle 0:d-1 \rangle}$)
+\item $\partial p^{[\delta+1]: \langle 0:\delta-1,3 \rangle} / \partial x_k$ = \textbf{iterate\_deriv\_x}($\delta+1$,$k$,$d$,$\xb$,$(j_0, \dots, j_{\delta} = 3,\dots, j_{k-1})$,$p^{[d]:\langle 0:d-1 \rangle}$)
 \item return $
 \sum_{j_\delta=0}^3 
 \frac{

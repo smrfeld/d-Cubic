@@ -772,22 +772,11 @@ namespace dcu {
 	double Grid::Impl::_iterate_interpolate(int delta, int d, std::vector<double> &frac_abscissas, IdxSet4 &idxs_j, P4 &p) const {
 		double p0,p1,p2,p3;
 
-		if (delta == d-1) {
-			// Arrived; regular 1D interpolation
+		if (delta == d) {
+			
+			// Arrived; return the point itself
+			return p.p[idxs_j];
 
-			idxs_j[d-1] = 0;
-			p0 = p.p[idxs_j];
-
-			idxs_j[d-1] = 1;
-			p1 = p.p[idxs_j];
-
-			idxs_j[d-1] = 2;
-			p2 = p.p[idxs_j];
-
-			idxs_j[d-1] = 3;
-			p3 = p.p[idxs_j];
-
-			return f1d_interpolate_by_ref(frac_abscissas[d-1],p0,p1,p2,p3);
 		} else {
 
 			// Deeper
@@ -985,19 +974,19 @@ namespace dcu {
 
 		} else { // Deeper
 
-			idxs_j[delta+1] = 0;
+			idxs_j[delta] = 0;
 			double dp0dxk = _iterate_deriv_x(delta+1,k,d,frac_abscissas,idxs_j,p);
 			double dfdp0 = f1d_deriv_pt_value_by_ref(frac_abscissas[delta],0);
 
-			idxs_j[delta+1] = 1;
+			idxs_j[delta] = 1;
 			double dp1dxk = _iterate_deriv_x(delta+1,k,d,frac_abscissas,idxs_j,p);
 			double dfdp1 = f1d_deriv_pt_value_by_ref(frac_abscissas[delta],1);
 
-			idxs_j[delta+1] = 2;
+			idxs_j[delta] = 2;
 			double dp2dxk = _iterate_deriv_x(delta+1,k,d,frac_abscissas,idxs_j,p);
 			double dfdp2 = f1d_deriv_pt_value_by_ref(frac_abscissas[delta],2);
 
-			idxs_j[delta+1] = 3;
+			idxs_j[delta] = 3;
 			double dp3dxk = _iterate_deriv_x(delta+1,k,d,frac_abscissas,idxs_j,p);
 			double dfdp3 = f1d_deriv_pt_value_by_ref(frac_abscissas[delta],3);
 

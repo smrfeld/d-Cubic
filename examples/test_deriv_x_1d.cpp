@@ -29,23 +29,19 @@ int main() {
 	std::vector<int> v({0});
 	for (int i=0; i<30; i++) {
 		v[0] = i;
-		grid.get_grid_point_ref(v).set_ordinate(fRand(0.0,5.0));
+		grid.get_grid_point_ref(v).set_ordinate(fRand(-4.0,-2.0));
 	};
 
 	// Write
-	grid.write_to_file("test_deriv_p_1d.txt");
+	grid.write_to_file("test_deriv_x_1d.txt");
 
 	// Point to evaluate at
-	std::vector<double> abcissa({0.71});
+	std::vector<double> abcissa({0.46});
 
 	// Derivs
-	IdxSet4 local_idxs({0});
 	double x_deriv;
-	for (int i=0; i<=3; i++) {
-		local_idxs[0] = i;
-		x_deriv = grid.get_deriv_wrt_pt_value(abcissa,local_idxs);
-		std::cout << "deriv @ " << abcissa[0] << " wrt p" << local_idxs[0] << " = " << x_deriv << std::endl;
-	};
+	x_deriv = grid.get_deriv_wrt_x(abcissa,0);
+	std::cout << "deriv @ " << abcissa[0] << " wrt x = " << x_deriv << std::endl;
 
 	return 0;
 };
