@@ -431,7 +431,7 @@ namespace dcu {
 			// Make the abscissa
 			std::vector<double> abscissas;
 			for (auto dim2=0; dim2<_dim_grid; dim2++) {
-				abscissas.push_back(_dims[dim2].get_pt_at_idx(grid_pt_idxs[dim2]));
+				abscissas.push_back(_dims[dim2].get_pt_by_idx(grid_pt_idxs[dim2]));
 			};
 
 			// Make the grid pt
@@ -490,7 +490,7 @@ namespace dcu {
 			// Make the abscissa
 			std::vector<double> abscissas;
 			for (auto dim2=0; dim2<_dim_grid; dim2++) {
-				abscissas.push_back(_dims[dim2].get_pt_at_idx(grid_pt_idxs[dim2]));
+				abscissas.push_back(_dims[dim2].get_pt_by_idx(grid_pt_idxs[dim2]));
 			};
 
 			// Find the two pts
@@ -619,20 +619,22 @@ namespace dcu {
 
 		// Get bounding idxs
 		IdxSet idxs_lower(_dim_grid), idxs_upper(_dim_grid);
-		std::pair<bool,std::pair<int,int>> bounds;
+		int i;
 		for (auto dim=0; dim<_dim_grid; dim++) {
-			bounds = _dims[dim].get_surrounding_idxs(abscissas[dim]);
-			if (!bounds.first) {
+			// Check in dim
+			if (!_dims[dim].check_if_pt_is_inside_domain(abscissas[dim])) {
 				// Outside grid
-				std::cerr << ">>> Error:Grid::Impl::get_surrounding_2_grid_pts <<< Abscissa in dim: " << dim << " value: " << abscissas[dim] << " is outside the grid: " << _dims[dim].get_start_pt() << " to: " << _dims[dim].get_end_pt() << std::endl;
+				std::cerr << ">>> Error:Grid::Impl::get_surrounding_2_grid_pts <<< Abscissa in dim: " << dim << " value: " << abscissas[dim] << " is outside the grid: " << _dims[dim].get_min_pt() << " to: " << _dims[dim].get_max_pt() << std::endl;
 				exit(EXIT_FAILURE);
 			};
 
-			idxs_lower[dim] = bounds.second.first;
-			idxs_upper[dim] = bounds.second.second;
+			i = _dims[dim].get_idxs_surrounding_pt(abscissas[dim]);
+
+			idxs_lower[dim] = i;
+			idxs_upper[dim] = i+1;
 
 			// Frac
-			frac_abscissas.push_back((abscissas[dim] - _dims[dim].get_pt_at_idx(idxs_lower[dim])) / (_dims[dim].get_pt_at_idx(idxs_upper[dim]) - _dims[dim].get_pt_at_idx(idxs_lower[dim])));
+			frac_abscissas.push_back((abscissas[dim] - _dims[dim].get_pt_by_idx(idxs_lower[dim])) / (_dims[dim].get_pt_by_idx(idxs_upper[dim]) - _dims[dim].get_pt_by_idx(idxs_lower[dim])));
 		};
 
 		// Returned
@@ -685,22 +687,24 @@ namespace dcu {
 
 		// Get bounding idxs
 		IdxSet idxs_0(_dim_grid), idxs_1(_dim_grid), idxs_2(_dim_grid), idxs_3(_dim_grid);
-		std::pair<bool,std::pair<int,int>> bounds;
+		int i;
 		for (auto dim=0; dim<_dim_grid; dim++) {
-			bounds = _dims[dim].get_surrounding_idxs(abscissas[dim]);
-			if (!bounds.first) {
+			// Check in dim
+			if (!_dims[dim].check_if_pt_is_inside_domain(abscissas[dim])) {
 				// Outside grid
-				std::cerr << ">>> Error:Grid::Impl::get_surrounding_4_grid_pts <<< Abscissa in dim: " << dim << " value: " << abscissas[dim] << " is outside the grid: " << _dims[dim].get_start_pt() << " to: " << _dims[dim].get_end_pt() << std::endl;
+				std::cerr << ">>> Error:Grid::Impl::get_surrounding_4_grid_pts <<< Abscissa in dim: " << dim << " value: " << abscissas[dim] << " is outside the grid: " << _dims[dim].get_min_pt() << " to: " << _dims[dim].get_max_pt() << std::endl;
 				exit(EXIT_FAILURE);
 			};
 
-			idxs_1[dim] = bounds.second.first;
-			idxs_2[dim] = bounds.second.second;
-			idxs_0[dim] = idxs_1[dim]-1;
-			idxs_3[dim] = idxs_2[dim]+1;
+			i = _dims[dim].get_idxs_surrounding_pt(abscissas[dim]);
+
+			idxs_0[dim] = i-1;
+			idxs_1[dim] = i;
+			idxs_2[dim] = i+1;
+			idxs_3[dim] = i+2;
 
 			// Frac
-			frac_abscissas.push_back((abscissas[dim] - _dims[dim].get_pt_at_idx(idxs_1[dim])) / (_dims[dim].get_pt_at_idx(idxs_2[dim]) - _dims[dim].get_pt_at_idx(idxs_1[dim])));
+			frac_abscissas.push_back((abscissas[dim] - _dims[dim].get_pt_by_idx(idxs_1[dim])) / (_dims[dim].get_pt_by_idx(idxs_2[dim]) - _dims[dim].get_pt_by_idx(idxs_1[dim])));
 		};
 
 		// Returned
