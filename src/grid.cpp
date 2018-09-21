@@ -142,6 +142,12 @@ namespace dcu {
 		double _iterate_interpolate(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, P4 &p) const;
 
 		/********************
+		Deriv wrt p
+		********************/
+
+		double _iterate_deriv_pt_value(int delta, int d, std::vector<double> &frac_abscissas, IdxSet &idxs_j, P4 &p) const;
+
+		/********************
 		Derivative wrt x
 		********************/
 
@@ -617,6 +623,9 @@ namespace dcu {
 			nbr2.frac_abscissas.push_back((abscissas[dim] - _dims[dim].get_pt_at_idx(idxs_lower[dim])) / (_dims[dim].get_pt_at_idx(idxs_upper[dim]) - _dims[dim].get_pt_at_idx(idxs_lower[dim])));
 		};
 
+		// Set idxs_i
+		nbr2.idxs_i = idxs_lower.get_vector_idxs();
+
 		// Iterate to fill out the map
 		IdxSet idxs_local(_dim_grid);
 		_iterate_get_surrounding_2_grid_pts(idxs_local,idxs_lower,idxs_upper,nbr2,0);
@@ -689,6 +698,9 @@ namespace dcu {
 				nbr4.locs.push_back(LocInDim::INSIDE);
 			};
 		};
+
+		// Set idxs_i
+		nbr4.idxs_i = idxs_1.get_vector_idxs();
 
 		// Iterate to fill out the nbr4
 		IdxSet idxs_local(_dim_grid);
@@ -825,42 +837,42 @@ namespace dcu {
 		return get_deriv_wrt_pt_value(abscissas,GridPtKey(local_idx_set,_dims));
 	};
 	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, GridPtKey local_grid_pt_key) {
-		/*
+		// d
 		int d = get_no_dims();
 
-		// nbrs p and frac
-		auto pr = get_surrounding_4_grid_pts(abscissas);
-		Nbr4 nbrs_p = pr.first;
-		std::vector<double> frac_abscissas = pr.second;
+		// nbrs
+		Nbr4 nbr4 = get_surrounding_4_grid_pts(abscissas);
 
-		// Type
-		if (nbrs_p.types[local_grid_pt_key] == GridPtType::INSIDE) {
+		// Frac abscissas
+		std::vector<double> frac_abscissas = nbr4.frac_abscissas;
 
-			// Inside
+		// Convert to p
+		P4 p(nbr4);
+
+		// Check: are there any exterior grid point?
+		bool all_inside = true;
+		for (auto dim=0; dim<d; dim++) {
+			if (nbr4.idxs_i[dim] == 0 || nbr4.idxs_i[dim] == _dims[dim].get_no_pts()-2 ) {
+				all_inside = false;
+				break;
+			};
+		};
+
+		if (all_inside) {
+			// Case 1: Totally interior point; no dimension near boundary
 
 			double ret=1.0;
-			for (auto alpha=1; alpha<=d; alpha++) {
-				ret *= get_deriv_wrt_p_f1d_by_ref(frac_abscissas[d-alpha+1-1], local_grid_pt_key[d-alpha+1-1], LocInDim::INSIDE);
+			for (auto alpha=0; alpha<d; alpha++) {
+				ret *= f1d_deriv_pt_value_by_ref(frac_abscissas[alpha], local_grid_pt_key[alpha]);
 			};
 			return ret;
 
 		} else {
+			// Case 2: At least one dimension near boundary
 
-			// Outside
+			return 0.0;
 
-			// Get pt
-			const GridPtOut* gpo = nbrs_p.out[local_grid_pt_key];
-
-			double ret=1.0;
-			LocInDim loc;
-			for (auto alpha=1; alpha<=d; alpha++) {
-				// Get loc in this dim
-				loc = gpo->get_loc_in_dim(d-alpha+1-1);
-				ret *= get_deriv_wrt_p_f1d_by_ref(frac_abscissas[d-alpha+1-1], local_grid_pt_key[d-alpha+1-1], loc);
-			};
-			return ret;
 		};
-		*/
 	};
 
 	/********************

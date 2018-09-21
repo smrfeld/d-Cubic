@@ -76,13 +76,18 @@ namespace dcu {
 	};
 
 	// Find
-	bool IdxSet::find(int val) {
+	bool IdxSet::find(int val) const {
 		auto it = std::find(_idxs.begin(), _idxs.end(), val);
 		if (it == _idxs.end()) {
 			return false;
 		} else {
 			return true;
 		};
+	};
+
+	// Get vector
+	std::vector<int> IdxSet::get_vector_idxs() const {
+		return _idxs;
 	};
 
  	// Print

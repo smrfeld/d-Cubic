@@ -49,7 +49,9 @@ namespace dcu {
 
 		int size() const;
 
-		bool find(int val);
+		bool find(int val) const;
+
+		std::vector<int> get_vector_idxs() const;
 
 		std::string print() const;
 	};

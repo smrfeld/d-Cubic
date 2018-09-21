@@ -42,6 +42,7 @@ namespace dcu {
 	****************************************/
 
 	struct Nbr2 {
+		std::vector<int> idxs_i;
 		std::unordered_map<GridPtKey, const GridPt*, hash_gpk> in;
 		std::vector<double> frac_abscissas;
 	};
@@ -51,6 +52,7 @@ namespace dcu {
 	****************************************/
 
 	struct Nbr4 {
+		std::vector<int> idxs_i;
 		std::unordered_map<GridPtKey, GridPtType, hash_gpk> types;
 		std::unordered_map<GridPtKey, const GridPt*, hash_gpk> in;
 		std::unordered_map<GridPtKey, const GridPtOut*, hash_gpk> out;
