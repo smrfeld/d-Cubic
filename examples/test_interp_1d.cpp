@@ -1,8 +1,9 @@
-#include <dCubic>
+#include <dcubic>
 
 #include <iostream>
 
 #include <random>
+#include <ctime>
 
 using namespace std;
 using namespace dcu;
@@ -15,18 +16,26 @@ double fRand(double fMin, double fMax)
 
 int main() {
 
+	// Seed
+	srand( time( NULL ) );
+
+	// Dim
 	Dimension1D dim(0.0,1.0,30);
 
+	// Grid
 	Grid grid({dim});
 
+	// Fill randomly
 	std::vector<int> v({0});
 	for (int i=0; i<30; i++) {
 		v[0] = i;
-		grid.set_grid_point_ordinate(grid.get_grid_point(v), fRand(0.0,5.0));
+		grid.get_grid_point_ref(v).set_ordinate(fRand(0.0,5.0));
 	};
 
-	grid.write_to_file("test_interp.txt");
+	// Write
+	grid.write_to_file("test_interp_1d.txt");
 
+	// Get val
 	double x = grid.get_val({0.71});
 	std::cout << "val @ 0.71 = " << x << std::endl;
 
