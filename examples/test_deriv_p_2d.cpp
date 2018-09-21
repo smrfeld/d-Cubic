@@ -17,7 +17,7 @@ int main() {
 
 	// Make dims
 	Dimension1D dim_1(0.0,1.0,30);
-	Dimension1D dim_2(0.0,1.0,17);
+	Dimension1D dim_2(0.0,1.0,23);
 
 	// Make grid
 	Grid grid({dim_1,dim_2});
@@ -36,7 +36,7 @@ int main() {
 	grid.write_to_file("test_deriv_p_2d.txt");
 
 	// Point to evaluate at
-	std::vector<double> abcissa({0.71,0.23});
+	std::vector<double> abcissa({0.71,0.33});
 
 	// Derivs
 	std::vector<int> local_idxs({0,0});
