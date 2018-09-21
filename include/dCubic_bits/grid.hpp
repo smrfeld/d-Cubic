@@ -139,23 +139,29 @@ namespace dcu {
 		Nbr2 get_surrounding_2_grid_pts(std::vector<double> abscissas) const;
 		Nbr4 get_surrounding_4_grid_pts(std::vector<double> abscissas) const;
 
+		Nbr2 get_surrounding_2_grid_pts_by_ref(const std::vector<double>& abscissas) const;
+		Nbr4 get_surrounding_4_grid_pts_by_ref(const std::vector<double>& abscissas) const;
+
 		/********************
 		Get a point by interpolating
 		********************/
 
 		double get_val(std::vector<double> abscissas) const;
+		double get_val_by_ref(const std::vector<double>& abscissas) const;
 
 		/********************
 		Get derivative wrt a point value p
 		********************/
 
 		double get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet4 idxs_k);
+		double get_deriv_wrt_pt_value_by_ref(const std::vector<double>& abscissas, const IdxSet4& idxs_k);
 
 		/********************
 		Get derivative wrt x
 		********************/
 
 		double get_deriv_wrt_x(std::vector<double> abscissas, int k);
+		double get_deriv_wrt_x_by_ref(const std::vector<double>& abscissas, int k);
 
 		/********************
 		1D

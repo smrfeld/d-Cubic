@@ -151,7 +151,7 @@ namespace dcu {
 		Deriv wrt p
 		********************/
 
-		double _iterate_deriv_pt_value(int delta, int d, std::vector<double> &frac_abscissas, IdxSet4 &idxs_j, P4 &p, IdxSet &idxs_i, IdxSet4 &idxs_k) const;
+		double _iterate_deriv_pt_value(int delta, int d, std::vector<double> &frac_abscissas, IdxSet4 &idxs_j, P4 &p, IdxSet &idxs_i, const IdxSet4 &idxs_k) const;
 
 		/********************
 		Derivative wrt x
@@ -220,23 +220,29 @@ namespace dcu {
 		Nbr2 get_surrounding_2_grid_pts(std::vector<double> abscissas) const;
 		Nbr4 get_surrounding_4_grid_pts(std::vector<double> abscissas) const;
 
+		Nbr2 get_surrounding_2_grid_pts_by_ref(const std::vector<double>& abscissas) const;
+		Nbr4 get_surrounding_4_grid_pts_by_ref(const std::vector<double>& abscissas) const;
+
 		/********************
 		Get a point by interpolating
 		********************/
 
 		double get_val(std::vector<double> abscissas) const;
+		double get_val_by_ref(const std::vector<double>& abscissas) const;
 
 		/********************
 		Get derivative
 		********************/
 
 		double get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet4 idx_set);
+		double get_deriv_wrt_pt_value_by_ref(const std::vector<double>& abscissas, const IdxSet4& idxs_k);
 
 		/********************
 		Get derivative wrt x
 		********************/
 
 		double get_deriv_wrt_x(std::vector<double> abscissas, int k);
+		double get_deriv_wrt_x_by_ref(const std::vector<double>& abscissas, int k);
 
 		/********************
 		1D funcs
@@ -608,6 +614,13 @@ namespace dcu {
 	********************/
 
 	Nbr2 Grid::Impl::get_surrounding_2_grid_pts(std::vector<double> abscissas) const {
+		return get_surrounding_2_grid_pts_by_ref(abscissas);
+	};
+	Nbr4 Grid::Impl::get_surrounding_4_grid_pts(std::vector<double> abscissas) const {
+		return get_surrounding_4_grid_pts_by_ref(abscissas);
+	};
+
+	Nbr2 Grid::Impl::get_surrounding_2_grid_pts_by_ref(const std::vector<double> &abscissas) const {
 		// Check size
 		if (abscissas.size() != _dim_grid) {
 			std::cerr << ">>> Error:Grid::Impl::get_surrounding_2_grid_pts <<< Abscissa size should equal grid size." << std::endl;
@@ -675,7 +688,7 @@ namespace dcu {
 		};
 	};
 
-	Nbr4 Grid::Impl::get_surrounding_4_grid_pts(std::vector<double> abscissas) const {
+	Nbr4 Grid::Impl::get_surrounding_4_grid_pts_by_ref(const std::vector<double> &abscissas) const {
 		// Check size
 		if (abscissas.size() != _dim_grid) {
 			std::cerr << ">>> Error:Grid::Impl::get_surrounding_4_grid_pts <<< Abscissa size should equal grid size." << std::endl;
@@ -801,6 +814,10 @@ namespace dcu {
 	};
 
 	double Grid::Impl::get_val(std::vector<double> abscissas) const {
+		return get_val_by_ref(abscissas);
+	};
+
+	double Grid::Impl::get_val_by_ref(const std::vector<double> &abscissas) const {
 		// Stopping
 		int d = get_no_dims();
 
@@ -808,7 +825,7 @@ namespace dcu {
 		IdxSet4 idxs_j(d);
 
 		// nbrs p
-		Nbr4 nbr4 = get_surrounding_4_grid_pts(abscissas);
+		Nbr4 nbr4 = get_surrounding_4_grid_pts_by_ref(abscissas);
 
 		// Frac
 		std::vector<double> frac_abscissas = nbr4.frac_abscissas;
@@ -824,7 +841,7 @@ namespace dcu {
 	Get derivative
 	********************/
 
-	double Grid::Impl::_iterate_deriv_pt_value(int delta, int d, std::vector<double> &frac_abscissas, IdxSet4 &idxs_j, P4 &p, IdxSet &idxs_i, IdxSet4 &idxs_k) const {
+	double Grid::Impl::_iterate_deriv_pt_value(int delta, int d, std::vector<double> &frac_abscissas, IdxSet4 &idxs_j, P4 &p, IdxSet &idxs_i, const IdxSet4 &idxs_k) const {
 
 		if (delta == d) {
 			// Done; evaluate
@@ -901,13 +918,16 @@ namespace dcu {
 		};
 	};
 
-
 	double Grid::Impl::get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet4 idxs_k) {
+		return get_deriv_wrt_pt_value_by_ref(abscissas,idxs_k);
+	};
+
+	double Grid::Impl::get_deriv_wrt_pt_value_by_ref(const std::vector<double>& abscissas, const IdxSet4& idxs_k) {
 		// d
 		int d = get_no_dims();
 
 		// nbrs
-		Nbr4 nbr4 = get_surrounding_4_grid_pts(abscissas);
+		Nbr4 nbr4 = get_surrounding_4_grid_pts_by_ref(abscissas);
 
 		// Frac abscissas
 		std::vector<double> frac_abscissas = nbr4.frac_abscissas;
@@ -999,6 +1019,10 @@ namespace dcu {
 	};
 
 	double Grid::Impl::get_deriv_wrt_x(std::vector<double> abscissas, int k) {
+		return get_deriv_wrt_x_by_ref(abscissas,k);
+	};
+
+	double Grid::Impl::get_deriv_wrt_x_by_ref(const std::vector<double> &abscissas, int k) {
 		// Stopping
 		int d = get_no_dims();
 
@@ -1006,7 +1030,7 @@ namespace dcu {
 		IdxSet4 idxs_j(d);
 
 		// nbrs p
-		Nbr4 nbr4 = get_surrounding_4_grid_pts(abscissas);
+		Nbr4 nbr4 = get_surrounding_4_grid_pts_by_ref(abscissas);
 
 		// Frac
 		std::vector<double> frac_abscissas = nbr4.frac_abscissas;
@@ -1279,12 +1303,22 @@ namespace dcu {
 		return _impl->get_surrounding_4_grid_pts(abscissas);
 	};
 
+	Nbr2 Grid::get_surrounding_2_grid_pts_by_ref(const std::vector<double>& abscissas) const {
+		return _impl->get_surrounding_2_grid_pts_by_ref(abscissas);
+	};
+	Nbr4 Grid::get_surrounding_4_grid_pts_by_ref(const std::vector<double>& abscissas) const {
+		return _impl->get_surrounding_4_grid_pts_by_ref(abscissas);
+	};
+
 	/********************
 	Get a point by interpolating
 	********************/
 
 	double Grid::get_val(std::vector<double> abscissas) const {
 		return _impl->get_val(abscissas);
+	};
+	double Grid::get_val_by_ref(const std::vector<double>& abscissas) const {
+		return _impl->get_val_by_ref(abscissas);
 	};
 
 	/********************
@@ -1294,6 +1328,9 @@ namespace dcu {
 	double Grid::get_deriv_wrt_pt_value(std::vector<double> abscissas, IdxSet4 idx_set) {
 		return _impl->get_deriv_wrt_pt_value(abscissas,idx_set);
 	};
+	double Grid::get_deriv_wrt_pt_value_by_ref(const std::vector<double>& abscissas, const IdxSet4& idxs_k) {
+		return _impl->get_deriv_wrt_pt_value_by_ref(abscissas,idxs_k);
+	};
 
 	/********************
 	Get derivative wrt x
@@ -1301,6 +1338,9 @@ namespace dcu {
 
 	double Grid::get_deriv_wrt_x(std::vector<double> abscissas, int k) {
 		return _impl->get_deriv_wrt_x(abscissas,k);
+	};
+	double Grid::get_deriv_wrt_x_by_ref(const std::vector<double>& abscissas, int k) {
+		return _impl->get_deriv_wrt_x_by_ref(abscissas,k);
 	};
 
 	/********************
