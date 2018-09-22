@@ -182,6 +182,12 @@ namespace dcu {
 		~Impl();
 
 		/********************
+		Print
+		********************/
+
+		void print_grid() const;
+
+		/********************
 		Get dims
 		********************/
 
@@ -367,6 +373,16 @@ namespace dcu {
 	Grid::Impl::~Impl()
 	{
 		_clean_up();
+	};
+
+	/********************
+	Print
+	********************/
+
+	void Grid::Impl::print_grid() const {
+		for (auto const &pr: _grid_pts) {
+			std::cout << pr.first << " : " << pr.second->get_ordinate() << std::endl;
+		};
 	};
 
 	/********************
@@ -1243,6 +1259,14 @@ namespace dcu {
         return *this; 
 	};
 	Grid::~Grid() = default;
+
+	/********************
+	Print
+	********************/
+
+	void Grid::print_grid() const {
+		print_grid();
+	};
 
 	/********************
 	Get dims
