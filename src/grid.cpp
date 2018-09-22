@@ -105,7 +105,7 @@ namespace dcu {
 		int _dim_grid;
 
 		// No pts in each dim of the grid
-		std::vector<const Dimension1D*> _dims;		
+		std::vector<Dimension1D> _dims;		
 
 		// Size of the grid
 		int _no_pts_grid;
@@ -174,7 +174,7 @@ namespace dcu {
 		Constructor
 		********************/
 
-		Impl(std::vector<const Dimension1D*> dims);
+		Impl(std::vector<Dimension1D> dims);
 		Impl(const Impl& other);
 		Impl(Impl&& other);
 		Impl& operator=(const Impl &other);
@@ -186,7 +186,7 @@ namespace dcu {
 		********************/
 
 		int get_no_dims() const;
-		const std::vector<const Dimension1D*>& get_dims() const;
+		const std::vector<Dimension1D>& get_dims() const;
 
 		/********************
 		Get grid points
@@ -329,7 +329,7 @@ namespace dcu {
 	Implementation
 	****************************************/
 
-	Grid::Impl::Impl(std::vector<const Dimension1D*> dims) {
+	Grid::Impl::Impl(std::vector<Dimension1D> dims) {
 		_dims = dims;
 		_shared_constructor();
 	};
@@ -337,7 +337,7 @@ namespace dcu {
 		_dim_grid = _dims.size();
 		_no_pts_grid = 1;
 		for (auto const &dim: _dims) {
-			_no_pts_grid *= dim->get_no_pts();
+			_no_pts_grid *= dim.get_no_pts();
 		};
 
 		// Make grid
@@ -411,7 +411,7 @@ namespace dcu {
 	int Grid::Impl::get_no_dims() const {
 		return _dims.size();
 	};
-	const std::vector<const Dimension1D*>& Grid::Impl::get_dims() const {
+	const std::vector<Dimension1D>& Grid::Impl::get_dims() const {
 		return _dims;
 	};
 
@@ -431,7 +431,7 @@ namespace dcu {
 	void Grid::Impl::_iterate_make_grid_pt(IdxSet &grid_pt_idxs, int dim) {
 		if (dim != _dim_grid) {
 			// Deeper!
-			for (grid_pt_idxs[dim]=0; grid_pt_idxs[dim]<_dims[dim]->get_no_pts(); grid_pt_idxs[dim]++) {
+			for (grid_pt_idxs[dim]=0; grid_pt_idxs[dim]<_dims[dim].get_no_pts(); grid_pt_idxs[dim]++) {
 				_iterate_make_grid_pt(grid_pt_idxs, dim+1);
 			};
 		} else {
@@ -440,7 +440,7 @@ namespace dcu {
 			// Make the abscissa
 			std::vector<double> abscissas;
 			for (auto dim2=0; dim2<_dim_grid; dim2++) {
-				abscissas.push_back(_dims[dim2]->get_pt_by_idx(grid_pt_idxs[dim2]));
+				abscissas.push_back(_dims[dim2].get_pt_by_idx(grid_pt_idxs[dim2]));
 			};
 
 			// Make the grid pt
@@ -478,15 +478,15 @@ namespace dcu {
 			if (!idxs_of_dims_outside.find(dim)) {
 				// Inside
 				// Loop all interior pts
-				for (grid_pt_idxs[dim]=0; grid_pt_idxs[dim]<_dims[dim]->get_no_pts(); grid_pt_idxs[dim]++) {
+				for (grid_pt_idxs[dim]=0; grid_pt_idxs[dim]<_dims[dim].get_no_pts(); grid_pt_idxs[dim]++) {
 					_iterate_make_grid_pt_outside(grid_pt_idxs,idxs_of_dims_outside,dim+1);
 				};
 			} else {
 				// Outside
-				// Loop just -1 and _dims[dim]->get_no_pts()
+				// Loop just -1 and _dims[dim].get_no_pts()
 				grid_pt_idxs[dim] = -1;
 				_iterate_make_grid_pt_outside(grid_pt_idxs,idxs_of_dims_outside,dim+1);
-				grid_pt_idxs[dim] = _dims[dim]->get_no_pts();
+				grid_pt_idxs[dim] = _dims[dim].get_no_pts();
 				_iterate_make_grid_pt_outside(grid_pt_idxs,idxs_of_dims_outside,dim+1);
 			};
 
@@ -499,7 +499,7 @@ namespace dcu {
 			// Make the abscissa
 			std::vector<double> abscissas;
 			for (auto dim2=0; dim2<_dim_grid; dim2++) {
-				abscissas.push_back(_dims[dim2]->get_pt_by_idx(grid_pt_idxs[dim2]));
+				abscissas.push_back(_dims[dim2].get_pt_by_idx(grid_pt_idxs[dim2]));
 			};
 
 			// Find the two pts
@@ -510,7 +510,7 @@ namespace dcu {
 					locs.push_back(LocInDim::P0_OUTSIDE);
 					p1_idxs[dim2] = grid_pt_idxs[dim2] + 1;
 					p2_idxs[dim2] = grid_pt_idxs[dim2] + 2;
-				} else if (grid_pt_idxs[dim2] == _dims[dim2]->get_no_pts()) {
+				} else if (grid_pt_idxs[dim2] == _dims[dim2].get_no_pts()) {
 					locs.push_back(LocInDim::P3_OUTSIDE);
 					p1_idxs[dim2] = grid_pt_idxs[dim2] - 1;
 					p2_idxs[dim2] = grid_pt_idxs[dim2] - 2;
@@ -638,19 +638,19 @@ namespace dcu {
 		int i;
 		for (auto dim=0; dim<_dim_grid; dim++) {
 			// Check in dim
-			if (!_dims[dim]->check_if_pt_is_inside_domain(abscissas[dim])) {
+			if (!_dims[dim].check_if_pt_is_inside_domain(abscissas[dim])) {
 				// Outside grid
-				std::cerr << ">>> Error:Grid::Impl::get_surrounding_2_grid_pts <<< Abscissa in dim: " << dim << " value: " << abscissas[dim] << " is outside the grid: " << _dims[dim]->get_min_pt() << " to: " << _dims[dim]->get_max_pt() << std::endl;
+				std::cerr << ">>> Error:Grid::Impl::get_surrounding_2_grid_pts <<< Abscissa in dim: " << dim << " value: " << abscissas[dim] << " is outside the grid: " << _dims[dim].get_min_pt() << " to: " << _dims[dim].get_max_pt() << std::endl;
 				exit(EXIT_FAILURE);
 			};
 
-			i = _dims[dim]->get_idxs_surrounding_pt(abscissas[dim]);
+			i = _dims[dim].get_idxs_surrounding_pt(abscissas[dim]);
 
 			idxs_lower[dim] = i;
 			idxs_upper[dim] = i+1;
 
 			// Frac
-			frac_abscissas.push_back((abscissas[dim] - _dims[dim]->get_pt_by_idx(idxs_lower[dim])) / (_dims[dim]->get_pt_by_idx(idxs_upper[dim]) - _dims[dim]->get_pt_by_idx(idxs_lower[dim])));
+			frac_abscissas.push_back((abscissas[dim] - _dims[dim].get_pt_by_idx(idxs_lower[dim])) / (_dims[dim].get_pt_by_idx(idxs_upper[dim]) - _dims[dim].get_pt_by_idx(idxs_lower[dim])));
 		};
 
 		// Returned
@@ -706,13 +706,13 @@ namespace dcu {
 		int i;
 		for (auto dim=0; dim<_dim_grid; dim++) {
 			// Check in dim
-			if (!_dims[dim]->check_if_pt_is_inside_domain(abscissas[dim])) {
+			if (!_dims[dim].check_if_pt_is_inside_domain(abscissas[dim])) {
 				// Outside grid
-				std::cerr << ">>> Error:Grid::Impl::get_surrounding_4_grid_pts <<< Abscissa in dim: " << dim << " value: " << abscissas[dim] << " is outside the grid: " << _dims[dim]->get_min_pt() << " to: " << _dims[dim]->get_max_pt() << std::endl;
+				std::cerr << ">>> Error:Grid::Impl::get_surrounding_4_grid_pts <<< Abscissa in dim: " << dim << " value: " << abscissas[dim] << " is outside the grid: " << _dims[dim].get_min_pt() << " to: " << _dims[dim].get_max_pt() << std::endl;
 				exit(EXIT_FAILURE);
 			};
 
-			i = _dims[dim]->get_idxs_surrounding_pt(abscissas[dim]);
+			i = _dims[dim].get_idxs_surrounding_pt(abscissas[dim]);
 
 			idxs_0[dim] = i-1;
 			idxs_1[dim] = i;
@@ -720,7 +720,7 @@ namespace dcu {
 			idxs_3[dim] = i+2;
 
 			// Frac
-			frac_abscissas.push_back((abscissas[dim] - _dims[dim]->get_pt_by_idx(idxs_1[dim])) / (_dims[dim]->get_pt_by_idx(idxs_2[dim]) - _dims[dim]->get_pt_by_idx(idxs_1[dim])));
+			frac_abscissas.push_back((abscissas[dim] - _dims[dim].get_pt_by_idx(idxs_1[dim])) / (_dims[dim].get_pt_by_idx(idxs_2[dim]) - _dims[dim].get_pt_by_idx(idxs_1[dim])));
 		};
 
 		// Returned
@@ -767,7 +767,7 @@ namespace dcu {
 			// Check: is it inside or out?
 			bool inside=true;
 			for (auto dim2=0; dim2<_dim_grid; dim2++) {
-				if (idxs_grid_pt[dim2] < 0 || idxs_grid_pt[dim2] > _dims[dim2]->get_no_pts()-1) {
+				if (idxs_grid_pt[dim2] < 0 || idxs_grid_pt[dim2] > _dims[dim2].get_no_pts()-1) {
 					// Out
 					inside = false;
 					break;
@@ -851,7 +851,7 @@ namespace dcu {
 			// Check main condition
 			bool at_least_one_cond_met = false;
 			for (auto dim=0; dim<d; dim++) {
-				if ((idxs_i[dim] == 0 && idxs_j[dim] == 0) || (idxs_i[dim] == _dims[dim]->get_no_pts()-2 && idxs_j[dim] == 3)) {
+				if ((idxs_i[dim] == 0 && idxs_j[dim] == 0) || (idxs_i[dim] == _dims[dim].get_no_pts()-2 && idxs_j[dim] == 3)) {
 					at_least_one_cond_met = true;
 					break;
 				};
@@ -941,7 +941,7 @@ namespace dcu {
 		// Check: are there any exterior grid point?
 		bool all_inside = true;
 		for (auto dim=0; dim<d; dim++) {
-			if (nbr4.idxs_i[dim] == 0 || nbr4.idxs_i[dim] == _dims[dim]->get_no_pts()-2 ) {
+			if (nbr4.idxs_i[dim] == 0 || nbr4.idxs_i[dim] == _dims[dim].get_no_pts()-2 ) {
 				all_inside = false;
 				break;
 			};
@@ -963,7 +963,7 @@ namespace dcu {
 			// i.e. if i=0, j=0 => illegal
 			// if i=n-2, j=3 => illegal
 			for (auto dim=0; dim<d; dim++) {
-				if ((nbr4.idxs_i[dim] == 0 && idxs_k[dim] == 0) || (nbr4.idxs_i[dim] == _dims[dim]->get_no_pts()-2 && idxs_k[dim] == 3)) {
+				if ((nbr4.idxs_i[dim] == 0 && idxs_k[dim] == 0) || (nbr4.idxs_i[dim] == _dims[dim].get_no_pts()-2 && idxs_k[dim] == 3)) {
 					std::cerr << ">>> Error: Grid::Impl::get_deriv_wrt_pt_value <<< The pt specified to take a derivative with respect to is not a real point (an exterior point that is estimated by a linear approx) - this is not allowed!" << std::endl;
 					exit(EXIT_FAILURE);
 				};
@@ -1092,7 +1092,7 @@ namespace dcu {
 		for (auto dim=0; dim<get_no_dims(); dim++) {
 			if (idxs_m[dim] == -1) {
 				idxs_m[dim] += 1;
-			} else if (idxs_m[dim] == _dims[dim]->get_no_pts()) {
+			} else if (idxs_m[dim] == _dims[dim].get_no_pts()) {
 				idxs_m[dim] -= 1;
 			};
 		};
@@ -1103,7 +1103,7 @@ namespace dcu {
 		for (auto dim=0; dim<get_no_dims(); dim++) {
 			if (idxs_p[dim] == -1) {
 				idxs_p[dim] += 2;
-			} else if (idxs_p[dim] == _dims[dim]->get_no_pts()) {
+			} else if (idxs_p[dim] == _dims[dim].get_no_pts()) {
 				idxs_p[dim] -= 2;
 			};
 		};
@@ -1231,7 +1231,7 @@ namespace dcu {
 	Constructor
 	********************/
 
-	Grid::Grid(std::vector<const Dimension1D*> dims) : _impl(new Impl(dims)) {};
+	Grid::Grid(std::vector<Dimension1D> dims) : _impl(new Impl(dims)) {};
 	Grid::Grid(const Grid& other) : _impl(new Impl(*other._impl)) {};
 	Grid::Grid(Grid&& other) : _impl(std::move(other._impl)) {};
 	Grid& Grid::operator=(const Grid &other) {
@@ -1251,7 +1251,7 @@ namespace dcu {
 	int Grid::get_no_dims() const {
 		return _impl->get_no_dims();
 	};
-	const std::vector<const Dimension1D*>& Grid::get_dims() const {
+	const std::vector<Dimension1D>& Grid::get_dims() const {
 		return _impl->get_dims();
 	};
 

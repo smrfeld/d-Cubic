@@ -93,7 +93,7 @@ namespace dcu {
 		Constructor
 		********************/
 
-		Grid(std::vector<const Dimension1D*> dims); // Note: these are copied!
+		Grid(std::vector<Dimension1D> dims);
 		Grid(const Grid& other);
 		Grid(Grid&& other);
 		Grid& operator=(const Grid &other);
@@ -105,7 +105,7 @@ namespace dcu {
 		********************/
 
 		int get_no_dims() const;
-		const std::vector<const Dimension1D*>& get_dims() const;
+		const std::vector<Dimension1D>& get_dims() const;
 
 		/********************
 		Get grid points

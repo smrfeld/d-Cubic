@@ -24,7 +24,7 @@ int main() {
 	Dimension1D dim2(0.0,1.0,8);
 
 	// Grid
-	Grid grid({&dim1,&dim2});
+	Grid grid({dim1,dim2});
 
 	// Fill randomly
 	std::vector<int> v({0,0});

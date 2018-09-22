@@ -23,7 +23,7 @@ int main() {
 	Dimension1D dim(0.0,1.0,11);
 
 	// Make grid
-	Grid grid({&dim});
+	Grid grid({dim});
 
 	// Fill randomly
 	std::vector<int> v({0});
