@@ -4,7 +4,7 @@
 #include "../include/dcubic_bits/dimension_1d.hpp"
 #include "../include/dcubic_bits/grid_pt.hpp"
 #include "../include/dcubic_bits/grid_pt_out.hpp"
-#include "grid_pt_key.hpp"
+#include "../include/dcubic_bits/grid_pt_key.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -499,7 +499,7 @@ namespace dcu {
 			// Make the abscissa
 			std::vector<double> abscissas;
 			for (auto dim2=0; dim2<_dim_grid; dim2++) {
-				abscissas.push_back(_dims[dim2].get_pt_by_idx(grid_pt_idxs[dim2]));
+				abscissas.push_back(_dims[dim2].get_pt_by_idx(grid_pt_idxs[dim2],false));
 			};
 
 			// Find the two pts

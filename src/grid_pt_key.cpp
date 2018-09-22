@@ -1,4 +1,4 @@
-#include "grid_pt_key.hpp"
+#include "../include/dcubic_bits/grid_pt_key.hpp"
 
 // Other headers
 #include "../include/dcubic_bits/dimension_1d.hpp"
