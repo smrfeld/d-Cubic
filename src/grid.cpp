@@ -185,7 +185,7 @@ namespace dcu {
 		Print
 		********************/
 
-		void print_grid() const;
+		void print_grid_pts_inside() const;
 
 		/********************
 		Get dims
@@ -379,7 +379,7 @@ namespace dcu {
 	Print
 	********************/
 
-	void Grid::Impl::print_grid() const {
+	void Grid::Impl::print_grid_pts_inside() const {
 		for (auto const &pr: _grid_pts) {
 			std::cout << pr.first << " : " << pr.second->get_ordinate() << std::endl;
 		};
@@ -1264,8 +1264,8 @@ namespace dcu {
 	Print
 	********************/
 
-	void Grid::print_grid() const {
-		print_grid();
+	void Grid::print_grid_pts_inside() const {
+		_impl->print_grid_pts_inside();
 	};
 
 	/********************

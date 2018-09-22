@@ -104,7 +104,7 @@ namespace dcu {
 		Print
 		********************/
 
-		void print_grid() const;
+		void print_grid_pts_inside() const;
 
 		/********************
 		Get dims
