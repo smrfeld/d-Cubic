@@ -59,6 +59,7 @@ namespace dcu {
 		// Ordinate
 		double get_ordinate() const;
 		void set_ordinate(double val);
+		void increment_ordinate(double val);
 
 		// Idxs
 		int get_idx(int dim) const;
@@ -180,6 +181,9 @@ namespace dcu {
 	void GridPt::Impl::set_ordinate(double val) {
 		_ordinate = val;
 	};
+	void GridPt::Impl::increment_ordinate(double val) {
+		_ordinate += val;
+	};
 
 	// Idxs
 	int GridPt::Impl::get_idx(int dim) const {
@@ -265,6 +269,9 @@ namespace dcu {
 	};
 	void GridPt::set_ordinate(double val) {
 		_impl->set_ordinate(val);
+	};
+	void GridPt::increment_ordinate(double val) {
+		_impl->increment_ordinate(val);
 	};
 
 	// Idxs

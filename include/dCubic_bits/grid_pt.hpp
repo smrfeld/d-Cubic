@@ -60,6 +60,7 @@ namespace dcu {
 		// Ordinate
 		double get_ordinate() const;
 		void set_ordinate(double val);
+		void increment_ordinate(double val);
 
 		// Idxs
 		int get_idx(int dim) const;
