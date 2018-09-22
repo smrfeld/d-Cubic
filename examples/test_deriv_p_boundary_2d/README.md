@@ -10,7 +10,7 @@ Dimension1D dim_2(0.0,1.0,21);
 
 Make the grid:
 ```
-Grid grid({dim_1,dim_2});
+Grid grid({&dim_1,&dim_2});
 ```
 
 Fill randomly

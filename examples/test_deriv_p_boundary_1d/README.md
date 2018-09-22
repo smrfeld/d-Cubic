@@ -9,7 +9,7 @@ Dimension1D dim(0.0,1.0,11);
 
 Make the grid:
 ```
-Grid grid({dim});
+Grid grid({&dim});
 ```
 
 Fill randomly
