@@ -1,7 +1,4 @@
-#ifndef VECTOR_H
-#define VECTOR_H
 #include <vector>
-#endif
 
 #ifndef UNORDERED_MAP_H
 #define UNORDERED_MAP_H
