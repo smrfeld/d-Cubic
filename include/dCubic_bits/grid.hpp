@@ -17,6 +17,7 @@ namespace dcu {
 	class Dimension1D;
 	class GridPt;
 	class GridPtOut;
+	class GridPtKey;
 	enum class GridPtType: unsigned int;
 
 	/****************************************
@@ -112,9 +113,11 @@ namespace dcu {
 
 		const GridPt* get_grid_point(std::vector<int> grid_idxs) const;
 		const GridPt* get_grid_point(IdxSet idx_set) const;
+		const GridPt* get_grid_point(GridPtKey key) const;
 
 		const GridPtOut* get_grid_point_outside(std::vector<int> grid_idxs) const;
 		const GridPtOut* get_grid_point_outside(IdxSet idx_set) const;
+		const GridPtOut* get_grid_point_outside(GridPtKey key) const;
 
 		/*****
 		Refs
@@ -122,9 +125,11 @@ namespace dcu {
 
 		GridPt& get_grid_point_ref(std::vector<int> grid_idxs);
 		GridPt& get_grid_point_ref(IdxSet idx_set);
+		GridPt& get_grid_point_ref(GridPtKey key);
 
 		GridPtOut& get_grid_point_outside_ref(std::vector<int> grid_idxs);
 		GridPtOut& get_grid_point_outside_ref(IdxSet idx_set);
+		GridPtOut& get_grid_point_outside_ref(GridPtKey key);
 
 		/********************
 		Get grid points surrounding a point
