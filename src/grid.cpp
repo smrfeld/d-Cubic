@@ -283,7 +283,7 @@ namespace dcu {
 	    void transform(double f(double));
 
 	    // Transform given current value and value of another grid
-	    void transform(double f(double, double), const Grid* other);
+	    void transform(double f(const double&, const double&, const int&), const Grid* other, int param);
 
 		/********************
 		Read/write grid
@@ -1161,10 +1161,10 @@ namespace dcu {
     };
 
     // Transform given current value and value of another grid
-    void Grid::Impl::transform(double f(double, double), const Grid* other) {
+    void Grid::Impl::transform(double f(const double&, const double&, const int&), const Grid* other, int param) {
 		// Go through all grid pts
     	for (auto &pr: _grid_pts) {
-    		pr.second->set_ordinate(f(pr.second->get_ordinate(),other->get_grid_point(pr.first)->get_ordinate()));
+    		pr.second->set_ordinate(f(pr.second->get_ordinate_const_ref(),other->get_grid_point(pr.first)->get_ordinate_const_ref(),param));
     	};
     };
 
@@ -1474,8 +1474,8 @@ namespace dcu {
     };
 
     // Transform given current value and value of another grid
-    void Grid::transform(double f(double, double), const Grid* other)  {
-    	_impl->transform(f, other);
+    void Grid::transform(double f(const double&, const double&, const int&), const Grid* other, int param)  {
+    	_impl->transform(f, other, param);
     };
 
 	/********************

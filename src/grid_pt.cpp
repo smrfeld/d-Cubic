@@ -58,6 +58,7 @@ namespace dcu {
 
 		// Ordinate
 		double get_ordinate() const;
+		const double& get_ordinate_const_ref() const;
 		void set_ordinate(double val);
 		void increment_ordinate(double val);
 
@@ -178,6 +179,9 @@ namespace dcu {
 	double GridPt::Impl::get_ordinate() const {
 		return _ordinate;
 	};
+	const double& GridPt::Impl::get_ordinate_const_ref() const {
+		return _ordinate;
+	};
 	void GridPt::Impl::set_ordinate(double val) {
 		_ordinate = val;
 	};
@@ -266,6 +270,9 @@ namespace dcu {
 	// Ordinate
 	double GridPt::get_ordinate() const {
 		return _impl->get_ordinate();
+	};
+	const double& GridPt::get_ordinate_const_ref() const {
+		return _impl->get_ordinate_const_ref();
 	};
 	void GridPt::set_ordinate(double val) {
 		_impl->set_ordinate(val);

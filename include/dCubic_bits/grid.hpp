@@ -194,7 +194,7 @@ namespace dcu {
 	    void transform(double f(double));
 
 	    // Transform given current value and value of another grid
-	    void transform(double f(double, double), const Grid* other);
+	    void transform(double f(const double&, const double&, const int&), const Grid* other, int param);
 
 		/********************
 		Read/write grid

@@ -56,6 +56,7 @@ namespace dcu {
 
 		// Ordinate
 		double get_ordinate() const;
+		const double& get_ordinate_const_ref() const;
 		void set_ordinate(double val);
 		void increment_ordinate(double val);
 
