@@ -273,10 +273,17 @@ namespace dcu {
 	    IdxSet apply_p_mapping_by_ref(const IdxSet &idxs) const;
 
 		/********************
-		Copy ordinates from another grid
+		Apply transformations from another grid
 		********************/
 
+	    // Warning: grid dimensions are not checked!
 	    void copy_ordinates(const Grid* other);
+
+	    // Transform given current ordinate value
+	    void transform(double f(double));
+
+	    // Transform given current value and value of another grid
+	    void transform(double f(double, double), const Grid* other);
 
 		/********************
 		Read/write grid
@@ -1133,14 +1140,31 @@ namespace dcu {
     };
 
 	/********************
-	Copy ordinates from another grid
+	Apply transformations from another grid
 	********************/
 
+    // Warning: grid dimensions are not checked!
     void Grid::Impl::copy_ordinates(const Grid* other) {
     	// Go through all grid pts
     	for (auto &pr: _grid_pts) {
     		// Copy
     		pr.second->set_ordinate(other->get_grid_point(pr.first)->get_ordinate());
+    	};
+    };
+
+    // Transform given current ordinate value
+    void Grid::Impl::transform(double f(double)) {
+		// Go through all grid pts
+    	for (auto &pr: _grid_pts) {
+    		pr.second->set_ordinate(f(pr.second->get_ordinate()));
+    	};
+    };
+
+    // Transform given current value and value of another grid
+    void Grid::Impl::transform(double f(double, double), const Grid* other) {
+		// Go through all grid pts
+    	for (auto &pr: _grid_pts) {
+    		pr.second->set_ordinate(f(pr.second->get_ordinate(),other->get_grid_point(pr.first)->get_ordinate()));
     	};
     };
 
@@ -1437,11 +1461,21 @@ namespace dcu {
     };
 
 	/********************
-	Copy ordinates from another grid
+	Apply transformations from another grid
 	********************/
 
     void Grid::copy_ordinates(const Grid* other) {
     	_impl->copy_ordinates(other);
+    };
+
+    // Transform given current ordinate value
+    void Grid::transform(double f(double)) {
+    	_impl->transform(f);
+    };
+
+    // Transform given current value and value of another grid
+    void Grid::transform(double f(double, double), const Grid* other)  {
+    	_impl->transform(f, other);
     };
 
 	/********************
