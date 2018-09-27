@@ -273,6 +273,12 @@ namespace dcu {
 	    IdxSet apply_p_mapping_by_ref(const IdxSet &idxs) const;
 
 		/********************
+		Copy ordinates from another grid
+		********************/
+
+	    void copy_ordinates(const Grid* other);
+
+		/********************
 		Read/write grid
 		********************/
 
@@ -1127,6 +1133,18 @@ namespace dcu {
     };
 
 	/********************
+	Copy ordinates from another grid
+	********************/
+
+    void Grid::Impl::copy_ordinates(const Grid* other) {
+    	// Go through all grid pts
+    	for (auto &pr: _grid_pts) {
+    		// Copy
+    		pr.second->set_ordinate(other->get_grid_point(pr.first.get_idx_set())->get_ordinate());
+    	};
+    };
+
+	/********************
 	Read/write grid
 	********************/
 
@@ -1395,6 +1413,25 @@ namespace dcu {
 		return _impl->f1d_deriv_x_by_ref(x_frac,p0,p1,p2,p3);
 	};
 
+    /********************
+	Apply M or P mappings
+	********************/
+
+    IdxSet Grid::apply_m_mapping_by_ref(const IdxSet &idxs) const {
+    	return _impl->apply_m_mapping_by_ref(idxs);
+    };
+    IdxSet Grid::apply_p_mapping_by_ref(const IdxSet &idxs) const {
+    	return _impl->apply_p_mapping_by_ref(idxs);
+    };
+
+	/********************
+	Copy ordinates from another grid
+	********************/
+
+    void Grid::copy_ordinates(const Grid* other) {
+    	_impl->copy_ordinates(other);
+    };
+
 	/********************
 	Read/write grid
 	********************/
@@ -1405,17 +1442,5 @@ namespace dcu {
 	void Grid::write_to_file(std::string fname) const {
 		_impl->write_to_file(fname);
 	};
-
-    /********************
-	Apply M or P mappings
-	********************/
-
-    IdxSet Grid::apply_m_mapping_by_ref(const IdxSet &idxs) const {
-    	return apply_m_mapping_by_ref(idxs);
-    };
-    IdxSet Grid::apply_p_mapping_by_ref(const IdxSet &idxs) const {
-    	return apply_p_mapping_by_ref(idxs);
-    };
-
 
 };

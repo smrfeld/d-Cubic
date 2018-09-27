@@ -179,6 +179,13 @@ namespace dcu {
 	    IdxSet apply_p_mapping_by_ref(const IdxSet &idxs) const;
 
 		/********************
+		Copy ordinates from another grid
+		********************/
+
+	    // Warning: grid dimensions are not checked!
+	    void copy_ordinates(const Grid* other);
+
+		/********************
 		Read/write grid
 		********************/
 
