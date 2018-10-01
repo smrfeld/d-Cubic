@@ -43,6 +43,9 @@ namespace dcu {
 		// Check if point is in domain
 		bool check_if_pt_is_inside_domain(double x) const;
 
+		// Get closest index
+		int get_closest_idx(double x) const;
+
 		// Get indexes surrounding a point
 		// ie point is between i and i+1 where i is returned
 		int get_idxs_surrounding_pt(double x) const; 

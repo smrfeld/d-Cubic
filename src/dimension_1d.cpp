@@ -1,6 +1,7 @@
 #include "../include/dcubic_bits/dimension_1d.hpp"
 
 #include <iostream>
+#include <cmath>
 
 /************************************
 * Namespace for dcu
@@ -93,6 +94,16 @@ namespace dcu {
 			return false; 
 		} else {
 			return true;
+		};
+	};
+
+	// Get closest index
+	int Dimension1D::get_closest_idx(double x) const {
+		int i = get_idxs_surrounding_pt(x);
+		if (abs(x - get_pt_by_idx(i)) < abs(x - get_pt_by_idx(i+1))) {
+			return i;
+		} else {
+			return i+1;
 		};
 	};
 

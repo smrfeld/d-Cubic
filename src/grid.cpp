@@ -9,7 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include "cmath"
+#include <cmath>
 #include <unordered_map>
 
 #define DIAG_PROJ 0
@@ -1162,7 +1162,7 @@ namespace dcu {
 	********************/
 
 	void Grid::Impl::read_from_file(std::string fname) {
-		std::ofstream f;
+		std::ifstream f;
 
 		// Open
 		f.open(fname);
@@ -1173,26 +1173,37 @@ namespace dcu {
 			exit(EXIT_FAILURE);
 		};
 
-		// Go through all grid pts
-		std::vector<double> abscissas;
+		// Abscissas
+		std::string abscissa_str;
+		double abscissa;
+		IdxSet idx_set(_dims.size());
+
+		// Ordinate
+		std::string ordinate_str="";
 		double ordinate;
-		int i_count = 0;
-		for (auto &pr: _grid_pts) {
 
-			// Get
-			abscissas = pr.second->get_abscissas();
-			ordinate = pr.second->get_ordinate();
-
-			// Write
-			for (auto dim=0; dim<_dim_grid; dim++) {
-				f << abscissas[dim] << " ";
+		// Read
+		std::string line;
+		std::istringstream iss;
+		while (getline(f,line)) {
+			// Skip empty lines
+			if (line == "") { continue; };
+			// Line
+			iss = std::istringstream(line);
+			// Abscissas
+			for (auto dim=0; dim<_dims.size(); dim++) {
+				iss >> abscissa_str;
+				abscissa = atof(abscissa_str.c_str());
+				idx_set[dim] = _dims[dim].get_closest_idx(abscissa);
 			};
-			f << ordinate;
-
-			if (i_count != _grid_pts.size()-1) {
-				f << "\n";
-			};
-			i_count++;
+			// Ordinate
+			iss >> ordinate_str;
+			ordinate = atof(ordinate_str.c_str());
+			// Set grid pt
+			get_grid_point_ref(GridPtKey(idx_set,_dims)).set_ordinate(ordinate);
+			// Reset strs
+			abscissa_str = "";
+			ordinate_str = "";
 		};
 
 		// Close
