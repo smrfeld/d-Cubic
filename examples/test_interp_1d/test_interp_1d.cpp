@@ -26,18 +26,23 @@ int main() {
 	Grid grid({dim});
 
 	// Fill randomly
-	std::vector<int> v({0});
-	for (int i=0; i<30; i++) {
-		v[0] = i;
-		grid.get_grid_point_ref(v).set_ordinate(fRand(0.0,5.0));
+	IdxSet v(1);
+	for (v[0]=1; v[0]<=30; v[0]++) {
+		grid.get_grid_point_inside(v)->set_ordinate(fRand(0.0,5.0));
 	};
 
 	// Write
 	grid.write_to_file("test_interp_1d.txt");
 
 	// Get val
-	double x = grid.get_val({0.71});
-	std::cout << "val @ 0.71 = " << x << std::endl;
+	double* x = new double[1];
+	x[0] = 0.71;
+	double y = grid.get_val(x);
+	std::cout << "val @ 0.71 = " << y << std::endl;
+
+	// Clean up
+	delete[] x;
+	x = nullptr;
 
 	return 0;
 };

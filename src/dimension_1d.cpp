@@ -78,13 +78,7 @@ namespace dcu {
 	};
 
 	// Get by idx
-	double Dimension1D::get_pt_by_idx(int idx, bool enforce_inside_domain, bool start_at_one) const {
-		if (enforce_inside_domain) {
-			if (idx >= _no_pts || idx < 0) {
-				std::cerr << ">>> Error: Dimension1D::get_pt_by_idx <<< Idx: " << idx << " is out of domain - valid idxs are: 0, 1, ..., " << _no_pts-1 << std::endl;
-				exit(EXIT_FAILURE);
-			};
-		};
+	double Dimension1D::get_pt_by_idx(int idx, bool start_at_one) const {
 		if (start_at_one) {
 			return _min_pt + (idx-1) * _delta;
 		} else {

@@ -173,7 +173,5 @@ namespace dcu {
 
 		// Check if all pts are interior
 		bool check_are_all_pts_inside() const;
-
-		// 
 	};
 };

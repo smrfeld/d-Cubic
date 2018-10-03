@@ -38,7 +38,7 @@ namespace dcu {
 		double get_delta() const;
 
 		// Get by idx
-		double get_pt_by_idx(int idx, bool enforce_inside_domain=true, bool start_at_one=false) const;
+		double get_pt_by_idx(int idx, bool start_at_one=false) const;
 
 		// Check if point is in domain
 		bool check_if_pt_is_inside_domain(double x) const;

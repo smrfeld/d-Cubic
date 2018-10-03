@@ -17,7 +17,7 @@ namespace dcu {
 	IdxSet::IdxSet(int no_idxs) {
 		_no_idxs = no_idxs;
 		_idxs = new int[_no_idxs];
-		std::fill_n(_idxs,_no_idxs,0.0);
+		std::fill_n(_idxs,_no_idxs,0);
 	};
 	IdxSet::IdxSet(int no_idxs, int* idxs) {
 		_no_idxs = no_idxs;

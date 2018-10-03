@@ -16,7 +16,7 @@ namespace dcu {
 	GridPt::GridPt(int no_dims, double* abscissas) {
 		_no_dims = no_dims;
 		_abcissas = new double[_no_dims];
-		std::fill_n(_abcissas,_no_dims,0.0);
+		std::copy(abscissas,abscissas+_no_dims,_abcissas);
 	};
 	GridPt::GridPt(std::vector<double> abscissas) {
 		_no_dims = abscissas.size();
@@ -56,7 +56,10 @@ namespace dcu {
 
 	void GridPt::_clean_up()
 	{
-		// Nothing...
+		if (_abcissas) {
+			delete[] _abcissas;
+			_abcissas = nullptr;
+		};
 	};
 	void GridPt::_copy(const GridPt& other)
 	{

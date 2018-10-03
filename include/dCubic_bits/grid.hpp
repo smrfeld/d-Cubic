@@ -42,7 +42,8 @@ namespace dcu {
 		int _no_grid_pts;
 
 		// Iterating funcs
-		void _iterate_make_grid_pt(int dim, IdxSet idxs, double* abscissas, Loc* locs);
+		void _iterate_make_grid_pt_inside(int dim, IdxSet idxs, double* abscissas);
+		void _iterate_make_grid_pt_outside(int dim, IdxSet idxs, double* abscissas, Loc* locs);		
 		void _iterate_get_surrounding_2_grid_pts(int dim, IdxSet idxs_local, const IdxSet &idxs_lower, Nbr2 &nbr2) const;
 		void _iterate_get_surrounding_4_grid_pts(int dim, IdxSet idxs_local, const IdxSet &idxs_p0, Nbr4 &nbr4) const;
 		double _iterate_interpolate(int delta, int d, Nbr4 &nbr4, IdxSet idxs_j) const;

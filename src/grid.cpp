@@ -119,16 +119,24 @@ namespace dcu {
 		other._grid_pts_out = nullptr;
 	};
 	void Grid::_shared_constructor() {
-		_no_grid_pts = 1;		
+		_no_grid_pts = 1;
+		_no_pts_in_dim = new int[_no_dims];	
 		for (auto dim=0; dim<_no_dims; dim++) {
 			_no_pts_in_dim[dim] = _dims[dim].get_no_pts();
 			_no_grid_pts *= _no_pts_in_dim[dim] + 2; // outside left/right
 		};
 
-		// Make grid pts
+		// Allocate grid pts
+		_grid_pts_in = new GridPtIn*[_no_grid_pts];
+		_grid_pts_out = new GridPtOut*[_no_grid_pts];
+
+		// Make grid pts inside
 		double* abscissas = new double[_no_dims];
+		_iterate_make_grid_pt_inside(0,IdxSet(_no_dims),abscissas);
+
+		// Make grid pts outside
 		Loc* locs = new Loc[_no_dims];
-		_iterate_make_grid_pt(0,IdxSet(_no_dims),abscissas,locs);
+		_iterate_make_grid_pt_outside(0,IdxSet(_no_dims),abscissas,locs);
 
 		// Clean up
 		delete[] abscissas;
@@ -141,45 +149,65 @@ namespace dcu {
 	Make grid pts
 	********************/
 
-	void Grid::_iterate_make_grid_pt(int dim, IdxSet idxs, double* abscissas, Loc* locs) {
+	void Grid::_iterate_make_grid_pt_inside(int dim, IdxSet idxs, double* abscissas) {
 		if (dim != _no_dims) {
 			// Deeper!
-			for (idxs[dim]=0; idxs[dim]<_no_pts_in_dim[dim]+2; idxs[dim]++) { // extra 2 for left/right
-				_iterate_make_grid_pt(dim+1, idxs, abscissas, locs);
+			for (idxs[dim]=1; idxs[dim]<=_no_pts_in_dim[dim]; idxs[dim]++) { // extra 2 for left/right
+				_iterate_make_grid_pt_inside(dim+1, idxs, abscissas);
 			};
 		} else {
 			// Do something
 
 			// Make the abscissa
-			bool interior=true;
 			for (auto dim2=0; dim2<_no_dims; dim2++) {
 				abscissas[dim2] = _dims[dim2].get_pt_by_idx(idxs[dim2],true);
 			};
 
 			// Make the grid pt
-			if (interior) {
-				move_grid_point_inside(idxs,new GridPtIn(_no_dims,abscissas));
-			} else {
-				// Make the other two pts
-				IdxSet idxs_p1(idxs), idxs_p2(idxs);
-				for (auto dim2=0; dim2<_no_dims; dim2++) {
-					if (idxs[dim2] == 0) {
-						interior = false;
-						locs[dim2] = Loc::OUTSIDE_LEFT;
-						idxs_p1[dim2] += 1;
-						idxs_p2[dim2] += 2;
-					} else if (idxs[dim2] == _no_pts_in_dim[dim2]+1) {
-						interior = false;
-						locs[dim2] = Loc::OUTSIDE_RIGHT;
-						idxs_p1[dim2] -= 1;
-						idxs_p2[dim2] -= 2;
-					} else {
-						locs[dim2] = Loc::INSIDE;
-					};				
-				};
-				// Make grid pt
-				move_grid_point_outside(idxs,new GridPtOut(_no_dims,abscissas,get_grid_point_inside(idxs_p1),get_grid_point_inside(idxs_p2),locs));
+			move_grid_point_inside(idxs,new GridPtIn(_no_dims,abscissas));
+		};
+	};
+
+	void Grid::_iterate_make_grid_pt_outside(int dim, IdxSet idxs, double* abscissas, Loc* locs) {
+		if (dim != _no_dims) {
+			// Deeper!
+			for (idxs[dim]=0; idxs[dim]<=_no_pts_in_dim[dim]+1; idxs[dim]++) { // extra 2 for left/right
+				_iterate_make_grid_pt_outside(dim+1, idxs, abscissas, locs);
 			};
+		} else {
+			// Do something
+
+			// Check that at least one dim is outside
+			bool inside=true;
+			IdxSet idxs_p1(idxs), idxs_p2(idxs);
+			for (auto dim2=0; dim2<_no_dims; dim2++) {
+				if (idxs[dim2] == 0) {
+					inside = false;
+					locs[dim2] = Loc::OUTSIDE_LEFT;
+					idxs_p1[dim2] += 1;
+					idxs_p2[dim2] += 2;
+				} else if (idxs[dim2] == _no_pts_in_dim[dim2]+1) {
+					inside = false;
+					locs[dim2] = Loc::OUTSIDE_RIGHT;
+					idxs_p1[dim2] -= 1;
+					idxs_p2[dim2] -= 2;
+				} else {
+					locs[dim2] = Loc::INSIDE;
+				};	
+			};
+
+			// This pt is inside
+			if (inside) {
+				return;
+			};
+
+			// Make the abscissa
+			for (auto dim2=0; dim2<_no_dims; dim2++) {
+				abscissas[dim2] = _dims[dim2].get_pt_by_idx(idxs[dim2],true);
+			};
+
+			// Make the grid pt
+			move_grid_point_outside(idxs,new GridPtOut(_no_dims,abscissas,get_grid_point_inside(idxs_p1),get_grid_point_inside(idxs_p2),locs));
 		};
 	};
 
@@ -222,8 +250,11 @@ namespace dcu {
 		};
 		if (_grid_pts_in[idx]) {
 			return _grid_pts_in[idx];
-		} else {
+		} else if (_grid_pts_out[idx]) {
 			return _grid_pts_out[idx];
+		} else {
+			std::cerr << ">>> Error: get_grid_point <<< does not exist at idxs: " << idxs << std::endl;
+			exit(EXIT_FAILURE);
 		};
 	};
 	GridPtIn* Grid::get_grid_point_inside(IdxSet idxs) const {
@@ -238,7 +269,12 @@ namespace dcu {
 
 			idx += term;
 		};
-		return _grid_pts_in[idx];
+		if (_grid_pts_in[idx]) {
+			return _grid_pts_in[idx];
+		} else {
+			std::cerr << ">>> Error: get_grid_point_inside <<< does not exist at idxs: " << idxs << std::endl;
+			exit(EXIT_FAILURE);
+		};
 	};
 	GridPtOut* Grid::get_grid_point_outside(IdxSet idxs) const {
 		int idx=0;
@@ -252,7 +288,12 @@ namespace dcu {
 
 			idx += term;
 		};
-		return _grid_pts_out[idx];
+		if (_grid_pts_out[idx]) {
+			return _grid_pts_out[idx];
+		} else {
+			std::cerr << ">>> Error: get_grid_point_outside <<< does not exist at idxs: " << idxs << std::endl;
+			exit(EXIT_FAILURE);
+		};		
 	};
 	void Grid::move_grid_point_inside(IdxSet idxs, GridPtIn* grid_pt) {
 		int idx=0;
