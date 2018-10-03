@@ -24,7 +24,7 @@ int main() {
 	Dimension1D dim_2(0.0,1.0,23);
 
 	// Make grid
-	Grid grid({dim_1,dim_2});
+	Grid grid({&dim_1,&dim_2});
 
 	// Fill randomly
 	IdxSet v(2);

@@ -29,7 +29,7 @@ namespace dcu {
 		int _no_dims;
 
 		// Dims
-		std::vector<Dimension1D> _dims;
+		Dimension1D** _dims;
 
 		// No pts in each dim
 		int* _no_pts_in_dim;
@@ -62,7 +62,8 @@ namespace dcu {
 		Constructor
 		********************/
 
-		Grid(std::vector<Dimension1D> dims);
+		Grid(int no_dims, Dimension1D** dims);
+		Grid(std::vector<Dimension1D*> dims);
 		Grid(const Grid& other);
 		Grid(Grid&& other);
 		Grid& operator=(const Grid &other);
@@ -80,7 +81,7 @@ namespace dcu {
 		********************/
 
 		int get_no_dims() const;
-		Dimension1D get_dim(int dim) const;
+		Dimension1D* get_dim(int dim) const;
 
 		/********************
 		Get/set grid points

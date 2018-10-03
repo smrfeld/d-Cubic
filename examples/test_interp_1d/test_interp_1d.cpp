@@ -23,7 +23,7 @@ int main() {
 	Dimension1D dim(0.0,1.0,30);
 
 	// Grid
-	Grid grid({dim});
+	Grid grid({&dim});
 
 	// Fill randomly
 	IdxSet v(1);
