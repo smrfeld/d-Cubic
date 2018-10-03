@@ -42,5 +42,9 @@ int main() {
 	double x_deriv = grid.get_deriv_wrt_x(x,0);
 	std::cout << "deriv @ " << x[0] << " wrt x = " << x_deriv << std::endl;
 
+	// Clean up
+	delete[] x;
+	x = nullptr;
+
 	return 0;
 };

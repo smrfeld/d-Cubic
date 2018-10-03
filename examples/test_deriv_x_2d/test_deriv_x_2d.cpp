@@ -27,12 +27,10 @@ int main() {
 	Grid grid({dim_1,dim_2});
 
 	// Fill randomly
-	std::vector<int> v({0,0});
-	for (int i=0; i<30; i++) {
-		for (int j=0; j<14; j++) {
-			v[0] = i;
-			v[1] = j;
-			grid.get_grid_point_ref(v).set_ordinate(fRand(-4.0,-2.0));
+	IdxSet v(2);
+	for (v[0]=1; v[0]<=30; v[0]++) {
+		for (v[1]=1; v[1]<=14; v[1]++) {
+			grid.get_grid_point_inside(v)->set_ordinate(fRand(-4.0,-2.0));
 		};
 	};
 
@@ -40,13 +38,19 @@ int main() {
 	grid.write_to_file("test_deriv_x_2d.txt");
 
 	// Point to evaluate at
-	std::vector<double> abcissa({0.46,0.33});
+	double* x = new double[2];
+	x[0] = 0.46;
+	x[1] = 0.33;
 
 	// Derivs
-	double x_deriv = grid.get_deriv_wrt_x(abcissa,0);
-	std::cout << "deriv @ " << abcissa[0] << "," << abcissa[1] << " wrt x = " << x_deriv << std::endl;
-	double y_deriv = grid.get_deriv_wrt_x(abcissa,1);
-	std::cout << "deriv @ " << abcissa[0] << "," << abcissa[1] << " wrt y = " << y_deriv << std::endl;
+	double x_deriv = grid.get_deriv_wrt_x(x,0);
+	std::cout << "deriv @ " << x[0] << "," << x[1] << " wrt x = " << x_deriv << std::endl;
+	double y_deriv = grid.get_deriv_wrt_x(x,1);
+	std::cout << "deriv @ " << x[0] << "," << x[1] << " wrt y = " << y_deriv << std::endl;
+
+	// Clean up
+	delete[] x;
+	x = nullptr;
 
 	return 0;
 };
