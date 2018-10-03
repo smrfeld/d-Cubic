@@ -78,14 +78,18 @@ namespace dcu {
 	};
 
 	// Get by idx
-	double Dimension1D::get_pt_by_idx(int idx, bool enforce_inside_domain) const {
+	double Dimension1D::get_pt_by_idx(int idx, bool enforce_inside_domain, bool start_at_one) const {
 		if (enforce_inside_domain) {
 			if (idx >= _no_pts || idx < 0) {
 				std::cerr << ">>> Error: Dimension1D::get_pt_by_idx <<< Idx: " << idx << " is out of domain - valid idxs are: 0, 1, ..., " << _no_pts-1 << std::endl;
 				exit(EXIT_FAILURE);
 			};
 		};
-		return _min_pt + idx * _delta;
+		if (start_at_one) {
+			return _min_pt + (idx-1) * _delta;
+		} else {
+			return _min_pt + idx * _delta;
+		};
 	};
 
 	// Check if point is in domain
@@ -98,9 +102,9 @@ namespace dcu {
 	};
 
 	// Get closest index
-	int Dimension1D::get_closest_idx(double x) const {
-		int i = get_idxs_surrounding_pt(x);
-		if (abs(x - get_pt_by_idx(i)) < abs(x - get_pt_by_idx(i+1))) {
+	int Dimension1D::get_closest_idx(double x, bool start_at_one) const {
+		int i = get_idxs_surrounding_pt(x,start_at_one);
+		if (abs(x - get_pt_by_idx(i,start_at_one)) < abs(x - get_pt_by_idx(i+1,start_at_one))) {
 			return i;
 		} else {
 			return i+1;
@@ -109,10 +113,14 @@ namespace dcu {
 
 	// Get indexes surrounding a point
 	// ie point is between i and i+1 where i is returned
-	int Dimension1D::get_idxs_surrounding_pt(double x) const {
+	int Dimension1D::get_idxs_surrounding_pt(double x, bool start_at_one) const {
 		int i = (x - _min_pt) / _delta;
 		if (i==_no_pts-1) {i--;};
-		return i;
+		if (start_at_one) {
+			return i+1;
+		} else {
+			return i;
+		};
 	};
 
 	// Get fraction of a point between successive points
@@ -120,7 +128,7 @@ namespace dcu {
 		return get_frac_between(x,get_idxs_surrounding_pt(x));
 	};
 	// Second optional specification: the return of the surrounding idxs
-	double Dimension1D::get_frac_between(double x, int i) const {
-		return (x - get_pt_by_idx(i)) / _delta;
+	double Dimension1D::get_frac_between(double x, int i, bool start_at_one) const {
+		return (x - get_pt_by_idx(i,start_at_one)) / _delta;
 	};
 };

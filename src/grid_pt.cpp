@@ -302,7 +302,7 @@ namespace dcu {
 	void GridPtOut::_clean_up()
 	{
 		if (_locs) {
-			delete _locs;
+			delete[] _locs;
 			_locs = nullptr;
 		};
 	};

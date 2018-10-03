@@ -10,9 +10,12 @@ namespace dcu {
 	// Forwards
 	class Dimension1D;
 	class GridPt;
+	class GridPtIn;
 	class GridPtOut;
-	class GridPtKey;
-	enum class GridPtType: unsigned int;
+	class Nbr4;
+	class Nbr2;
+	class IdxSet;
+	enum class Loc: unsigned int;
 
 	/****************************************
 	Grid
@@ -26,7 +29,7 @@ namespace dcu {
 		int _no_dims;
 
 		// Dims
-		Dimension1D* _dims;
+		std::vector<Dimension1D> _dims;
 
 		// No pts in each dim
 		int* _no_pts_in_dim;
@@ -58,7 +61,6 @@ namespace dcu {
 		Constructor
 		********************/
 
-		Grid(int no_dims, Dimension1D* dims);
 		Grid(std::vector<Dimension1D> dims);
 		Grid(const Grid& other);
 		Grid(Grid&& other);
@@ -89,8 +91,8 @@ namespace dcu {
 
 		// MOVE a grid point in
 		// This means Grid class assumes ownership!
-		void move_grid_point_inside(IdxSet idxs, GridPtIn* grid_pt) const;
-		void move_grid_point_outside(IdxSet idxs, GridPtOut* grid_pt) const;
+		void move_grid_point_inside(IdxSet idxs, GridPtIn* grid_pt);
+		void move_grid_point_outside(IdxSet idxs, GridPtOut* grid_pt);
 
 		/********************
 		Get grid points surrounding a point

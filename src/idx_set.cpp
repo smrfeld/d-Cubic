@@ -61,7 +61,7 @@ namespace dcu {
 	void IdxSet::_clean_up()
 	{
 		if (_idxs) {
-			delete _idxs;
+			delete[] _idxs;
 			_idxs = nullptr;
 		};
 	};

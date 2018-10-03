@@ -3,8 +3,7 @@
 // Other headers
 #include "../include/dcubic_bits/dimension_1d.hpp"
 #include "../include/dcubic_bits/grid_pt.hpp"
-#include "../include/dcubic_bits/neighbors.hpp"
-#include "../include/dcubic_bits/idx_set.hpp"
+#include "../include/dcubic_bits/neighbors.hpp" // includes idxset
 
 #include <fstream>
 #include <iostream>
@@ -23,26 +22,16 @@ namespace dcu {
 	Gridementation
 	****************************************/
 
-	Grid(int no_dims, Dimension1D* dims) {
-		_no_dims = no_dims;
-		_dims = new Dimension1D[_no_dims];
-		std::copy(dims,dims+_no_dims,_dims);
+	Grid::Grid(std::vector<Dimension1D> dims) {
+		_no_dims = dims.size();
+		_dims = dims;
 
 		_shared_constructor();
 	};
-	Grid::(std::vector<Dimension1D> dims) {
-		_no_dims = no_dims;
-		_dims = new Dimension1D[_no_dims];
-		for (auto dim=0; dim<_no_dims; dim++) {
-			_dims[dim] = dims[dim];
-		};
-
-		_shared_constructor();
-	};
-	Grid::(const Grid& other) {
+	Grid::Grid(const Grid& other) {
 		_copy(other);
 	};
-	Grid::(Grid&& other) {
+	Grid::Grid(Grid&& other) {
 		_move(other);
 	};
     Grid& Grid::operator=(const Grid& other) {
@@ -70,12 +59,8 @@ namespace dcu {
 
 	void Grid::_clean_up()
 	{
-		if (_dims) {
-			delete _dims;
-			_dims = nullptr;
-		};
 		if (_no_pts_in_dim) {
-			delete _no_pts_in_dim;
+			delete[] _no_pts_in_dim;
 			_no_pts_in_dim = nullptr;
 		};
 		if (_grid_pts_in) {
@@ -85,7 +70,7 @@ namespace dcu {
 					_grid_pts_in[ipt] = nullptr;
 				};
 			};
-			delete _grid_pts_in;
+			delete[] _grid_pts_in;
 			_grid_pts_in = nullptr;
 		};
 		if (_grid_pts_out) {
@@ -95,7 +80,7 @@ namespace dcu {
 					_grid_pts_out[ipt] = nullptr;
 				};
 			};
-			delete _grid_pts_out;
+			delete[] _grid_pts_out;
 			_grid_pts_out = nullptr;
 		};
 	};
@@ -104,15 +89,14 @@ namespace dcu {
 		_no_dims = other._no_dims;
 		_no_grid_pts = other._no_grid_pts;
 
-		_dims = new Dimension1D[_no_dims];
-		std::copy(other._dims,other._dims+_no_dims,_dims);
+		_dims = other._dims;
 
 		_no_pts_in_dim = new int[_no_dims];
 		std::copy(other._no_pts_in_dim,other._no_pts_in_dim+_no_dims,_no_pts_in_dim);
 
-		_grid_pts_in = new GridPt*[_no_grid_pts];
+		_grid_pts_in = new GridPtIn*[_no_grid_pts];
 		std::copy(other._grid_pts_in,other._grid_pts_in+_no_grid_pts,_grid_pts_in);
-		_grid_pts_out = new GridPt*[_no_grid_pts];
+		_grid_pts_out = new GridPtOut*[_no_grid_pts];
 		std::copy(other._grid_pts_out,other._grid_pts_out+_no_grid_pts,_grid_pts_out);
 	};
 	void Grid::_move(Grid& other)
@@ -130,7 +114,6 @@ namespace dcu {
 		// Reset other
 		other._no_dims = 0;
 		other._no_grid_pts = 0;
-		other._dims = nullptr;
 		other._no_pts_in_dim = nullptr;
 		other._grid_pts_in = nullptr;
 		other._grid_pts_out = nullptr;
@@ -138,7 +121,7 @@ namespace dcu {
 	void Grid::_shared_constructor() {
 		_no_grid_pts = 1;		
 		for (auto dim=0; dim<_no_dims; dim++) {
-			_no_pts_in_dim[dim] = _dim[dim].get_no_pts();
+			_no_pts_in_dim[dim] = _dims[dim].get_no_pts();
 			_no_grid_pts *= _no_pts_in_dim[dim] + 2; // outside left/right
 		};
 
@@ -148,8 +131,8 @@ namespace dcu {
 		_iterate_make_grid_pt(0,IdxSet(_no_dims),abscissas,locs);
 
 		// Clean up
-		delete abscissas;
-		delete locs;
+		delete[] abscissas;
+		delete[] locs;
 		abscissas = nullptr;
 		locs = nullptr;
 	};
@@ -159,10 +142,10 @@ namespace dcu {
 	********************/
 
 	void Grid::_iterate_make_grid_pt(int dim, IdxSet idxs, double* abscissas, Loc* locs) {
-		if (dim != _dim_grid) {
+		if (dim != _no_dims) {
 			// Deeper!
 			for (idxs[dim]=0; idxs[dim]<_no_pts_in_dim[dim]+2; idxs[dim]++) { // extra 2 for left/right
-				_iterate_make_grid_pt(dim+1, idxs);
+				_iterate_make_grid_pt(dim+1, idxs, abscissas, locs);
 			};
 		} else {
 			// Do something
@@ -170,32 +153,32 @@ namespace dcu {
 			// Make the abscissa
 			bool interior=true;
 			for (auto dim2=0; dim2<_no_dims; dim2++) {
-				abscissas[dim2] = _dims[dim2].get_pt_by_idx(idxs[dim2]);
+				abscissas[dim2] = _dims[dim2].get_pt_by_idx(idxs[dim2],true);
 			};
 
 			// Make the grid pt
 			if (interior) {
-				move_grid_point_inside(idxs,new GridPtIn(no_dims,abscissas));
+				move_grid_point_inside(idxs,new GridPtIn(_no_dims,abscissas));
 			} else {
 				// Make the other two pts
 				IdxSet idxs_p1(idxs), idxs_p2(idxs);
 				for (auto dim2=0; dim2<_no_dims; dim2++) {
 					if (idxs[dim2] == 0) {
 						interior = false;
-						locs[dim2] == Loc::OUTSIDE_LEFT;
+						locs[dim2] = Loc::OUTSIDE_LEFT;
 						idxs_p1[dim2] += 1;
 						idxs_p2[dim2] += 2;
 					} else if (idxs[dim2] == _no_pts_in_dim[dim2]+1) {
 						interior = false;
-						locs[dim2] == Loc::OUTSIDE_RIGHT;
+						locs[dim2] = Loc::OUTSIDE_RIGHT;
 						idxs_p1[dim2] -= 1;
 						idxs_p2[dim2] -= 2;
 					} else {
-						locs[dim2] == Loc::INTERIOR;
+						locs[dim2] = Loc::INSIDE;
 					};				
 				};
 				// Make grid pt
-				move_grid_point_outside(idxs,new GridPtOut(no_dims,abscissas,get_grid_point_inside(idxs_p1),get_grid_point_inside(idxs_p2),locs));
+				move_grid_point_outside(idxs,new GridPtOut(_no_dims,abscissas,get_grid_point_inside(idxs_p1),get_grid_point_inside(idxs_p2),locs));
 			};
 		};
 	};
@@ -237,7 +220,7 @@ namespace dcu {
 
 			idx += term;
 		};
-		if (_grid_pts_inside[idx]) {
+		if (_grid_pts_in[idx]) {
 			return _grid_pts_in[idx];
 		} else {
 			return _grid_pts_out[idx];
@@ -285,7 +268,7 @@ namespace dcu {
 		};
 		_grid_pts_in[idx] = grid_pt;
 	};
-	void Grid::move_grid_point_outside(IdxSet idxs, GridPtout* grid_pt) {
+	void Grid::move_grid_point_outside(IdxSet idxs, GridPtOut* grid_pt) {
 		int idx=0;
 		int term;
 		for (auto dim=0; dim<_no_dims; dim++) {
@@ -311,7 +294,7 @@ namespace dcu {
 
 		// Get bounding idxs
 		IdxSet idxs_lower(_no_dims), idxs_upper(_no_dims);
-		for (auto dim=0; dim<_dim_grid; dim++) {
+		for (auto dim=0; dim<_no_dims; dim++) {
 			// Check in dim
 			if (!_dims[dim].check_if_pt_is_inside_domain(abscissas[dim])) {
 				// Outside grid
@@ -319,18 +302,18 @@ namespace dcu {
 				exit(EXIT_FAILURE);
 			};
 
-			idxs_lower[dim] = _dims[dim].get_idxs_surrounding_pt(abscissas[dim]);
+			idxs_lower[dim] = _dims[dim].get_idxs_surrounding_pt(abscissas[dim],true);
 			idxs_upper[dim] = idxs_lower[dim]+1;
 
 			// Frac
-			frac_abscissas[dim] = ((abscissas[dim] - _dims[dim].get_pt_by_idx(idxs_lower[dim])) / (_dims[dim].get_pt_by_idx(idxs_upper[dim]) - _dims[dim].get_pt_by_idx(idxs_lower[dim])));
+			frac_abscissas[dim] = _dims[dim].get_frac_between(abscissas[dim],idxs_lower[dim],true);
 		};
 
 		// Returned
 		Nbr2 nbr2(idxs_lower, frac_abscissas);
 
 		// Clean up
-		delete frac_abscissas;
+		delete[] frac_abscissas;
 		frac_abscissas = nullptr;
 
 		// Iterate to fill out the map
@@ -340,7 +323,7 @@ namespace dcu {
 	};
 
 	void Grid::_iterate_get_surrounding_2_grid_pts(int dim, IdxSet idxs_local, const IdxSet &idxs_lower, Nbr2 &nbr2) const {
-		if (dim != _dim_grid) {
+		if (dim != _no_dims) {
 			// Deeper!
 			// Can be lower (=0) or higher (=+1) in this dim
 			idxs_local[dim] = 0;
@@ -352,7 +335,7 @@ namespace dcu {
 			// Do something
 
 			// Add to nbr2
-			nbr2.set_grid_pt(idxs_local, get_grid_point(idxs_lower+idxs_local));
+			nbr2.set_grid_point(idxs_local, get_grid_point(idxs_lower+idxs_local));
 		};
 	};
 
@@ -363,7 +346,7 @@ namespace dcu {
 
 		// Get bounding idxs
 		IdxSet idxs_p0(_no_dims), idxs_p1(_no_dims), idxs_p2(_no_dims), idxs_p3(_no_dims);
-		for (auto dim=0; dim<_dim_grid; dim++) {
+		for (auto dim=0; dim<_no_dims; dim++) {
 			// Check in dim
 			if (!_dims[dim].check_if_pt_is_inside_domain(abscissas[dim])) {
 				// Outside grid
@@ -371,20 +354,20 @@ namespace dcu {
 				exit(EXIT_FAILURE);
 			};
 
-			idxs_p1[dim] = _dims[dim].get_idxs_surrounding_pt(abscissas[dim]);
+			idxs_p1[dim] = _dims[dim].get_idxs_surrounding_pt(abscissas[dim],true);
 			idxs_p0[dim] = idxs_p1[dim]-1;
 			idxs_p2[dim] = idxs_p1[dim]+1;
 			idxs_p3[dim] = idxs_p1[dim]+2;
 
 			// Frac
-			frac_abscissas[dim] = ((abscissas[dim] - _dims[dim].get_pt_by_idx(idxs_p1[dim])) / (_dims[dim].get_pt_by_idx(idxs_p2[dim]) - _dims[dim].get_pt_by_idx(idxs_p1[dim])));
+			frac_abscissas[dim] = _dims[dim].get_frac_between(abscissas[dim],idxs_p1[dim],true);
 		};
 
 		// Returned
 		Nbr4 nbr4(idxs_p1, frac_abscissas);
 
 		// Clean up
-		delete frac_abscissas;
+		delete[] frac_abscissas;
 		frac_abscissas = nullptr;
 
 		// Iterate to fill out the map
@@ -394,7 +377,7 @@ namespace dcu {
 	};
 
 	void Grid::_iterate_get_surrounding_4_grid_pts(int dim, IdxSet idxs_local, const IdxSet &idxs_p0, Nbr4 &nbr4) const {
-		if (dim != _dim_grid) {
+		if (dim != _no_dims) {
 			// Deeper!
 			// Can be 0,1,2,3
 			idxs_local[dim] = 0;
@@ -410,7 +393,7 @@ namespace dcu {
 			// Do something
 
 			// Add to nbr4
-			nbr4.set_grid_pt(idxs_local, get_grid_point(idxs_p0+idxs_local));
+			nbr4.set_grid_point(idxs_local, get_grid_point(idxs_p0+idxs_local));
 		};
 	};
 
@@ -420,7 +403,7 @@ namespace dcu {
 
 	double Grid::get_val(double* abscissas) const {
 		// nbrs p
-		Nbr4 nbr4 = get_surrounding_4_grid_pts_by_ref(abscissas);
+		Nbr4 nbr4 = get_surrounding_4_grid_pts(abscissas);
 
 		// Iterate
 		return _iterate_interpolate(0,_no_dims,nbr4,IdxSet(_no_dims));
@@ -448,7 +431,7 @@ namespace dcu {
 			idxs_j[delta] = 3;
 			p3 = _iterate_interpolate(delta+1, d, nbr4, idxs_j);
 
-			return f1d_interpolate_by_ref(nbr4.get_frac_abscissa(delta),p0,p1,p2,p3);
+			return f1d_interpolate(nbr4.get_frac_abscissa(delta),p0,p1,p2,p3);
 		};
 	};
 
@@ -459,7 +442,7 @@ namespace dcu {
 	double Grid::get_deriv_wrt_pt_value(double* abscissas, IdxSet idxs_k) {
 
 		// nbrs
-		Nbr4 nbr4 = get_surrounding_4_grid_pts_by_ref(abscissas);
+		Nbr4 nbr4 = get_surrounding_4_grid_pts(abscissas);
 
 		// Check: are there any exterior grid point?
 		bool all_inside = true;
@@ -475,7 +458,7 @@ namespace dcu {
 
 			double ret=1.0;
 			for (auto alpha=0; alpha<_no_dims; alpha++) {
-				ret *= f1d_deriv_pt_value_by_ref(nbr4.get_frac_abscissa(alpha), idxs_k[alpha]);
+				ret *= f1d_deriv_pt_value(nbr4.get_frac_abscissa(alpha), idxs_k[alpha]);
 			};
 			return ret;
 
@@ -520,7 +503,7 @@ namespace dcu {
 				IdxSet idxs_k_global = idxs_k - 1 + nbr4.get_idxs_i();
 
 				// Apply M mapping
-				IdxSet idxs_m = apply_m_mapping_by_ref(idxs_j_global);
+				IdxSet idxs_m = apply_m_mapping(idxs_j_global);
 
 				// Check
 				if (idxs_m == idxs_k_global) {
@@ -528,7 +511,7 @@ namespace dcu {
 				};
 
 				// Apply P mapping
-				IdxSet idxs_p = apply_p_mapping_by_ref(idxs_j_global);
+				IdxSet idxs_p = apply_p_mapping(idxs_j_global);
 
 				// Check
 				if (idxs_p == idxs_k_global) {
@@ -556,19 +539,19 @@ namespace dcu {
 
 			idxs_j[delta] = 0;
 			double dp0dp = _iterate_deriv_pt_value(delta+1,d,nbr4,idxs_j,idxs_k);
-			double dfdp0 = f1d_deriv_pt_value_by_ref(nbr4.get_frac_abscissa(delta),0);
+			double dfdp0 = f1d_deriv_pt_value(nbr4.get_frac_abscissa(delta),0);
 
 			idxs_j[delta] = 1;
 			double dp1dp = _iterate_deriv_pt_value(delta+1,d,nbr4,idxs_j,idxs_k);
-			double dfdp1 = f1d_deriv_pt_value_by_ref(nbr4.get_frac_abscissa(delta),1);
+			double dfdp1 = f1d_deriv_pt_value(nbr4.get_frac_abscissa(delta),1);
 
 			idxs_j[delta] = 2;
 			double dp2dp = _iterate_deriv_pt_value(delta+1,d,nbr4,idxs_j,idxs_k);
-			double dfdp2 = f1d_deriv_pt_value_by_ref(nbr4.get_frac_abscissa(delta),2);
+			double dfdp2 = f1d_deriv_pt_value(nbr4.get_frac_abscissa(delta),2);
 
 			idxs_j[delta] = 3;
 			double dp3dp = _iterate_deriv_pt_value(delta+1,d,nbr4,idxs_j,idxs_k);
-			double dfdp3 = f1d_deriv_pt_value_by_ref(nbr4.get_frac_abscissa(delta),3);
+			double dfdp3 = f1d_deriv_pt_value(nbr4.get_frac_abscissa(delta),3);
 
 			return dfdp0 * dp0dp + dfdp1 * dp1dp + dfdp2 * dp2dp + dfdp3 * dp3dp;
 		};
@@ -581,10 +564,10 @@ namespace dcu {
 	double Grid::get_deriv_wrt_x(double* abscissas, int k) {
 
 		// nbrs p
-		Nbr4 nbr4 = get_surrounding_4_grid_pts_by_ref(abscissas);
+		Nbr4 nbr4 = get_surrounding_4_grid_pts(abscissas);
 
 		// Iterate
-		return _iterate_deriv_x(0,k,d,nbr4,IdxSet(_no_dims));
+		return _iterate_deriv_x(0,k,_no_dims,nbr4,IdxSet(_no_dims));
 	};
 	double Grid::_iterate_deriv_x(int delta, int k, int d, Nbr4 &nbr4, IdxSet idxs_j) const {
 		
@@ -602,25 +585,25 @@ namespace dcu {
 			idxs_j[k] = 3;
 			double p3 = _iterate_interpolate(k+1,d,nbr4,idxs_j);
 
-			return f1d_deriv_x_by_ref(nbr4.get_frac_abscissa(k),p0,p1,p2,p3);
+			return f1d_deriv_x(nbr4.get_frac_abscissa(k),p0,p1,p2,p3);
 
 		} else { // Deeper
 
 			idxs_j[delta] = 0;
 			double dp0dxk = _iterate_deriv_x(delta+1,k,d,nbr4,idxs_j);
-			double dfdp0 = f1d_deriv_pt_value_by_ref(nbr4.get_frac_abscissa(delta),0);
+			double dfdp0 = f1d_deriv_pt_value(nbr4.get_frac_abscissa(delta),0);
 
 			idxs_j[delta] = 1;
 			double dp1dxk = _iterate_deriv_x(delta+1,k,d,nbr4,idxs_j);
-			double dfdp1 = f1d_deriv_pt_value_by_ref(nbr4.get_frac_abscissa(delta),1);
+			double dfdp1 = f1d_deriv_pt_value(nbr4.get_frac_abscissa(delta),1);
 
 			idxs_j[delta] = 2;
 			double dp2dxk = _iterate_deriv_x(delta+1,k,d,nbr4,idxs_j);
-			double dfdp2 = f1d_deriv_pt_value_by_ref(nbr4.get_frac_abscissa(delta),2);
+			double dfdp2 = f1d_deriv_pt_value(nbr4.get_frac_abscissa(delta),2);
 
 			idxs_j[delta] = 3;
 			double dp3dxk = _iterate_deriv_x(delta+1,k,d,nbr4,idxs_j);
-			double dfdp3 = f1d_deriv_pt_value_by_ref(nbr4.get_frac_abscissa(delta),3);
+			double dfdp3 = f1d_deriv_pt_value(nbr4.get_frac_abscissa(delta),3);
 
 			return dfdp0 * dp0dxk + dfdp1 * dp1dxk + dfdp2 * dp2dxk + dfdp3 * dp3dxk;
 		};
@@ -635,7 +618,7 @@ namespace dcu {
 	};
 
 	// p_idx = 0,1,2,3, depending on loc
-	double Grid::f1d_deriv_pt_value(const double &x_frac, int p_idx) const {
+	double Grid::f1d_deriv_pt_value(double x_frac, int p_idx) const {
 		if (p_idx==0) {
 			return -0.5*pow(x_frac,3) + pow(x_frac,2) - 0.5*x_frac;
 		} else if (p_idx==1) {
@@ -651,7 +634,7 @@ namespace dcu {
 		exit(EXIT_FAILURE);
 	};
 
-	double Grid::f1d_deriv_x(const double &x_frac, const double &p0, const double &p1, const double &p2, const double &p3) const {
+	double Grid::f1d_deriv_x(double x_frac, double p0, double p1, double p2, double p3) const {
 		return 3.0*(-0.5*p0 + 1.5*p1 - 1.5*p2 + 0.5*p3)*pow(x_frac,2) + 2.0*(p0 - 2.5*p1 + 2.0*p2 - 0.5*p3)*x_frac + (-0.5*p0 + 0.5*p2);
 	};
 
@@ -719,13 +702,13 @@ namespace dcu {
 			for (auto dim=0; dim<_no_dims; dim++) {
 				iss >> abscissa_str;
 				abscissa = atof(abscissa_str.c_str());
-				idx_set[dim] = _dims[dim].get_closest_idx(abscissa);
+				idx_set[dim] = _dims[dim].get_closest_idx(abscissa,true);
 			};
 			// Ordinate
 			iss >> ordinate_str;
 			ordinate = atof(ordinate_str.c_str());
 			// Set grid pt
-			get_grid_point(idx_set).set_ordinate(ordinate);
+			get_grid_point_inside(idx_set)->set_ordinate(ordinate);
 			// Reset strs
 			abscissa_str = "";
 			ordinate_str = "";
@@ -748,7 +731,11 @@ namespace dcu {
 
 		// Go through all grid pts
 		bool first_line=true;
-		for (auto const &pt: _grid_pts_in) {
+		for (auto i=0; i<_no_grid_pts; i++) {
+
+			if (!_grid_pts_in[i]) {
+				continue;
+			};
 
 			if (!first_line) {
 				f << "\n";
@@ -758,9 +745,9 @@ namespace dcu {
 
 			// Write
 			for (auto dim=0; dim<_no_dims; dim++) {
-				f << pt->get_abscissa(dim) << " ";
+				f << _grid_pts_in[i]->get_abscissa(dim) << " ";
 			};
-			f << pt->get_ordinate();
+			f << _grid_pts_in[i]->get_ordinate();
 		};
 
 		// Close
