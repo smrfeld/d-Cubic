@@ -480,7 +480,7 @@ namespace dcu {
 			// Check main condition
 			bool at_least_one_cond_met = false;
 			for (auto dim=0; dim<d; dim++) {
-				if ((nbr4.get_idx_i(dim) == 0 && idxs_j[dim] == 0) || (nbr4.get_idx_i(dim) == _no_pts_in_dim[dim]-2 && idxs_j[dim] == 3)) {
+				if ((nbr4.get_idx_i(dim) == 1 && idxs_j[dim] == 0) || (nbr4.get_idx_i(dim) == _no_pts_in_dim[dim]-1 && idxs_j[dim] == 3)) {
 					at_least_one_cond_met = true;
 					break;
 				};
@@ -638,9 +638,9 @@ namespace dcu {
     IdxSet Grid::apply_m_mapping(IdxSet idxs) const {
 		IdxSet idxs_m = idxs;
 		for (auto dim=0; dim<_no_dims; dim++) {
-			if (idxs_m[dim] == -1) {
+			if (idxs_m[dim] == 0) {
 				idxs_m[dim] += 1;
-			} else if (idxs_m[dim] == _no_pts_in_dim[dim]) {
+			} else if (idxs_m[dim] == _no_pts_in_dim[dim]+1) {
 				idxs_m[dim] -= 1;
 			};
 		};
@@ -649,9 +649,9 @@ namespace dcu {
     IdxSet Grid::apply_p_mapping(IdxSet idxs) const {
 		IdxSet idxs_p = idxs;
 		for (auto dim=0; dim<_no_dims; dim++) {
-			if (idxs_p[dim] == -1) {
+			if (idxs_p[dim] == 0) {
 				idxs_p[dim] += 2;
-			} else if (idxs_p[dim] == _no_pts_in_dim[dim]) {
+			} else if (idxs_p[dim] == _no_pts_in_dim[dim]+1) {
 				idxs_p[dim] -= 2;
 			};
 		};
