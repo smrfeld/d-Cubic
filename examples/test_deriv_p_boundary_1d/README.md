@@ -14,10 +14,9 @@ Grid grid({dim});
 
 Fill randomly
 ```
-std::vector<int> v({0,0});
-for (int i=0; i<11; i++) {
-	v[0] = i;
-	grid.get_grid_point_ref(v).set_ordinate(fRand(0.0,5.0));
+IdxSet v(1);
+for (v[0]=1; v[0]<=11; v[0]++) {
+	grid.get_grid_point_inside(v)->set_ordinate(fRand(0.0,5.0));
 };
 ```
 
@@ -28,16 +27,16 @@ grid.write_to_file("test_deriv_p_boundary_1d.txt");
 
 Point to evaluate at
 ```
-std::vector<double> abcissa({0.023});
+double* x = new double[1];
+x[0] = 0.023;
 ```
 
 NOTE: derivative wrt p0 will throw an error, since it is out of the grid
 ```
-IdxSet4 local_idxs({0});
+IdxSet local_idxs(1);
 double x_deriv;
-for (int i=1; i<=3; i++) {
-	local_idxs[0] = i;
-	x_deriv = grid.get_deriv_wrt_pt_value(abcissa,local_idxs);
-	std::cout << "deriv @ " << abcissa[0] << " wrt p" << local_idxs[0] << " = " << x_deriv << std::endl;
+for (local_idxs[0]=1; local_idxs[0]<=3; local_idxs[0]++) {
+	x_deriv = grid.get_deriv_wrt_pt_value(x,local_idxs);
+	std::cout << "deriv @ " << x[0] << " wrt p" << local_idxs[0] << " = " << x_deriv << std::endl;
 };
 ```

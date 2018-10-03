@@ -29,7 +29,7 @@ int main() {
 	// Fill randomly
 	IdxSet v(2);
 	for (v[0]=1; v[0]<=30; v[0]++) {
-		for (v[1]=1; v[1]<=17; v[1]++) {
+		for (v[1]=1; v[1]<=23; v[1]++) {
 			grid.get_grid_point_inside(v)->set_ordinate(fRand(0.0,5.0));
 		};
 	};
@@ -55,6 +55,6 @@ int main() {
 	// Clean up
 	delete[] x;
 	x = nullptr;
-	
+
 	return 0;
 };

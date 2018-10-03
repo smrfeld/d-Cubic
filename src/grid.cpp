@@ -128,7 +128,9 @@ namespace dcu {
 
 		// Allocate grid pts
 		_grid_pts_in = new GridPtIn*[_no_grid_pts];
+		std::fill_n(_grid_pts_in,_no_grid_pts,nullptr);
 		_grid_pts_out = new GridPtOut*[_no_grid_pts];
+		std::fill_n(_grid_pts_out,_no_grid_pts,nullptr);
 
 		// Make grid pts inside
 		double* abscissas = new double[_no_dims];
