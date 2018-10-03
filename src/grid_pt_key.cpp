@@ -64,6 +64,7 @@ namespace dcu {
 
 		// IdxSet
 		IdxSet get_idx_set() const;
+		void set_idx_set(IdxSet idxs);
 
 		/********************
 		From IdxSet
@@ -244,7 +245,9 @@ namespace dcu {
 	IdxSet GridPtKey::Impl::get_idx_set() const {
 		return _idxs;
 	};
-
+	void GridPtKey::Impl::set_idx_set(IdxSet idxs) {
+		_idxs = idxs;
+	};
 
 	/********************
 	From IdxSet
@@ -349,6 +352,9 @@ namespace dcu {
 	// IdxSet
 	IdxSet GridPtKey::get_idx_set() const {
 		return _impl->get_idx_set();
+	};
+	void GridPtKey::set_idx_set(IdxSet idxs) {
+		_impl->set_idx_set(idxs);
 	};
 
 	/********************

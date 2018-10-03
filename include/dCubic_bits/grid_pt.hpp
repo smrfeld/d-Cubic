@@ -60,6 +60,14 @@ namespace dcu {
 		void set_ordinate(double val);
 		void increment_ordinate(double val);
 
+		// Update
+		void set_update(double val);
+		void increment_update(double val);
+		void multiply_update(double val);
+		void reset_update();
+		double get_update() const;
+		void committ_update(); // automatically resets
+
 		// Idxs
 		int get_idx(int dim) const;
 		IdxSet get_idxs() const;

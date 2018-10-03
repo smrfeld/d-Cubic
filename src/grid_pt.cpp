@@ -27,6 +27,9 @@ namespace dcu {
 		// Ordinate
 		double _ordinate;
 
+		// Update
+		double _update;
+
 		// Indexes
 		IdxSet _idxs;
 
@@ -61,6 +64,14 @@ namespace dcu {
 		const double& get_ordinate_const_ref() const;
 		void set_ordinate(double val);
 		void increment_ordinate(double val);
+
+		// Update
+		void set_update(double val);
+		void increment_update(double val);
+		void multiply_update(double val);
+		void reset_update();
+		double get_update() const;
+		void committ_update(); // automatically resets
 
 		// Idxs
 		int get_idx(int dim) const;
@@ -108,6 +119,7 @@ namespace dcu {
 
 		// Store
 		_abcissas = abscissas;
+		_update = 0.0;
 
 		// Init
 		_ordinate = 0.0;
@@ -148,17 +160,20 @@ namespace dcu {
 	void GridPt::Impl::_copy(const Impl& other)
 	{
 		_abcissas = other._abcissas;
+		_update = other._update;
 		_ordinate = other._ordinate;
 		_idxs = other._idxs;
 	};
 	void GridPt::Impl::_move(Impl& other)
 	{
 		_abcissas = other._abcissas;
+		_update = other._update;
 		_ordinate = other._ordinate;
 		_idxs = other._idxs;
 
 		// Reset other
 		other._abcissas.clear();
+		other._update = 0.0;
 		other._ordinate = 0.0;
 		// other._idxs = IdxSet();
 	};
@@ -187,6 +202,27 @@ namespace dcu {
 	};
 	void GridPt::Impl::increment_ordinate(double val) {
 		_ordinate += val;
+	};
+
+	// Update
+	void GridPt::Impl::set_update(double val) {
+		_update = val;
+	};
+	void GridPt::Impl::increment_update(double val) {
+		_update += val;
+	};
+	void GridPt::Impl::multiply_update(double val) {
+		_update *= val;
+	};
+	void GridPt::Impl::reset_update() {
+		_update = 0.0;
+	};
+	double GridPt::Impl::get_update() const {
+		return _update;
+	};
+	void GridPt::Impl::committ_update() {
+		_ordinate += _update;
+		_update = 0.0;
 	};
 
 	// Idxs
@@ -279,6 +315,26 @@ namespace dcu {
 	};
 	void GridPt::increment_ordinate(double val) {
 		_impl->increment_ordinate(val);
+	};
+
+	// Update
+	void GridPt::set_update(double val) {
+		_impl->set_update(val);
+	};	
+	void GridPt::increment_update(double val) {
+		_impl->increment_update(val);
+	};
+	void GridPt::multiply_update(double val) {
+		_impl->multiply_update(val);
+	};
+	void GridPt::reset_update() {
+		_impl->reset_update();
+	};
+	double GridPt::get_update() const {
+		return _impl->get_update();
+	};
+	void GridPt::committ_update() {
+		_impl->committ_update();
 	};
 
 	// Idxs
