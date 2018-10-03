@@ -13,10 +13,15 @@ namespace dcu {
 
 	class GridPt {
 
+	protected:
+
+		// No dims
+		int _no_dims;		
+
 	private:
 
 		// Abscissa values
-		std::vector<double> _abcissas;
+		double* _abcissas;
 
 		// Constructor helpers
 		void _clean_up();
@@ -29,6 +34,7 @@ namespace dcu {
 		Constructor
 		********************/
 
+		GridPt(int no_dims, double* abscissas);
 		GridPt(std::vector<double> abscissas);
 		GridPt(const GridPt& other);
 		GridPt(GridPt&& other);
@@ -42,7 +48,6 @@ namespace dcu {
 
 		// Abscissa
 		double get_abscissa(int dim) const;
-		std::vector<double> get_abscissas() const;
 
 		// Ordinate
 		// --- PURE ---
@@ -111,6 +116,7 @@ namespace dcu {
 		Constructor
 		********************/
 
+		GridPtIn(int no_dims, double* abscissas);
 		GridPtIn(std::vector<double> abscissas);
 		GridPtIn(const GridPtIn& other);
 		GridPtIn(GridPtIn&& other);
@@ -128,5 +134,93 @@ namespace dcu {
 		void set_ordinate(double val);
 		void increment_ordinate(double val);
 
+	};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/****************************************
+	Exterior grid pt
+	****************************************/
+
+	// Location of pt in each dim
+	enum class Loc: unsigned int {OUTSIDE_LOW, INSIDE, OUTSIDE_HIGH};
+
+	class GridPtOut : public GridPt {
+
+	private:
+
+		// Dependent pts
+		const GridPtIn* _p1;
+		const GridPtIn* _p2;
+
+		// Locs
+		Loc* _locs;
+
+		// Constructor helpers
+		void _clean_up();
+		void _copy(const GridPtOut& other);
+		void _move(GridPtOut& other);
+
+	public:
+
+		/********************
+		Constructor
+		********************/
+
+		GridPtOut(int no_dims, double* abscissas, const GridPtIn* p1, const GridPtIn* p2, Loc* locs);
+		GridPtOut(std::vector<double> abscissas, const GridPtIn* p1, const GridPtIn* p2, std::vector<Loc> locs);
+		GridPtOut(const GridPtOut& other);
+		GridPtOut(GridPtOut&& other);
+		GridPtOut& operator=(const GridPtOut &other);
+		GridPtOut& operator=(GridPtOut &&other);
+		~GridPtOut();
+
+		/********************
+		Access
+		********************/
+
+		// Ordinate
+		double get_ordinate() const;
+
+		// Get dependent points
+		const GridPtIn* get_dep_p1() const;
+		const GridPtIn* get_dep_p2() const;
+
+		// Which dims are outside
+		Loc get_loc_in_dim(int dim) const;
 	};
 };
