@@ -46,9 +46,9 @@ namespace dcu {
 		void _iterate_make_grid_pt_outside(int dim, IdxSet idxs, double* abscissas, Loc* locs);		
 		void _iterate_get_surrounding_2_grid_pts(int dim, IdxSet idxs_local, const IdxSet &idxs_lower, Nbr2 &nbr2) const;
 		void _iterate_get_surrounding_4_grid_pts(int dim, IdxSet idxs_local, const IdxSet &idxs_p0, Nbr4 &nbr4) const;
-		double _iterate_interpolate(int delta, int d, Nbr4 &nbr4, IdxSet idxs_j) const;
-		double _iterate_deriv_pt_value(int delta, int d, Nbr4 &nbr4, IdxSet idxs_j, IdxSet idxs_k) const;
-		double _iterate_deriv_x(int delta, int k, int d, Nbr4 &nbr4, IdxSet idxs_j) const;
+		double _iterate_interpolate(int delta, int d, const Nbr4 &nbr4, IdxSet idxs_j) const;
+		double _iterate_deriv_pt_value(int delta, int d, const Nbr4 &nbr4, IdxSet idxs_j, IdxSet idxs_k) const;
+		double _iterate_deriv_x(int delta, int k, int d, const Nbr4 &nbr4, IdxSet idxs_j) const;
 
 		// Constructor helpers
 		void _clean_up();
@@ -110,18 +110,21 @@ namespace dcu {
 		********************/
 
 		double get_val(double* abscissas) const;
+		double get_val(const Nbr4 &nbr4) const;
 
 		/********************
 		Get derivative wrt a point value p
 		********************/
 
 		double get_deriv_wrt_pt_value(double* abscissas, IdxSet idxs_k);
+		double get_deriv_wrt_pt_value(const Nbr4 &nbr4, IdxSet idxs_k);
 
 		/********************
 		Get derivative wrt x
 		********************/
 
 		double get_deriv_wrt_x(double* abscissas, int k);
+		double get_deriv_wrt_x(const Nbr4 &nbr4, int k);
 
 		/********************
 		1D functions

@@ -480,10 +480,14 @@ namespace dcu {
 		// nbrs p
 		Nbr4 nbr4 = get_surrounding_4_grid_pts(abscissas);
 
+		// Return
+		return get_val(nbr4);
+	};
+	double Grid::get_val(const Nbr4 &nbr4) const {
 		// Iterate
 		return _iterate_interpolate(0,_no_dims,nbr4,IdxSet(_no_dims));
 	};
-	double Grid::_iterate_interpolate(int delta, int d, Nbr4 &nbr4, IdxSet idxs_j) const {
+	double Grid::_iterate_interpolate(int delta, int d, const Nbr4 &nbr4, IdxSet idxs_j) const {
 		double p0,p1,p2,p3;
 
 		if (delta == d) {
@@ -519,6 +523,11 @@ namespace dcu {
 		// nbrs
 		Nbr4 nbr4 = get_surrounding_4_grid_pts(abscissas);
 
+		// Get
+		return get_deriv_wrt_pt_value(nbr4,idxs_k);
+	};
+	double Grid::get_deriv_wrt_pt_value(const Nbr4 &nbr4, IdxSet idxs_k) {
+
 		// Check: are there any exterior grid points?
 		if (nbr4.check_are_all_pts_inside()) {
 			// Case 1: Totally interior point; no dimension near boundary
@@ -548,7 +557,7 @@ namespace dcu {
 		};
 	};
 
-	double Grid::_iterate_deriv_pt_value(int delta, int d, Nbr4 &nbr4, IdxSet idxs_j, IdxSet idxs_k) const {
+	double Grid::_iterate_deriv_pt_value(int delta, int d, const Nbr4 &nbr4, IdxSet idxs_j, IdxSet idxs_k) const {
 
 		if (delta == d) {
 			// Done; evaluate
@@ -634,10 +643,14 @@ namespace dcu {
 		// nbrs p
 		Nbr4 nbr4 = get_surrounding_4_grid_pts(abscissas);
 
+		// Get
+		return get_deriv_wrt_x(nbr4, k);
+	};
+	double Grid::get_deriv_wrt_x(const Nbr4 &nbr4, int k) {
 		// Iterate
 		return _iterate_deriv_x(0,k,_no_dims,nbr4,IdxSet(_no_dims));
 	};
-	double Grid::_iterate_deriv_x(int delta, int k, int d, Nbr4 &nbr4, IdxSet idxs_j) const {
+	double Grid::_iterate_deriv_x(int delta, int k, int d, const Nbr4 &nbr4, IdxSet idxs_j) const {
 		
 		if (delta == k) { // Evaluate the derivative
 
