@@ -44,6 +44,8 @@ namespace dcu {
 		for (auto i=0; i<_no_dims; i++) {
 			_frac_abscissas[i] = frac_abscissas[i];
 		};
+
+		_shared_constructor();
 	};
 	Nbr2::Nbr2(const Nbr2& other) : _idxs_i(other._idxs_i) {
 		_copy(other);
@@ -76,16 +78,30 @@ namespace dcu {
 
 	void Nbr2::_clean_up()
 	{
-		// Nothing...
+		if (_grid_pts) {
+			for (auto i=0; i<_no_grid_pts; i++) {
+				// Nbr4 doesnt own grid pt; just clear
+				if (_grid_pts[i]) {
+					_grid_pts[i] = nullptr;
+				};
+			};
+			delete[] _grid_pts;
+			_grid_pts = nullptr;
+		};
+
+		if (_frac_abscissas) {
+			delete[] _frac_abscissas;
+			_frac_abscissas = nullptr;
+		};	
 	};
 	void Nbr2::_copy(const Nbr2& other)
 	{
 		_no_dims = other._no_dims;
 		_idxs_i = other._idxs_i;
+		_no_grid_pts = other._no_grid_pts;
 
-		int l=pow(2,_no_dims);
-		_grid_pts = new GridPt*[l];
-		std::copy(other._grid_pts,other._grid_pts+l,_grid_pts);
+		_grid_pts = new GridPt*[_no_grid_pts];
+		std::copy(other._grid_pts,other._grid_pts+_no_grid_pts,_grid_pts);
 
 		_frac_abscissas = new double[_no_dims];
 		std::copy(other._frac_abscissas,other._frac_abscissas+_no_dims,_frac_abscissas);
@@ -94,6 +110,7 @@ namespace dcu {
 	{
 		_no_dims = other._no_dims;
 		_idxs_i = std::move(other._idxs_i);
+		_no_grid_pts = other._no_grid_pts;
 
 		_grid_pts = other._grid_pts;
 
@@ -101,13 +118,14 @@ namespace dcu {
 
 		// Reset other
 		other._no_dims = 0;
+		other._no_grid_pts = 0;
 		other._grid_pts = nullptr;
 		other._frac_abscissas = nullptr;
 	};
 	void Nbr2::_shared_constructor() {
-		int l = pow(2,_no_dims);
-		_grid_pts = new GridPt*[l];
-		std::fill_n(_grid_pts,l,nullptr);
+		_no_grid_pts = pow(2,_no_dims);
+		_grid_pts = new GridPt*[_no_grid_pts];
+		std::fill_n(_grid_pts,_no_grid_pts,nullptr);
 	};
 
 	/********************
@@ -128,6 +146,14 @@ namespace dcu {
 			idx += idxs[dim] * pow(2,dim);
 		};
 		return _grid_pts[idx];
+	};
+	GridPt* Nbr2::get_grid_point(int i) const {
+		return _grid_pts[i];
+	};
+	
+	// No grid pts
+	int Nbr2::get_no_grid_pts() const {
+		return _no_grid_pts;
 	};
 
 	// Frac abscissas
@@ -222,6 +248,8 @@ namespace dcu {
 		for (auto i=0; i<_no_dims; i++) {
 			_frac_abscissas[i] = frac_abscissas[i];
 		};
+
+		_shared_constructor();
 	};
 	Nbr4::Nbr4(const Nbr4& other) : _idxs_i(other._idxs_i) {
 		_copy(other);
@@ -254,16 +282,30 @@ namespace dcu {
 
 	void Nbr4::_clean_up()
 	{
-		// Nothing...
+		if (_grid_pts) {
+			for (auto i=0; i<_no_grid_pts; i++) {
+				// Nbr4 doesnt own grid pt; just clear
+				if (_grid_pts[i]) {
+					_grid_pts[i] = nullptr;
+				};
+			};
+			delete[] _grid_pts;
+			_grid_pts = nullptr;
+		};
+
+		if (_frac_abscissas) {
+			delete[] _frac_abscissas;
+			_frac_abscissas = nullptr;
+		};
 	};
 	void Nbr4::_copy(const Nbr4& other)
 	{
 		_no_dims = other._no_dims;
 		_idxs_i = other._idxs_i;
+		_no_grid_pts = other._no_grid_pts;
 
-		int l=pow(4,_no_dims);
-		_grid_pts = new GridPt*[l];
-		std::copy(other._grid_pts,other._grid_pts+l,_grid_pts);
+		_grid_pts = new GridPt*[_no_grid_pts];
+		std::copy(other._grid_pts,other._grid_pts+_no_grid_pts,_grid_pts);
 
 		_frac_abscissas = new double[_no_dims];
 		std::copy(other._frac_abscissas,other._frac_abscissas+_no_dims,_frac_abscissas);
@@ -272,6 +314,7 @@ namespace dcu {
 	{
 		_no_dims = other._no_dims;
 		_idxs_i = std::move(other._idxs_i);
+		_no_grid_pts = other._no_grid_pts;
 
 		_grid_pts = other._grid_pts;
 
@@ -279,13 +322,14 @@ namespace dcu {
 
 		// Reset other
 		other._no_dims = 0;
+		other._no_grid_pts = 0;
 		other._grid_pts = nullptr;
 		other._frac_abscissas = nullptr;
 	};
 	void Nbr4::_shared_constructor() {
-		int l = pow(4,_no_dims);
-		_grid_pts = new GridPt*[l];
-		std::fill_n(_grid_pts,l,nullptr);
+		_no_grid_pts = pow(4,_no_dims);
+		_grid_pts = new GridPt*[_no_grid_pts];
+		std::fill_n(_grid_pts,_no_grid_pts,nullptr);
 	};
 
 	/********************
@@ -306,6 +350,14 @@ namespace dcu {
 			idx += idxs[dim] * pow(4,dim);
 		};
 		return _grid_pts[idx];
+	};
+	GridPt* Nbr4::get_grid_point(int i) const {
+		return _grid_pts[i];
+	};
+	
+	// No grid pts
+	int Nbr4::get_no_grid_pts() const {
+		return _no_grid_pts;
 	};
 
 	// Frac abscissas

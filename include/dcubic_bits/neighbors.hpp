@@ -29,6 +29,7 @@ namespace dcu {
 		IdxSet _idxs_i;
 
 		// The grid pts
+		int _no_grid_pts;
 		GridPt** _grid_pts;
 
 		// Frac abscissa
@@ -59,7 +60,11 @@ namespace dcu {
 		// Grid pts
 		void set_grid_point(IdxSet idxs, GridPt *grid_pt);
 		GridPt* get_grid_point(IdxSet idxs) const;
+		GridPt* get_grid_point(int i) const;
 
+		// No grid pts
+		int get_no_grid_pts() const;
+		
 		// Frac abscissas
 		double get_frac_abscissa(int dim) const;
 
@@ -133,6 +138,7 @@ namespace dcu {
 		IdxSet _idxs_i;
 
 		// The grid pts
+		int _no_grid_pts;
 		GridPt** _grid_pts;
 
 		// Frac abscissa
@@ -163,6 +169,10 @@ namespace dcu {
 		// Grid pts
 		void set_grid_point(IdxSet idxs, GridPt *grid_pt);
 		GridPt* get_grid_point(IdxSet idxs) const;
+		GridPt* get_grid_point(int i) const;
+
+		// No grid pts
+		int get_no_grid_pts() const;
 
 		// Frac abscissas
 		double get_frac_abscissa(int dim) const;
