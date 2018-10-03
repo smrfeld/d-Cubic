@@ -134,26 +134,36 @@ namespace dcu {
 
 	// Grid pts
 	void Nbr2::set_grid_point(IdxSet idxs, GridPt *grid_pt) {
-		int idx = 0;
-		for (auto dim=0; dim<_no_dims; dim++) {
-			idx += idxs[dim] * pow(2,dim);
-		};
-		_grid_pts[idx] = grid_pt;
+		_grid_pts[convert_idx_set(idxs)] = grid_pt;
 	};
 	GridPt* Nbr2::get_grid_point(IdxSet idxs) const {
-		int idx = 0;
-		for (auto dim=0; dim<_no_dims; dim++) {
-			idx += idxs[dim] * pow(2,dim);
-		};
-		return _grid_pts[idx];
+		return _grid_pts[convert_idx_set(idxs)];
 	};
 	GridPt* Nbr2::get_grid_point(int i) const {
 		return _grid_pts[i];
 	};
-	
+
 	// No grid pts
 	int Nbr2::get_no_grid_pts() const {
 		return _no_grid_pts;
+	};
+
+	// Idx sets
+	IdxSet Nbr2::convert_idx_set(int i) const {
+		int idx=i;
+		IdxSet idxs(_no_dims);
+		for (auto dim=_no_dims-1; dim>=0; dim--) { // backwards
+			idxs[dim] = int(idx / pow(2,dim));
+			idx -= idxs[dim] * pow(2,dim);
+		};
+		return idxs;
+	};
+	int Nbr2::convert_idx_set(IdxSet idxs) const {
+		int idx = 0;
+		for (auto dim=0; dim<_no_dims; dim++) {
+			idx += idxs[dim] * pow(2,dim);
+		};
+		return idx;
 	};
 
 	// Frac abscissas
@@ -338,26 +348,36 @@ namespace dcu {
 
 	// Grid pts
 	void Nbr4::set_grid_point(IdxSet idxs, GridPt *grid_pt) {
-		int idx = 0;
-		for (auto dim=0; dim<_no_dims; dim++) {
-			idx += idxs[dim] * pow(4,dim);
-		};
-		_grid_pts[idx] = grid_pt;
+		_grid_pts[convert_idx_set(idxs)] = grid_pt;
 	};
 	GridPt* Nbr4::get_grid_point(IdxSet idxs) const {
-		int idx = 0;
-		for (auto dim=0; dim<_no_dims; dim++) {
-			idx += idxs[dim] * pow(4,dim);
-		};
-		return _grid_pts[idx];
+		return _grid_pts[convert_idx_set(idxs)];
 	};
 	GridPt* Nbr4::get_grid_point(int i) const {
 		return _grid_pts[i];
 	};
-	
+
 	// No grid pts
 	int Nbr4::get_no_grid_pts() const {
 		return _no_grid_pts;
+	};
+
+	// Idx sets
+	IdxSet Nbr4::convert_idx_set(int i) const {
+		int idx=i;
+		IdxSet idxs(_no_dims);
+		for (auto dim=_no_dims-1; dim>=0; dim--) { // backwards
+			idxs[dim] = int(idx / pow(4,dim));
+			idx -= idxs[dim] * pow(4,dim);
+		};
+		return idxs;
+	};
+	int Nbr4::convert_idx_set(IdxSet idxs) const {
+		int idx = 0;
+		for (auto dim=0; dim<_no_dims; dim++) {
+			idx += idxs[dim] * pow(4,dim);
+		};
+		return idx;
 	};
 
 	// Frac abscissas
