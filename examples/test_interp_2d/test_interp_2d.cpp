@@ -27,12 +27,10 @@ int main() {
 	Grid grid({dim1,dim2});
 
 	// Fill randomly
-	std::vector<int> v({0,0});
-	for (int i=0; i<22; i++) {
-		for (int j=0; j<8; j++) {
-			v[0] = i;
-			v[1] = j;
-			grid.get_grid_point_ref(v).set_ordinate(fRand(0.0,5.0));
+	IdxSet v(2);
+	for (v[0]=1; v[0]<=22; v[0]++) {
+		for (v[1]=1; v[1]<=8; v[1]++) {
+			grid.get_grid_point_inside(v)->set_ordinate(fRand(0.0,5.0));
 		};
 	};
 
@@ -40,8 +38,15 @@ int main() {
 	grid.write_to_file("test_interp_2d.txt");
 
 	// Get val
-	double x = grid.get_val({0.71,0.33});
-	std::cout << "Val @ 0.71, 0.33 = " << x << std::endl;
+	double* x = new double[2];
+	x[0] = 0.71;
+	x[1] = 0.33;
+	double y = grid.get_val(x);
+	std::cout << "Val @ 0.71, 0.33 = " << y << std::endl;
+
+	// Clean up
+	delete[] x;
+	x = nullptr;
 
 	return 0;
 };
