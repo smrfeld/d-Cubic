@@ -54,8 +54,5 @@ namespace dcu {
 		double get_frac_between(double x) const;
 		// Second optional specification: the return of the surrounding idxs
 		double get_frac_between(double x, int i) const;
-
-		// Print domain range
-		void print_bounds() const;
 	};
 };

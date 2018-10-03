@@ -196,6 +196,11 @@ namespace dcu {
 	Access
 	********************/
 
+	// Type
+	GridPtType GridPtIn::get_type() const {
+		return GridPtType::INSIDE;
+	};
+
 	// Abscissa
 	double GridPtIn::get_ordinate() const {
 		return _ordinate;
@@ -324,6 +329,11 @@ namespace dcu {
 	/********************
 	Access
 	********************/
+
+	// Type
+	GridPtType GridPtOut::get_type() const {
+		return GridPtType::OUTSIDE;
+	};
 
 	// Abscissa
 	double GridPtOut::get_ordinate() const {

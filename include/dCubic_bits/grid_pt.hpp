@@ -7,6 +7,12 @@
 namespace dcu {
 
 	/****************************************
+	Type
+	****************************************/
+
+	enum class GridPtType: unsigned int {INSIDE, OUTSIDE};
+
+	/****************************************
 	Grid pt
 	--- CAUTION: abstract base!!! ---
 	****************************************/
@@ -16,7 +22,7 @@ namespace dcu {
 	protected:
 
 		// No dims
-		int _no_dims;		
+		int _no_dims;
 
 	private:
 
@@ -45,6 +51,9 @@ namespace dcu {
 		/********************
 		Access
 		********************/
+
+		// Type
+		virtual GridPtType get_type() const = 0;
 
 		// Abscissa
 		double get_abscissa(int dim) const;
@@ -128,6 +137,9 @@ namespace dcu {
 		Access
 		********************/
 
+		// Type
+		GridPtType get_type() const;
+
 		// Ordinate
 		double get_ordinate() const;
 		const double& get_ordinate_const_ref() const;
@@ -177,7 +189,7 @@ namespace dcu {
 	****************************************/
 
 	// Location of pt in each dim
-	enum class Loc: unsigned int {OUTSIDE_LOW, INSIDE, OUTSIDE_HIGH};
+	enum class Loc: unsigned int {OUTSIDE_LEFT, INSIDE, OUTSIDE_RIGHT};
 
 	class GridPtOut : public GridPt {
 
@@ -212,6 +224,9 @@ namespace dcu {
 		/********************
 		Access
 		********************/
+
+		// Type
+		GridPtType get_type() const;
 
 		// Ordinate
 		double get_ordinate() const;

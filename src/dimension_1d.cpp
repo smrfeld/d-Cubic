@@ -123,9 +123,4 @@ namespace dcu {
 	double Dimension1D::get_frac_between(double x, int i) const {
 		return (x - get_pt_by_idx(i)) / _delta;
 	};
-
-	// Print domain range
-	void Dimension1D::print_bounds() const {
-		std::cout << "Min: " << _min_pt << " Max: " << _max_pt << std::endl;
-	};
 };
