@@ -71,7 +71,7 @@ namespace dcu {
 	{
 		if (_dims) {
 			for (auto i=0; i<_no_dims; i++) {
-				delete _dims[i];
+				// Grid does not own the Dimensions! Just delete the array
 				_dims[i] = nullptr;
 			};
 			delete[] _dims;

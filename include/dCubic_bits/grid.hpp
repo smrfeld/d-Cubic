@@ -62,6 +62,7 @@ namespace dcu {
 		Constructor
 		********************/
 
+		// Note: ownership of Dimension1D is not transferred!
 		Grid(int no_dims, Dimension1D** dims);
 		Grid(std::vector<Dimension1D*> dims);
 		Grid(const Grid& other);
