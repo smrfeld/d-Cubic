@@ -1,9 +1,5 @@
 #include "../include/dcubic_bits/grid_pt.hpp"
 
-// Other headers
-#include "../include/dcubic_bits/idx_set.hpp"
-#include "../include/dcubic_bits/grid_pt_out.hpp"
-
 #include <iostream>
 #include <sstream>
 
@@ -14,137 +10,33 @@
 namespace dcu {
 
 	/****************************************
-	Implementation header
+	Grid pt
 	****************************************/
 
-	class GridPt::Impl {
-
-	private:
-
-		// Abscissa values
-		std::vector<double> _abcissas;
-
-		// Ordinate
-		double _ordinate;
-
-		// Update
-		double _update;
-
-		// Indexes
-		IdxSet _idxs;
-
-		// Constructor helpers
-		void _clean_up();
-		void _copy(const Impl& other);
-		void _move(Impl& other);
-
-	public:
-
-		/********************
-		Constructor
-		********************/
-
-		Impl(IdxSet idxs, std::vector<double> abscissas);
-		Impl(const Impl& other);
-		Impl(Impl&& other);
-		Impl& operator=(const Impl &other);
-		Impl& operator=(Impl &&other);
-		~Impl();
-
-		/********************
-		Access
-		********************/
-
-		// Abscissa
-		double get_abscissa(int dim) const;
-		std::vector<double> get_abscissas() const;
-
-		// Ordinate
-		double get_ordinate() const;
-		const double& get_ordinate_const_ref() const;
-		void set_ordinate(double val);
-		void increment_ordinate(double val);
-
-		// Update
-		void set_update(double val);
-		void increment_update(double val);
-		void multiply_update(double val);
-		void reset_update();
-		double get_update() const;
-		void committ_update(); // automatically resets
-
-		// Idxs
-		int get_idx(int dim) const;
-		IdxSet get_idxs() const;
-
-		/********************
-		Print
-		********************/
-
-		std::string print_abscissa() const;
-
-	};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	/****************************************
-	Implementation
-	****************************************/
-
-	GridPt::Impl::Impl(IdxSet idxs, std::vector<double> abscissas) : _idxs(idxs) {
-		// Check lengths
-		if (idxs.size() != abscissas.size()) {
-			std::cout << ">>> Error: GridPt::Impl::Impl <<< Sizes must match." << std::endl;
-			exit(EXIT_FAILURE);
-		};
-
-		// Store
+	GridPt::GridPt(std::vector<double> abscissas) {
 		_abcissas = abscissas;
-		_update = 0.0;
-
-		// Init
-		_ordinate = 0.0;
 	};
-	GridPt::Impl::Impl(const Impl& other) : _idxs(other._idxs) {
+	GridPt::GridPt(const GridPt& other) {
 		_copy(other);
 	};
-	GridPt::Impl::Impl(Impl&& other) : _idxs(std::move(other._idxs)) {
+	GridPt::GridPt(GridPt&& other) {
 		_move(other);
 	};
-    GridPt::Impl& GridPt::Impl::operator=(const Impl& other) {
+    GridPt& GridPt::operator=(const GridPt& other) {
 		if (this != &other) {
 			_clean_up();
 			_copy(other);
 		};
 		return *this;
     };
-    GridPt::Impl& GridPt::Impl::operator=(Impl&& other) {
+    GridPt& GridPt::operator=(GridPt&& other) {
 		if (this != &other) {
 			_clean_up();
 			_move(other);
 		};
 		return *this;
     };
-	GridPt::Impl::~Impl()
+	GridPt::~GridPt()
 	{
 		_clean_up();
 	};
@@ -153,29 +45,20 @@ namespace dcu {
 	Helpers for constructors
 	********************/
 
-	void GridPt::Impl::_clean_up()
+	void GridPt::_clean_up()
 	{
 		// Nothing...
 	};
-	void GridPt::Impl::_copy(const Impl& other)
+	void GridPt::_copy(const GridPt& other)
 	{
 		_abcissas = other._abcissas;
-		_update = other._update;
-		_ordinate = other._ordinate;
-		_idxs = other._idxs;
 	};
-	void GridPt::Impl::_move(Impl& other)
+	void GridPt::_move(GridPt& other)
 	{
 		_abcissas = other._abcissas;
-		_update = other._update;
-		_ordinate = other._ordinate;
-		_idxs = other._idxs;
 
 		// Reset other
 		other._abcissas.clear();
-		other._update = 0.0;
-		other._ordinate = 0.0;
-		// other._idxs = IdxSet();
 	};
 
 	/********************
@@ -183,61 +66,18 @@ namespace dcu {
 	********************/
 
 	// Abscissa
-	double GridPt::Impl::get_abscissa(int dim) const {
+	double GridPt::get_abscissa(int dim) const {
 		return _abcissas[dim];
 	};
-	std::vector<double> GridPt::Impl::get_abscissas() const {
+	std::vector<double> GridPt::get_abscissas() const {
 		return _abcissas;
-	};
-
-	// Ordinate
-	double GridPt::Impl::get_ordinate() const {
-		return _ordinate;
-	};
-	const double& GridPt::Impl::get_ordinate_const_ref() const {
-		return _ordinate;
-	};
-	void GridPt::Impl::set_ordinate(double val) {
-		_ordinate = val;
-	};
-	void GridPt::Impl::increment_ordinate(double val) {
-		_ordinate += val;
-	};
-
-	// Update
-	void GridPt::Impl::set_update(double val) {
-		_update = val;
-	};
-	void GridPt::Impl::increment_update(double val) {
-		_update += val;
-	};
-	void GridPt::Impl::multiply_update(double val) {
-		_update *= val;
-	};
-	void GridPt::Impl::reset_update() {
-		_update = 0.0;
-	};
-	double GridPt::Impl::get_update() const {
-		return _update;
-	};
-	void GridPt::Impl::committ_update() {
-		_ordinate += _update;
-		_update = 0.0;
-	};
-
-	// Idxs
-	int GridPt::Impl::get_idx(int dim) const {
-		return _idxs[dim];
-	};
-	IdxSet GridPt::Impl::get_idxs() const {
-		return _idxs;
 	};
 
 	/********************
 	Print
 	********************/
 
-	std::string GridPt::Impl::print_abscissa() const {
+	std::string GridPt::print() const {
 		std::ostringstream s;
 		s << "(";
 		for (auto dim=0; dim<_abcissas.size(); dim++) {
@@ -246,7 +86,7 @@ namespace dcu {
 				s << " ";
 			};
 		};
-		s << ")";
+		s << "): " << get_ordinate();
 		return s.str();
 	};
 
@@ -270,87 +110,90 @@ namespace dcu {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	/****************************************
-	Impl forwards
+	Grid pt interior
 	****************************************/
 
+	GridPtIn::GridPtIn(std::vector<double> abscissas) : GridPt(abscissas) {
+		_ordinate = 0.0;
+	};
+	GridPtIn::GridPtIn(const GridPtIn& other) : GridPt(other) {
+		_copy(other);
+	};
+	GridPtIn::GridPtIn(GridPtIn&& other) : GridPt(std::move(other)) {
+		_move(other);
+	};
+    GridPtIn& GridPtIn::operator=(const GridPtIn& other) {
+		if (this != &other) {
+	        GridPt::operator=(other);
+			_clean_up();
+			_copy(other);
+		};
+		return *this;
+    };
+    GridPtIn& GridPtIn::operator=(GridPtIn&& other) {
+		if (this != &other) {
+	        GridPt::operator=(std::move(other));
+			_clean_up();
+			_move(other);
+		};
+		return *this;
+    };
+	GridPtIn::~GridPtIn()
+	{
+		_clean_up();
+	};
+
 	/********************
-	Constructor
+	Helpers for constructors
 	********************/
 
-	GridPt::GridPt(IdxSet idxs, std::vector<double> abscissas) : _impl(new Impl(idxs, abscissas)) {};
-	GridPt::GridPt(const GridPt& other) : _impl(new Impl(*other._impl)) {};
-	GridPt::GridPt(GridPt&& other) : _impl(std::move(other._impl)) {};
-	GridPt& GridPt::operator=(const GridPt &other) {
-        _impl.reset(new Impl(*other._impl));
-        return *this; 
+	void GridPtIn::_clean_up()
+	{
+		// Nothing...
 	};
-	GridPt& GridPt::operator=(GridPt &&other) {
-        _impl = std::move(other._impl);
-        return *this; 
+	void GridPtIn::_copy(const GridPtIn& other)
+	{
+		_ordinate = other._ordinate;
 	};
-	GridPt::~GridPt() = default;
+	void GridPtIn::_move(GridPtIn& other)
+	{
+		_ordinate = other._ordinate;
+
+		// Reset other
+		other._ordinate = 0.0;
+	};
 
 	/********************
 	Access
 	********************/
 
 	// Abscissa
-	double GridPt::get_abscissa(int dim) const {
-		return _impl->get_abscissa(dim);
+	double GridPtIn::get_ordinate() const {
+		return _ordinate;
 	};
-	std::vector<double> GridPt::get_abscissas() const {
-		return _impl->get_abscissas();
+	const double& GridPtIn::get_ordinate_const_ref() const {
+		return _ordinate;
 	};
-
-	// Ordinate
-	double GridPt::get_ordinate() const {
-		return _impl->get_ordinate();
+	void GridPtIn::set_ordinate(double val) {
+		_ordinate = val;
 	};
-	const double& GridPt::get_ordinate_const_ref() const {
-		return _impl->get_ordinate_const_ref();
+	void GridPtIn::increment_ordinate(double val) {
+		_ordinate += val;
 	};
-	void GridPt::set_ordinate(double val) {
-		_impl->set_ordinate(val);
-	};
-	void GridPt::increment_ordinate(double val) {
-		_impl->increment_ordinate(val);
-	};
-
-	// Update
-	void GridPt::set_update(double val) {
-		_impl->set_update(val);
-	};	
-	void GridPt::increment_update(double val) {
-		_impl->increment_update(val);
-	};
-	void GridPt::multiply_update(double val) {
-		_impl->multiply_update(val);
-	};
-	void GridPt::reset_update() {
-		_impl->reset_update();
-	};
-	double GridPt::get_update() const {
-		return _impl->get_update();
-	};
-	void GridPt::committ_update() {
-		_impl->committ_update();
-	};
-
-	// Idxs
-	int GridPt::get_idx(int dim) const {
-		return _impl->get_idx(dim);
-	};
-	IdxSet GridPt::get_idxs() const {
-		return _impl->get_idxs();
-	};
-
-	/********************
-	Print
-	********************/
-
-	std::string GridPt::print_abscissa() const {
-		return _impl->print_abscissa();
-	};
-
 };
