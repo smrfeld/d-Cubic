@@ -4,6 +4,7 @@
 #include "../include/dcubic_bits/grid_pt.hpp"
 
 #include <cmath>
+#include <iostream>
 
 /************************************
 * Namespace for dcu
@@ -78,15 +79,25 @@ namespace dcu {
 
 	void Nbr2::_clean_up()
 	{
-		if (_grid_pts) {
+		if (_grid_pts_in) {
 			for (auto i=0; i<_no_grid_pts; i++) {
 				// Nbr4 doesnt own grid pt; just clear
-				if (_grid_pts[i]) {
-					_grid_pts[i] = nullptr;
+				if (_grid_pts_in[i]) {
+					_grid_pts_in[i] = nullptr;
 				};
 			};
-			delete[] _grid_pts;
-			_grid_pts = nullptr;
+			delete[] _grid_pts_in;
+			_grid_pts_in = nullptr;
+		};
+		if (_grid_pts_out) {
+			for (auto i=0; i<_no_grid_pts; i++) {
+				// Nbr4 doesnt own grid pt; just clear
+				if (_grid_pts_out[i]) {
+					_grid_pts_out[i] = nullptr;
+				};
+			};
+			delete[] _grid_pts_out;
+			_grid_pts_out = nullptr;
 		};
 
 		if (_frac_abscissas) {
@@ -100,8 +111,11 @@ namespace dcu {
 		_idxs_i = other._idxs_i;
 		_no_grid_pts = other._no_grid_pts;
 
-		_grid_pts = new GridPt*[_no_grid_pts];
-		std::copy(other._grid_pts,other._grid_pts+_no_grid_pts,_grid_pts);
+		_grid_pts_in = new GridPtIn*[_no_grid_pts];
+		std::copy(other._grid_pts_in,other._grid_pts_in+_no_grid_pts,_grid_pts_in);
+
+		_grid_pts_out = new GridPtOut*[_no_grid_pts];
+		std::copy(other._grid_pts_out,other._grid_pts_out+_no_grid_pts,_grid_pts_out);
 
 		_frac_abscissas = new double[_no_dims];
 		std::copy(other._frac_abscissas,other._frac_abscissas+_no_dims,_frac_abscissas);
@@ -112,20 +126,24 @@ namespace dcu {
 		_idxs_i = std::move(other._idxs_i);
 		_no_grid_pts = other._no_grid_pts;
 
-		_grid_pts = other._grid_pts;
+		_grid_pts_in = other._grid_pts_in;
+		_grid_pts_out = other._grid_pts_out;
 
 		_frac_abscissas = other._frac_abscissas;
 
 		// Reset other
 		other._no_dims = 0;
 		other._no_grid_pts = 0;
-		other._grid_pts = nullptr;
+		other._grid_pts_in = nullptr;
+		other._grid_pts_out = nullptr;
 		other._frac_abscissas = nullptr;
 	};
 	void Nbr2::_shared_constructor() {
 		_no_grid_pts = pow(2,_no_dims);
-		_grid_pts = new GridPt*[_no_grid_pts];
-		std::fill_n(_grid_pts,_no_grid_pts,nullptr);
+		_grid_pts_in = new GridPtIn*[_no_grid_pts];
+		std::fill_n(_grid_pts_in,_no_grid_pts,nullptr);
+		_grid_pts_out = new GridPtOut*[_no_grid_pts];
+		std::fill_n(_grid_pts_out,_no_grid_pts,nullptr);
 	};
 
 	/********************
@@ -133,14 +151,52 @@ namespace dcu {
 	********************/
 
 	// Grid pts
-	void Nbr2::set_grid_point(IdxSet idxs, GridPt *grid_pt) {
-		_grid_pts[convert_idx_set(idxs)] = grid_pt;
-	};
 	GridPt* Nbr2::get_grid_point(IdxSet idxs) const {
-		return _grid_pts[convert_idx_set(idxs)];
+		return get_grid_point(convert_idx_set(idxs));
 	};
 	GridPt* Nbr2::get_grid_point(int i) const {
-		return _grid_pts[i];
+		if (_grid_pts_in[i]) {
+			return _grid_pts_in[i];
+		} else if (_grid_pts_out[i]) {
+			return _grid_pts_out[i];
+		} else {
+			std::cerr << ">>> Error: Nbr2::get_grid_point <<< grid pt not found at linear idx: " << i << std::endl;
+			exit(EXIT_FAILURE);
+		};	
+	};
+
+	// Inside/outside
+	GridPtIn* Nbr2::get_grid_point_inside(IdxSet idxs) const {
+		return get_grid_point_inside(convert_idx_set(idxs));
+	};
+	GridPtIn* Nbr2::get_grid_point_inside(int i) const {
+		if (_grid_pts_in[i]) {
+			return _grid_pts_in[i];
+		} else {
+			std::cerr << ">>> Error: Nbr2::get_grid_point_inside <<< grid pt not found at linear idx: " << i << std::endl;
+			exit(EXIT_FAILURE);
+		};	
+	};
+	GridPtOut* Nbr2::get_grid_point_outside(IdxSet idxs) const {
+		return get_grid_point_outside(convert_idx_set(idxs));
+	};
+	GridPtOut* Nbr2::get_grid_point_outside(int i) const {
+		if (_grid_pts_out[i]) {
+			return _grid_pts_out[i];
+		} else {
+			std::cerr << ">>> Error: Nbr2::get_grid_point_outside <<< grid pt not found at linear idx: " << i << std::endl;
+			exit(EXIT_FAILURE);
+		};	
+	};
+
+	// Set
+	void Nbr2::set_grid_point_inside(IdxSet idxs, GridPtIn *grid_pt) {
+		int i = convert_idx_set(idxs);
+		_grid_pts_in[i] = grid_pt;
+	};
+	void Nbr2::set_grid_point_outside(IdxSet idxs, GridPtOut *grid_pt) {
+		int i = convert_idx_set(idxs);
+		_grid_pts_out[i] = grid_pt;
 	};
 
 	// No grid pts
@@ -292,15 +348,25 @@ namespace dcu {
 
 	void Nbr4::_clean_up()
 	{
-		if (_grid_pts) {
+		if (_grid_pts_in) {
 			for (auto i=0; i<_no_grid_pts; i++) {
 				// Nbr4 doesnt own grid pt; just clear
-				if (_grid_pts[i]) {
-					_grid_pts[i] = nullptr;
+				if (_grid_pts_in[i]) {
+					_grid_pts_in[i] = nullptr;
 				};
 			};
-			delete[] _grid_pts;
-			_grid_pts = nullptr;
+			delete[] _grid_pts_in;
+			_grid_pts_in = nullptr;
+		};
+		if (_grid_pts_out) {
+			for (auto i=0; i<_no_grid_pts; i++) {
+				// Nbr4 doesnt own grid pt; just clear
+				if (_grid_pts_out[i]) {
+					_grid_pts_out[i] = nullptr;
+				};
+			};
+			delete[] _grid_pts_out;
+			_grid_pts_out = nullptr;
 		};
 
 		if (_frac_abscissas) {
@@ -314,8 +380,10 @@ namespace dcu {
 		_idxs_i = other._idxs_i;
 		_no_grid_pts = other._no_grid_pts;
 
-		_grid_pts = new GridPt*[_no_grid_pts];
-		std::copy(other._grid_pts,other._grid_pts+_no_grid_pts,_grid_pts);
+		_grid_pts_in = new GridPtIn*[_no_grid_pts];
+		std::copy(other._grid_pts_in,other._grid_pts_in+_no_grid_pts,_grid_pts_in);
+		_grid_pts_out = new GridPtOut*[_no_grid_pts];
+		std::copy(other._grid_pts_out,other._grid_pts_out+_no_grid_pts,_grid_pts_out);
 
 		_frac_abscissas = new double[_no_dims];
 		std::copy(other._frac_abscissas,other._frac_abscissas+_no_dims,_frac_abscissas);
@@ -326,20 +394,24 @@ namespace dcu {
 		_idxs_i = std::move(other._idxs_i);
 		_no_grid_pts = other._no_grid_pts;
 
-		_grid_pts = other._grid_pts;
+		_grid_pts_in = other._grid_pts_in;
+		_grid_pts_out = other._grid_pts_out;
 
 		_frac_abscissas = other._frac_abscissas;
 
 		// Reset other
 		other._no_dims = 0;
 		other._no_grid_pts = 0;
-		other._grid_pts = nullptr;
+		other._grid_pts_in = nullptr;
+		other._grid_pts_out = nullptr;
 		other._frac_abscissas = nullptr;
 	};
 	void Nbr4::_shared_constructor() {
 		_no_grid_pts = pow(4,_no_dims);
-		_grid_pts = new GridPt*[_no_grid_pts];
-		std::fill_n(_grid_pts,_no_grid_pts,nullptr);
+		_grid_pts_in = new GridPtIn*[_no_grid_pts];
+		std::fill_n(_grid_pts_in,_no_grid_pts,nullptr);
+		_grid_pts_out = new GridPtOut*[_no_grid_pts];
+		std::fill_n(_grid_pts_out,_no_grid_pts,nullptr);
 	};
 
 	/********************
@@ -347,14 +419,52 @@ namespace dcu {
 	********************/
 
 	// Grid pts
-	void Nbr4::set_grid_point(IdxSet idxs, GridPt *grid_pt) {
-		_grid_pts[convert_idx_set(idxs)] = grid_pt;
-	};
 	GridPt* Nbr4::get_grid_point(IdxSet idxs) const {
-		return _grid_pts[convert_idx_set(idxs)];
+		return get_grid_point(convert_idx_set(idxs));
 	};
 	GridPt* Nbr4::get_grid_point(int i) const {
-		return _grid_pts[i];
+		if (_grid_pts_in[i]) {
+			return _grid_pts_in[i];
+		} else if (_grid_pts_out[i]) {
+			return _grid_pts_out[i];
+		} else {
+			std::cerr << ">>> Error: Nbr4::get_grid_point <<< grid pt not found at linear idx: " << i << std::endl;
+			exit(EXIT_FAILURE);
+		};	
+	};
+
+	// Inside/outside
+	GridPtIn* Nbr4::get_grid_point_inside(IdxSet idxs) const {
+		return get_grid_point_inside(convert_idx_set(idxs));
+	};
+	GridPtIn* Nbr4::get_grid_point_inside(int i) const {
+		if (_grid_pts_in[i]) {
+			return _grid_pts_in[i];
+		} else {
+			std::cerr << ">>> Error: Nbr4::get_grid_point_inside <<< grid pt not found at linear idx: " << i << std::endl;
+			exit(EXIT_FAILURE);
+		};	
+	};
+	GridPtOut* Nbr4::get_grid_point_outside(IdxSet idxs) const {
+		return get_grid_point_outside(convert_idx_set(idxs));
+	};
+	GridPtOut* Nbr4::get_grid_point_outside(int i) const {
+		if (_grid_pts_out[i]) {
+			return _grid_pts_out[i];
+		} else {
+			std::cerr << ">>> Error: Nbr2::get_grid_point_outside <<< grid pt not found at linear idx: " << i << std::endl;
+			exit(EXIT_FAILURE);
+		};	
+	};
+
+	// Set
+	void Nbr4::set_grid_point_inside(IdxSet idxs, GridPtIn *grid_pt) {
+		int i = convert_idx_set(idxs);
+		_grid_pts_in[i] = grid_pt;
+	};
+	void Nbr4::set_grid_point_outside(IdxSet idxs, GridPtOut *grid_pt) {
+		int i = convert_idx_set(idxs);
+		_grid_pts_out[i] = grid_pt;
 	};
 
 	// No grid pts
@@ -395,12 +505,9 @@ namespace dcu {
 
 	// Check if all pts are interior
 	bool Nbr4::check_are_all_pts_inside() const {
-		for (auto i=0; i<pow(4,_no_dims); i++) {
-			if (_grid_pts[i]) {
-				if (_grid_pts[i]->get_type() == GridPtType::OUTSIDE) {
-					// At least one is outside
-					return false;
-				};
+		for (auto i=0; i<_no_grid_pts; i++) {
+			if (_grid_pts_out[i]) {
+				return false;
 			};
 		};
 		// All inside

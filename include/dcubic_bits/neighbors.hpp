@@ -13,6 +13,8 @@ namespace dcu {
 
 	// Forwards
 	class GridPt;
+	class GridPtIn;
+	class GridPtOut;
 
 	/****************************************
 	Neighborhood of points surrounding a point, 2 in each dim
@@ -30,7 +32,8 @@ namespace dcu {
 
 		// The grid pts
 		int _no_grid_pts;
-		GridPt** _grid_pts;
+		GridPtIn** _grid_pts_in;
+		GridPtOut** _grid_pts_out;
 
 		// Frac abscissa
 		double* _frac_abscissas;
@@ -58,16 +61,25 @@ namespace dcu {
 		********************/
 
 		// Grid pts
-		void set_grid_point(IdxSet idxs, GridPt *grid_pt);
 		GridPt* get_grid_point(IdxSet idxs) const;
 		GridPt* get_grid_point(int i) const;
+
+		// Inside/outside
+		GridPtIn* get_grid_point_inside(IdxSet idxs) const;
+		GridPtIn* get_grid_point_inside(int i) const;
+		GridPtOut* get_grid_point_outside(IdxSet idxs) const;
+		GridPtOut* get_grid_point_outside(int i) const;
+
+		// Set
+		void set_grid_point_inside(IdxSet idxs, GridPtIn *grid_pt);
+		void set_grid_point_outside(IdxSet idxs, GridPtOut *grid_pt);
+
+		// No grid pts
+		int get_no_grid_pts() const;
 
 		// Idx sets
 		IdxSet convert_idx_set(int i) const;
 		int convert_idx_set(IdxSet idxs) const;
-
-		// No grid pts
-		int get_no_grid_pts() const;
 		
 		// Frac abscissas
 		double get_frac_abscissa(int dim) const;
@@ -143,7 +155,8 @@ namespace dcu {
 
 		// The grid pts
 		int _no_grid_pts;
-		GridPt** _grid_pts;
+		GridPtIn** _grid_pts_in;
+		GridPtOut** _grid_pts_out;
 
 		// Frac abscissa
 		double* _frac_abscissas;
@@ -171,9 +184,18 @@ namespace dcu {
 		********************/
 
 		// Grid pts
-		void set_grid_point(IdxSet idxs, GridPt *grid_pt);
 		GridPt* get_grid_point(IdxSet idxs) const;
 		GridPt* get_grid_point(int i) const;
+
+		// Inside/outside
+		GridPtIn* get_grid_point_inside(IdxSet idxs) const;
+		GridPtIn* get_grid_point_inside(int i) const;
+		GridPtOut* get_grid_point_outside(IdxSet idxs) const;
+		GridPtOut* get_grid_point_outside(int i) const;
+
+		// Set
+		void set_grid_point_inside(IdxSet idxs, GridPtIn *grid_pt);
+		void set_grid_point_outside(IdxSet idxs, GridPtOut *grid_pt);
 
 		// No grid pts
 		int get_no_grid_pts() const;

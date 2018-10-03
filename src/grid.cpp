@@ -410,7 +410,7 @@ namespace dcu {
 			// Do something
 
 			// Add to nbr2
-			nbr2.set_grid_point(idxs_local, get_grid_point(idxs_lower+idxs_local));
+			nbr2.set_grid_point_inside(idxs_local, get_grid_point_inside(idxs_lower+idxs_local));
 		};
 	};
 
@@ -467,8 +467,12 @@ namespace dcu {
 		} else {
 			// Do something
 
-			// Add to nbr4
-			nbr4.set_grid_point(idxs_local, get_grid_point(idxs_p0+idxs_local));
+			// Add to nbr4bh
+			if (get_grid_point(idxs_p0+idxs_local)->get_type() == GridPtType::INSIDE) {
+				nbr4.set_grid_point_inside(idxs_local, get_grid_point_inside(idxs_p0+idxs_local));
+			} else {
+				nbr4.set_grid_point_outside(idxs_local, get_grid_point_outside(idxs_p0+idxs_local));
+			};
 		};
 	};
 
