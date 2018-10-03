@@ -444,16 +444,8 @@ namespace dcu {
 		// nbrs
 		Nbr4 nbr4 = get_surrounding_4_grid_pts(abscissas);
 
-		// Check: are there any exterior grid point?
-		bool all_inside = true;
-		for (auto dim=0; dim<_no_dims; dim++) {
-			if (nbr4.get_idx_i(dim) == 0 || nbr4.get_idx_i(dim) == _no_pts_in_dim[dim]-2 ) {
-				all_inside = false;
-				break;
-			};
-		};
-
-		if (all_inside) {
+		// Check: are there any exterior grid points?
+		if (nbr4.check_are_all_pts_inside()) {
 			// Case 1: Totally interior point; no dimension near boundary
 
 			double ret=1.0;
@@ -465,14 +457,15 @@ namespace dcu {
 		} else {
 			// Case 2: At least one dimension near boundary
 
-			// Check that we are not taking an illegal derivative
-			// if i=0, j=0 => illegal, or
-			// if i=n-2, j=3 => illegal
-			for (auto dim=0; dim<_no_dims; dim++) {
-				if ((nbr4.get_idx_i(dim) == 0 && idxs_k[dim] == 0) || (nbr4.get_idx_i(dim) == _no_pts_in_dim[dim]-2 && idxs_k[dim] == 3)) {
+			// Check that we are not taking an illegal derivative with respect to an outside grid pt
+			if (nbr4.get_grid_point(idxs_k)) {
+				if (nbr4.get_grid_point(idxs_k)->get_type() == GridPtType::OUTSIDE) {
 					std::cerr << ">>> Error: Grid::get_deriv_wrt_pt_value <<< The pt specified to take a derivative with respect to is not a real point (an exterior point that is estimated by a linear approx) - this is not allowed!" << std::endl;
 					exit(EXIT_FAILURE);
 				};
+			} else {
+				std::cerr << ">>> Error: Grid::get_deriv_wrt_pt_value <<< pt at this idx does not exist" << std::endl;
+				exit(EXIT_FAILURE);
 			};
 
 			// Iterate

@@ -1,5 +1,8 @@
 #include "../include/dcubic_bits/neighbors.hpp"
 
+// Other headers
+#include "../include/dcubic_bits/grid_pt.hpp"
+
 #include <cmath>
 
 /************************************
@@ -316,5 +319,19 @@ namespace dcu {
 	};
 	int Nbr4::get_idx_i(int dim) const {
 		return _idxs_i[dim];
+	};
+
+	// Check if all pts are interior
+	bool Nbr4::check_are_all_pts_inside() const {
+		for (auto i=0; i<pow(4,_no_dims); i++) {
+			if (_grid_pts[i]) {
+				if (_grid_pts[i]->get_type() == GridPtType::OUTSIDE) {
+					// At least one is outside
+					return false;
+				};
+			};
+		};
+		// All inside
+		return true;
 	};
 };

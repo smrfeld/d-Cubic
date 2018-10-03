@@ -170,5 +170,10 @@ namespace dcu {
 		// Center idx
 		IdxSet get_idxs_i() const;
 		int get_idx_i(int dim) const;
+
+		// Check if all pts are interior
+		bool check_are_all_pts_inside() const;
+
+		// 
 	};
 };
