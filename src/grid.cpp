@@ -329,6 +329,12 @@ namespace dcu {
 
 			idx += term;
 		};
+
+		// Delete existing grid pt
+		if (_grid_pts_in[idx]) {
+			delete _grid_pts_in[idx];
+		};
+
 		_grid_pts_in[idx] = grid_pt;
 	};
 	void Grid::move_grid_point_outside(IdxSet idxs, GridPtOut* grid_pt) {
@@ -343,6 +349,12 @@ namespace dcu {
 
 			idx += term;
 		};
+
+		// Delete existing grid pt
+		if (_grid_pts_out[idx]) {
+			delete _grid_pts_out[idx];
+		};
+
 		_grid_pts_out[idx] = grid_pt;
 	};
 
