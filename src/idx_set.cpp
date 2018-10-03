@@ -15,12 +15,22 @@ namespace dcu {
 
 	// Constructors
 	IdxSet::IdxSet(int no_idxs) {
-		for (auto i=0; i<no_idxs; i++) {
-			_idxs.push_back(0);
-		};
+		_no_idxs = no_idxs;
+		_idxs = new int[_no_idxs];
+		std::fill_n(_idxs,_no_idxs,0.0);
 	};
+	IdxSet::IdxSet(int no_idxs, int* idxs) {
+		_no_idxs = no_idxs;
+		_idxs = new int[_no_idxs];
+		std::copy(idxs,idxs+_no_idxs,_idxs);
+	};
+
 	IdxSet::IdxSet(std::vector<int> idxs) {
-		_idxs = idxs;
+		_no_idxs = idxs.size();
+		_idxs = new int[_no_idxs];
+		for (auto i=0; i<_no_idxs; i++) {
+			_idxs[i] = idxs[i];
+		};
 	};
 	IdxSet::IdxSet(const IdxSet& other) {
 		_copy(other);
@@ -50,15 +60,25 @@ namespace dcu {
 	// Helpers
 	void IdxSet::_clean_up()
 	{
-		// Nothing...
+		if (_idxs) {
+			delete _idxs;
+			_idxs = nullptr;
+		};
 	};
 	void IdxSet::_copy(const IdxSet& other)
 	{
-		_idxs = other._idxs;
+		_no_idxs = other._no_idxs;
+		_idxs = new int[_no_idxs];
+		std::copy(other._idxs,other._idxs+_no_idxs,_idxs);
 	};
 	void IdxSet::_move(IdxSet& other)
 	{
-		_idxs = std::move(other._idxs);
+		_no_idxs = other._no_idxs;
+		_idxs = other._idxs;
+
+		// Reset other
+		other._no_idxs = 0;
+		other._idxs = nullptr;
 	};
 
 	// Accessors
@@ -71,31 +91,16 @@ namespace dcu {
 
 	// Size
 	int IdxSet::size() const {
-		return _idxs.size();
-	};
-
-	// Find
-	bool IdxSet::find(int val) const {
-		auto it = std::find(_idxs.begin(), _idxs.end(), val);
-		if (it == _idxs.end()) {
-			return false;
-		} else {
-			return true;
-		};
-	};
-
-	// Get vector
-	const std::vector<int>& IdxSet::get_vector_idxs() const {
-		return _idxs;
+		return _no_idxs;
 	};
 
  	// Print
  	std::string IdxSet::print() const {
  		std::ostringstream stream;
 		stream << "(";
-		for (auto i=0; i<_idxs.size(); i++) {
+		for (auto i=0; i<_no_idxs; i++) {
 			stream << _idxs[i];
-			if (i != _idxs.size()-1) {
+			if (i != _no_idxs-1) {
 				stream << " ";
 			};
 		};
@@ -144,245 +149,4 @@ namespace dcu {
     	};
     	return lhs;
     };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	/****************************************
-	IdxSet2
-	****************************************/
-
-	IdxSet2::IdxSet2(int no_idxs) : IdxSet(no_idxs) {};
-	IdxSet2::IdxSet2(std::vector<int> idxs) : IdxSet(idxs) {
-		for (auto const &x: _idxs) {
-			if (x<0 || x>1) {
-				std::cerr << ">>> Error: IdxSet2::IdxSet2 <<< idxs must be 0,1" << std::endl;
-				exit(EXIT_FAILURE);
-			};
-		};
-	};
-
-    int IdxSet2::get_linear() const {
-		int ret=0,add=0;
-		for (auto i=0; i<_idxs.size(); i++) {
-			add = _idxs[i];
-
-			for (auto j=i+1; j<_idxs.size(); j++) {
-				add *= 2;
-			};
-			ret += add;
-		};
-
-		return ret;
-    };
-
-	void IdxSet2::set_from_linear(int idx_linear) {
-		int idx_working = idx_linear;
-
-		// Determine the idxs
-		int pwr;
-		for (auto dim=0; dim<_idxs.size(); dim++) {
-			pwr = 1;
-			for (auto dim2=dim+1; dim2<_idxs.size(); dim2++) {
-				pwr *= 2;
-			};
-
-			// Add
-			_idxs[dim] = int(idx_working/pwr);
-
-			// Remove
-			idx_working -= _idxs[dim]*pwr;
-		};
-	};
-
-	// Printing
-    std::ostream& operator<< (std::ostream& stream, const IdxSet2& idxs) {
-		stream << idxs.print();
-		return stream;
-    };
-
-    // Comparator
-    bool operator==(const IdxSet2 &lhs, const IdxSet2 &rhs) {
-    	return lhs.get_linear() == rhs.get_linear();
-    };
-    bool operator<(const IdxSet2 &lhs, const IdxSet2 &rhs) {
-    	return lhs.get_linear() < rhs.get_linear();
-    };
-
-    // Math
-    IdxSet2 operator+(IdxSet2 lhs, const IdxSet2& rhs) {
-    	for (auto i=0; i<lhs.size(); i++) {
-    		lhs[i] += rhs[i];
-    	};
-    	return lhs;
-    };
-    IdxSet2 operator-(IdxSet2 lhs, const IdxSet2& rhs) {
-    	for (auto i=0; i<lhs.size(); i++) {
-    		lhs[i] -= rhs[i];
-    	};
-    	return lhs;
-    };
-    IdxSet2 operator+(IdxSet2 lhs, int rhs) {
-    	for (auto i=0; i<lhs.size(); i++) {
-    		lhs[i] += rhs;
-    	};
-    	return lhs;
-    };
-    IdxSet2 operator-(IdxSet2 lhs, int rhs) {
-    	for (auto i=0; i<lhs.size(); i++) {
-    		lhs[i] -= rhs;
-    	};
-    	return lhs;
-    };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	/****************************************
-	IdxSet4
-	****************************************/
-
-	IdxSet4::IdxSet4(int no_idxs) : IdxSet(no_idxs) {};
-	IdxSet4::IdxSet4(std::vector<int> idxs) : IdxSet(idxs) {
-		for (auto const &x: _idxs) {
-			if (x<0 || x>3) {
-				std::cerr << ">>> Error: IdxSet4::IdxSet4 <<< idxs must be 0,1,2,3" << std::endl;
-				exit(EXIT_FAILURE);
-			};
-		};
-	};
-
-    int IdxSet4::get_linear() const {
-		int ret=0,add=0;
-		for (auto i=0; i<_idxs.size(); i++) {
-			add = _idxs[i];
-
-			for (auto j=i+1; j<_idxs.size(); j++) {
-				add *= 4;
-			};
-			ret += add;
-		};
-
-		return ret;
-    };
-
-	void IdxSet4::set_from_linear(int idx_linear) {
-		int idx_working = idx_linear;
-
-		// Determine the idxs
-		int pwr;
-		for (auto dim=0; dim<_idxs.size(); dim++) {
-			pwr = 1;
-			for (auto dim2=dim+1; dim2<_idxs.size(); dim2++) {
-				pwr *= 4;
-			};
-
-			// Add
-			_idxs[dim] = int(idx_working/pwr);
-
-			// Remove
-			idx_working -= _idxs[dim]*pwr;
-		};
-	};
-
-	// Printing
-    std::ostream& operator<< (std::ostream& stream, const IdxSet4& idxs) {
-		stream << idxs.print();
-		return stream;
-    };
-
-    // Comparator
-    bool operator==(const IdxSet4 &lhs, const IdxSet4 &rhs) {
-    	return lhs.get_linear() == rhs.get_linear();
-    };
-    bool operator<(const IdxSet4 &lhs, const IdxSet4 &rhs) {
-    	return lhs.get_linear() < rhs.get_linear();
-    };
-
-    // Math
-    IdxSet4 operator+(IdxSet4 lhs, const IdxSet4& rhs) {
-    	for (auto i=0; i<lhs.size(); i++) {
-    		lhs[i] += rhs[i];
-    	};
-    	return lhs;
-    };
-    IdxSet4 operator-(IdxSet4 lhs, const IdxSet4& rhs) {
-    	for (auto i=0; i<lhs.size(); i++) {
-    		lhs[i] -= rhs[i];
-    	};
-    	return lhs;
-    };
-    IdxSet4 operator+(IdxSet4 lhs, int rhs) {
-    	for (auto i=0; i<lhs.size(); i++) {
-    		lhs[i] += rhs;
-    	};
-    	return lhs;
-    };
-    IdxSet4 operator-(IdxSet4 lhs, int rhs) {
-    	for (auto i=0; i<lhs.size(); i++) {
-    		lhs[i] -= rhs;
-    	};
-    	return lhs;
-    };
-
-
 };

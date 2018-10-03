@@ -17,12 +17,7 @@ INSTALL_LIB_DIR = /usr/local/lib
 INSTALL_INCLUDE_DIR = /usr/local/include
 
 # source files
-SRC_NAMES = dimension_1d.cpp \
-	idx_set.cpp \
-	grid_pt_key.cpp \
-	grid_pt.cpp \
-	grid_pt_out.cpp \
-	grid.cpp
+SRC_NAMES = idx_set.cpp
 SRCS = $(addprefix $(SOURCE_DIR)/, $(SRC_NAMES))
 OBJS = $(addprefix $(BUILD_DIR)/, $(SRC_NAMES:.cpp=.o))
 DEPS = $(OBJS:.o=.d)
