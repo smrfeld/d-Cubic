@@ -103,7 +103,11 @@ namespace dcu {
 		return s.str();
 	};
 
-
+	// Printing
+    std::ostream& operator<< (std::ostream& stream, const GridPt& pt) {
+		stream << pt.print();
+		return stream;
+    };
 
 
 

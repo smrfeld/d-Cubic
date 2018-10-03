@@ -69,6 +69,8 @@ namespace dcu {
 		std::string print() const;
 	};
 
+	// Printing
+    std::ostream& operator<< (std::ostream& stream, const GridPt& pt);
 
 
 
